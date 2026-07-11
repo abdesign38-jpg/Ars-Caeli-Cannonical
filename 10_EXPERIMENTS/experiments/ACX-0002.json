@@ -1,0 +1,14 @@
+{
+  "id": "ACX-0002",
+  "title": "Universo Reverso v2 — Exploración 60 s",
+  "engine": "ACE-AEON",
+  "engine_version": "prototype-60s",
+  "duration_real_s": 60,
+  "parameters": {
+    "carrier_hz": 55,
+    "harmonic_hz": 111,
+    "modulation_hz_start": 0.8,
+    "modulation_hz_end": 0.05
+  },
+  "notes": "Mayor duración y sensación de cruce mediante cambio gradual."
+}

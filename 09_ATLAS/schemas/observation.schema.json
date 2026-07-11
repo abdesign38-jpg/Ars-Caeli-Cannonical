@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "APL Observation Schema",
+  "type": "object",
+  "required": [
+    "id",
+    "experiment_id",
+    "participant_id",
+    "observed"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^ACO-[0-9]{4}$"
+    },
+    "experiment_id": {
+      "type": "string",
+      "pattern": "^ACX-[0-9]{4}$"
+    },
+    "participant_id": {
+      "type": "string",
+      "pattern": "^P-[0-9]{4}$"
+    },
+    "observed": {
+      "type": "object"
+    },
+    "interpretation": {
+      "type": "object"
+    },
+    "safety": {
+      "type": "object"
+    },
+    "source": {
+      "type": "string"
+    }
+  }
+}

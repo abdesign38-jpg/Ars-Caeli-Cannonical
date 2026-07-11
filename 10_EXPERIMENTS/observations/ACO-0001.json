@@ -1,0 +1,20 @@
+{
+  "id": "ACO-0001",
+  "experiment_id": "ACX-0001",
+  "participant_id": "P-0001",
+  "observed": {
+    "body": [
+      "hormigueo en la parte posterior de la cabeza"
+    ],
+    "dizziness": false,
+    "affect": "interes"
+  },
+  "interpretation": {
+    "experimental": "respuesta corporal localizada subjetiva",
+    "symbolic": null
+  },
+  "safety": {
+    "adverse_event": false
+  },
+  "source": "retrospective conversation"
+}

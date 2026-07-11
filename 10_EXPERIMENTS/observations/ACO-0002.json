@@ -1,0 +1,20 @@
+{
+  "id": "ACO-0002",
+  "experiment_id": "ACX-0002",
+  "participant_id": "P-0001",
+  "observed": {
+    "body": [
+      "sensacion breve de apertura al final"
+    ],
+    "time": "ligera suspension",
+    "affect": "calma"
+  },
+  "interpretation": {
+    "experimental": "posible efecto de transicion temporal y espectral",
+    "symbolic": "apertura percibida"
+  },
+  "safety": {
+    "adverse_event": false
+  },
+  "source": "retrospective conversation"
+}

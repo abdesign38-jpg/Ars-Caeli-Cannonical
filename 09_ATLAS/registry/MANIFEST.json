@@ -1,0 +1,126 @@
+[
+  {
+    "path": "README.md",
+    "sha256": "640dfe24abec76334536222bdb54b9d65b4a71916be2a1e99480620c7e027255"
+  },
+  {
+    "path": "docs/ANONYMIZATION.md",
+    "sha256": "82bbac240f02d66a1096d2192fc76b8c8f39475b3aceff38947e9f8ba67b3fa6"
+  },
+  {
+    "path": "docs/BIOFEEDBACK_PROTOCOL.md",
+    "sha256": "21b3b615aa2659509ba56c4edc81f642e65c8ef8dd1921a00f01082c2d7951e2"
+  },
+  {
+    "path": "docs/MIGRATION_RULES.md",
+    "sha256": "59f6a26fdc84c96d616230249600ca122a82ef439c94a25dbc2a265c11db2e64"
+  },
+  {
+    "path": "docs/SESSION_MODEL.md",
+    "sha256": "b16557f1c9481794ce9ec6418fb0de41fbc533893461eff36c1a9c2716902f74"
+  },
+  {
+    "path": "examples/LINKAGE_EXAMPLE.md",
+    "sha256": "4955c7f378c17b964ce88e8f1a03a6d32b00c10668f90c4d4b3fb1facab1ed04"
+  },
+  {
+    "path": "experiments/ACX-0001.json",
+    "sha256": "31a1940966aee11c1dea1924e4ff30b8b2b8aad039faf73cb55a0e5a3aaf8b9d"
+  },
+  {
+    "path": "experiments/ACX-0001.md",
+    "sha256": "bc9a87de0fee1e0c4fa491f08b1dcae8c9e506012ed6750e6fedb1bffcbb642c"
+  },
+  {
+    "path": "experiments/ACX-0002.json",
+    "sha256": "51d4808dd1483b2e1d29f52fda2925966fb3ff09c0b86744c09d52049f3db093"
+  },
+  {
+    "path": "experiments/ACX-0002.md",
+    "sha256": "ec208f58015a5746d8549df5f133704c36b42c3ca8e848b322c58f1322dc0f99"
+  },
+  {
+    "path": "experiments/ACX-0003.json",
+    "sha256": "cd432def3fd85a4afe848ffb5d857361472a30be44771b08e39351459cc4606f"
+  },
+  {
+    "path": "experiments/ACX-0003.md",
+    "sha256": "2771c71485e73122a54742639f9c50ffa8c974a7b4ee2e8d82b1ba5927191c2b"
+  },
+  {
+    "path": "experiments/ACX-0004.json",
+    "sha256": "466b8d9317eeb3be461c9d4392dec83f8bdd5764b8b0e66baa285b24e1904777"
+  },
+  {
+    "path": "experiments/ACX-0004.md",
+    "sha256": "c89e5dab7c817b3879786e281f8ebb6a7c17bd9511c5a771f2adbafa3604d885"
+  },
+  {
+    "path": "observations/ACO-0001.json",
+    "sha256": "630762d5b89699e1fe39fec05e1305e06c9ea2b1e57f4823f8870cfc431b2702"
+  },
+  {
+    "path": "observations/ACO-0001.md",
+    "sha256": "8f50680f46bb69f98c4822b434808b0c88742d876adc4163fb867901482f5f40"
+  },
+  {
+    "path": "observations/ACO-0002.json",
+    "sha256": "05f8de51a30c265a4ed0150b1ee9f80746064b77eaf652d5d0ae72e8eb89ce61"
+  },
+  {
+    "path": "observations/ACO-0002.md",
+    "sha256": "f91542d64c9a60f1a540dff1e2dba8f6fc3e2e84183aa5ee2b301deab61c74a1"
+  },
+  {
+    "path": "observations/ACO-0003.json",
+    "sha256": "9813173f977ae264ec3333efe319096dae61d8896a73da5a1da1cc0de7a56419"
+  },
+  {
+    "path": "observations/ACO-0003.md",
+    "sha256": "6e5ae63572bedfa5b671afeea174c6ccb2791dfd27e372ee04c37cba9acd45f7"
+  },
+  {
+    "path": "observations/ACO-0004.json",
+    "sha256": "23fd1d83f586cce5c9fa0a58033981b0f7ec214fc2e04fd431acf262037877d3"
+  },
+  {
+    "path": "observations/ACO-0004.md",
+    "sha256": "9222b21cd07057930c185c1ae2de230926397c7d0b499ee111bafb8a8e18effa"
+  },
+  {
+    "path": "registry/ACO_INDEX.json",
+    "sha256": "4ab395bb7db3f6e3f4513c54bb20798cb473c05287c9ad326595179e32379f3e"
+  },
+  {
+    "path": "registry/ACX_INDEX.json",
+    "sha256": "cf8d1e3bcabda39777fc927d8bee82bcceea6cd184d09591be484ed5cfdfda05"
+  },
+  {
+    "path": "registry/DOCUMENT_INDEX.json",
+    "sha256": "55ebfc89ce4a36de3b0e8fea2f90b4487140d4be86c2b3e5b92d548ff22b2911"
+  },
+  {
+    "path": "registry/MASTER_REGISTRY.json",
+    "sha256": "14037b65aaf3d31ed3d340d590adedc9376a02de669c97039a0f9b1b1204a757"
+  },
+  {
+    "path": "schemas/observation.schema.json",
+    "sha256": "1042aa6915c656b19f9b7ffd75324c2c369e111495254fcb388b4c3f3dfc1df5"
+  },
+  {
+    "path": "schemas/session.schema.json",
+    "sha256": "17a9985dad32457bd1b6afae01e06ab438abc5be606a923b28d9ccb1b1fb9be2"
+  },
+  {
+    "path": "templates/SESSION_TEMPLATE.apl",
+    "sha256": "26353a471efe17ba730c1378062c0fd246ec961ce478245e1992d43c4a725269"
+  },
+  {
+    "path": "templates/SESSION_TEMPLATE.json",
+    "sha256": "79de6668f39cd395967ba11a0756f70c377b538edda86f61e50207b6c5b0fe29"
+  },
+  {
+    "path": "templates/SESSION_TEMPLATE.md",
+    "sha256": "2f1b69784b99fb05a1f6598e55f0fa03516e3648844471333ce8076274ca2970"
+  }
+]

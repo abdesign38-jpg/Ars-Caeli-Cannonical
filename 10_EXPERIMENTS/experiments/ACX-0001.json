@@ -1,0 +1,16 @@
+{
+  "id": "ACX-0001",
+  "title": "Universo Reverso — Experimento 30 s",
+  "engine": "ACE-AEON",
+  "engine_version": "prototype-30s",
+  "duration_real_s": 30,
+  "parameters": {
+    "carrier_hz": 82.41,
+    "modulation_hz": [
+      1.0,
+      0.5
+    ],
+    "presence": 0.08
+  },
+  "notes": "Inversión de pulso/vacío con cierre."
+}

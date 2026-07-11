@@ -1,0 +1,29 @@
+{
+  "version": "0.1.0",
+  "kernel_specs": [
+    "ACSPEC-012",
+    "ACSPEC-013",
+    "ACSPEC-014",
+    "ACSPEC-015",
+    "ACSPEC-016",
+    "ACSPEC-017",
+    "ACSPEC-018",
+    "ACSPEC-019"
+  ],
+  "canonical_folders": [
+    "00_KERNEL",
+    "01_LANGUAGE",
+    "02_FOUNDATION",
+    "03_INFRASTRUCTURE",
+    "04_PHYSICS",
+    "05_BIOLOGY",
+    "06_PSYCHOLOGY",
+    "07_ALCHEMY",
+    "08_ENGINES",
+    "09_ATLAS",
+    "10_EXPERIMENTS",
+    "11_DATA",
+    "12_REFERENCE"
+  ],
+  "source_of_truth": "Git repository"
+}

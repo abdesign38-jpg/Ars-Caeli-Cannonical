@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ars Caeli Canonical Metadata",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "version",
+    "status",
+    "layer",
+    "owner",
+    "created",
+    "updated"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "experimental",
+        "stable",
+        "deprecated",
+        "rejected",
+        "archived"
+      ]
+    },
+    "layer": {
+      "enum": [
+        "kernel",
+        "language",
+        "foundation",
+        "infrastructure",
+        "universal",
+        "individual",
+        "symbolic",
+        "engineering",
+        "experimental",
+        "reference"
+      ]
+    },
+    "maturity": {
+      "type": "string"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "created": {
+      "type": "string",
+      "format": "date"
+    },
+    "updated": {
+      "type": "string",
+      "format": "date"
+    },
+    "depends_on": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "related_to": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "implements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "implemented_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "observed_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tested_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "derived_from": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "supersedes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "compatible_with": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "breaking_changes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "ACX-0003",
+  "title": "Motor Generativo Ars Caeli Alpha 2",
+  "engine": "ACE-AEON",
+  "engine_version": "alpha-2-headphones",
+  "duration_real_s": 180,
+  "parameters": {
+    "presence_default": 0.09,
+    "limiter": true,
+    "stereo_motion": true
+  },
+  "notes": "Motor generativo optimizado para audífonos."
+}

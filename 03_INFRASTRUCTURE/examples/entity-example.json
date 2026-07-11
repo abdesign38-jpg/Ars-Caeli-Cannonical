@@ -1,0 +1,23 @@
+{
+  "id": "ACP-002",
+  "type": "parameter",
+  "title": "Densidad del Vacío",
+  "version": "0.1.0",
+  "status": "experimental",
+  "layer": "universal",
+  "maturity": "operationalized",
+  "definition": "Proporción y distribución de intervalos de baja estimulación.",
+  "relations": [
+    {
+      "predicate": "modulates",
+      "target": "ACS-003",
+      "confidence": "unknown"
+    },
+    {
+      "predicate": "depends_on",
+      "target": "APC-001",
+      "confidence": "strong"
+    }
+  ],
+  "evidence": []
+}

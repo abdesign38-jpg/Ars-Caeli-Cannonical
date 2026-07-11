@@ -1,0 +1,26 @@
+[
+  {
+    "id": "ACO-0001",
+    "experiment_id": "ACX-0001",
+    "path_json": "observations/ACO-0001.json",
+    "path_md": "observations/ACO-0001.md"
+  },
+  {
+    "id": "ACO-0002",
+    "experiment_id": "ACX-0002",
+    "path_json": "observations/ACO-0002.json",
+    "path_md": "observations/ACO-0002.md"
+  },
+  {
+    "id": "ACO-0003",
+    "experiment_id": "ACX-0003",
+    "path_json": "observations/ACO-0003.json",
+    "path_md": "observations/ACO-0003.md"
+  },
+  {
+    "id": "ACO-0004",
+    "experiment_id": "ACX-0004",
+    "path_json": "observations/ACO-0004.json",
+    "path_md": "observations/ACO-0004.md"
+  }
+]

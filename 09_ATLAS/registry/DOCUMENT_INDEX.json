@@ -1,0 +1,32 @@
+[
+  {
+    "id": "ATLAS-000",
+    "title": "Atlas Core README",
+    "path": "README.md",
+    "status": "experimental"
+  },
+  {
+    "id": "ATLAS-001",
+    "title": "Modelo de Sesión",
+    "path": "docs/SESSION_MODEL.md",
+    "status": "experimental"
+  },
+  {
+    "id": "ATLAS-002",
+    "title": "Protocolo Biofeedback",
+    "path": "docs/BIOFEEDBACK_PROTOCOL.md",
+    "status": "experimental"
+  },
+  {
+    "id": "ATLAS-003",
+    "title": "Política de anonimización",
+    "path": "docs/ANONYMIZATION.md",
+    "status": "experimental"
+  },
+  {
+    "id": "ATLAS-004",
+    "title": "Reglas de migración",
+    "path": "docs/MIGRATION_RULES.md",
+    "status": "experimental"
+  }
+]

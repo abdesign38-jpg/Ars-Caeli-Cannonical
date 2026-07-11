@@ -1,0 +1,26 @@
+{
+  "id": "ACO-0004",
+  "experiment_id": "ACX-0004",
+  "participant_id": "P-0001",
+  "observed": {
+    "duration_perceived_s": 1800,
+    "duration_real_s": 240,
+    "time": "suspension; perdida de referencia temporal",
+    "imagery": "imagenes repetitivas y visualizacion del departamento y manos con ojos cerrados",
+    "body": [
+      "movimiento percibido sin movimiento real",
+      "garganta seca"
+    ],
+    "respiration": "alteracion inicial sin miedo ni dolor",
+    "affect": "tranquilidad; congruencia ajena"
+  },
+  "interpretation": {
+    "experimental": "alta inmersion, distorsion temporal y amplificacion de imagen corporal",
+    "symbolic": "afinidad subjetiva con universo reverso"
+  },
+  "safety": {
+    "adverse_event": false,
+    "persistent_symptoms": false
+  },
+  "source": "retrospective conversation"
+}

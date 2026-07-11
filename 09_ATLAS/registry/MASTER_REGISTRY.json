@@ -1,0 +1,24 @@
+{
+  "system": "Ars Caeli",
+  "component": "ATLAS",
+  "version": "0.1.0",
+  "status": "experimental",
+  "updated": "2026-07-10",
+  "canonical_sources": {
+    "language": "APL_Aletheia_Percepta_Language_v0.1",
+    "infrastructure": "Ars_Caeli_Infrastructure_v0.1",
+    "physics": "ACSPEC_Physics_Cognitive_v0.1",
+    "foundation": "ACSPEC_Foundation_v0.1"
+  },
+  "entity_counts": {
+    "experiments": 4,
+    "observations": 4,
+    "hypotheses": 0,
+    "knowledge": 0
+  },
+  "indexes": {
+    "experiments": "registry/ACX_INDEX.json",
+    "observations": "registry/ACO_INDEX.json",
+    "documents": "registry/DOCUMENT_INDEX.json"
+  }
+}

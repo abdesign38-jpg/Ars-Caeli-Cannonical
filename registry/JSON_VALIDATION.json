@@ -1,0 +1,106 @@
+[
+  {
+    "path": "registry/SOURCES.json",
+    "valid": true
+  },
+  {
+    "path": "registry/MIGRATION_MAP.json",
+    "valid": true
+  },
+  {
+    "path": "registry/COLLISIONS.json",
+    "valid": true
+  },
+  {
+    "path": "10_EXPERIMENTS/experiments/ACX-0001.json",
+    "valid": true
+  },
+  {
+    "path": "10_EXPERIMENTS/experiments/ACX-0002.json",
+    "valid": true
+  },
+  {
+    "path": "10_EXPERIMENTS/experiments/ACX-0003.json",
+    "valid": true
+  },
+  {
+    "path": "10_EXPERIMENTS/experiments/ACX-0004.json",
+    "valid": true
+  },
+  {
+    "path": "10_EXPERIMENTS/observations/ACO-0001.json",
+    "valid": true
+  },
+  {
+    "path": "10_EXPERIMENTS/observations/ACO-0002.json",
+    "valid": true
+  },
+  {
+    "path": "10_EXPERIMENTS/observations/ACO-0003.json",
+    "valid": true
+  },
+  {
+    "path": "10_EXPERIMENTS/observations/ACO-0004.json",
+    "valid": true
+  },
+  {
+    "path": "09_ATLAS/schemas/session.schema.json",
+    "valid": true
+  },
+  {
+    "path": "09_ATLAS/schemas/observation.schema.json",
+    "valid": true
+  },
+  {
+    "path": "09_ATLAS/templates/SESSION_TEMPLATE.json",
+    "valid": true
+  },
+  {
+    "path": "09_ATLAS/registry/MASTER_REGISTRY.json",
+    "valid": true
+  },
+  {
+    "path": "09_ATLAS/registry/DOCUMENT_INDEX.json",
+    "valid": true
+  },
+  {
+    "path": "09_ATLAS/registry/ACX_INDEX.json",
+    "valid": true
+  },
+  {
+    "path": "09_ATLAS/registry/ACO_INDEX.json",
+    "valid": true
+  },
+  {
+    "path": "09_ATLAS/registry/MANIFEST.json",
+    "valid": true
+  },
+  {
+    "path": "03_INFRASTRUCTURE/schemas/canonical_metadata.schema.json",
+    "valid": true
+  },
+  {
+    "path": "03_INFRASTRUCTURE/schemas/apl_entity.schema.json",
+    "valid": true
+  },
+  {
+    "path": "03_INFRASTRUCTURE/examples/entity-example.json",
+    "valid": true
+  },
+  {
+    "path": "03_INFRASTRUCTURE/registry/support_support_registry.json",
+    "valid": true
+  },
+  {
+    "path": "03_INFRASTRUCTURE/registry/support_MANIFEST.json",
+    "valid": true
+  },
+  {
+    "path": "03_INFRASTRUCTURE/registry/infrastructure_registry.json",
+    "valid": true
+  },
+  {
+    "path": "01_LANGUAGE/APL/apl_registry.json",
+    "valid": true
+  }
+]

@@ -1,0 +1,12 @@
+graph TD
+    AEON[ACE-AEON] -->|generates| ACX[ACX Experiment]
+    ACX -->|produces| ACO[ACO Observation]
+    BIO[ACE-BIOFEEDBACK] -->|records| ACO
+    ACO -->|stored_in| MNEM[ACE-MNEMOSYNE]
+    MNEM -->|detects| ACR[ACR Pattern]
+    ACR -->|informs| ACH[ACH Hypothesis]
+    NOO[ACE-NOOGENESIS] -->|coordinates| ACH
+    ACH -->|updates| AEON
+    ACO -->|supports or contradicts| ACH
+    ACH -->|contributes_to| ACK[ACK Knowledge]
+    ATLAS[ACE-ATLAS] -->|consolidates| ACK

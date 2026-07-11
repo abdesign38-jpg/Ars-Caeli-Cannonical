@@ -1,0 +1,26 @@
+[
+  {
+    "id": "ACX-0001",
+    "title": "Universo Reverso — Experimento 30 s",
+    "path_json": "experiments/ACX-0001.json",
+    "path_md": "experiments/ACX-0001.md"
+  },
+  {
+    "id": "ACX-0002",
+    "title": "Universo Reverso v2 — Exploración 60 s",
+    "path_json": "experiments/ACX-0002.json",
+    "path_md": "experiments/ACX-0002.md"
+  },
+  {
+    "id": "ACX-0003",
+    "title": "Motor Generativo Ars Caeli Alpha 2",
+    "path_json": "experiments/ACX-0003.json",
+    "path_md": "experiments/ACX-0003.md"
+  },
+  {
+    "id": "ACX-0004",
+    "title": "Motor Beta Ars Caeli",
+    "path_json": "experiments/ACX-0004.json",
+    "path_md": "experiments/ACX-0004.md"
+  }
+]

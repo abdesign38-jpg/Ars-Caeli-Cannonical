@@ -1,0 +1,21 @@
+{
+  "session_id": "ACS-XXXX",
+  "experiment_id": "ACX-XXXX",
+  "participant_id": "P-XXXX",
+  "engine": "ACE-AEON",
+  "engine_version": "0.0.0",
+  "date": null,
+  "duration_real_s": 0,
+  "duration_perceived_s": null,
+  "context": {},
+  "parameters": {},
+  "observations": [],
+  "interpretations": {
+    "experimental": null,
+    "symbolic": null
+  },
+  "metrics": {},
+  "safety": {},
+  "data_quality": "prospective",
+  "completeness": "complete"
+}

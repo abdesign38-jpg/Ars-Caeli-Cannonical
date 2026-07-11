@@ -1,0 +1,37 @@
+{
+  "language": "APL",
+  "name": "Aletheia Percepta Language",
+  "version": "0.1.0",
+  "status": "experimental",
+  "entity_prefixes": {
+    "APC": "concept",
+    "ACP": "parameter",
+    "ACR": "relation",
+    "ACS": "state",
+    "ACE": "engine",
+    "ACH": "hypothesis",
+    "ACX": "experiment",
+    "ACO": "observation",
+    "ACM": "metric",
+    "ACK": "knowledge",
+    "ACSYN": "symbol",
+    "ACORG": "organism"
+  },
+  "layers": [
+    "universal",
+    "individual",
+    "symbolic"
+  ],
+  "maturity": [
+    "seed",
+    "defined",
+    "operationalized",
+    "implemented",
+    "observed",
+    "correlated",
+    "provisional",
+    "consolidated",
+    "deprecated",
+    "rejected"
+  ]
+}

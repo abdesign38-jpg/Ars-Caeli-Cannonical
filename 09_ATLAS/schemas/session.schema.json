@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ATLAS Session Schema",
+  "type": "object",
+  "required": [
+    "session_id",
+    "experiment_id",
+    "participant_id",
+    "engine",
+    "engine_version",
+    "duration_real_s",
+    "context",
+    "parameters",
+    "safety"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "pattern": "^ACS-[0-9]{4}$"
+    },
+    "experiment_id": {
+      "type": "string",
+      "pattern": "^ACX-[0-9]{4}$"
+    },
+    "participant_id": {
+      "type": "string",
+      "pattern": "^P-[0-9]{4}$"
+    },
+    "engine": {
+      "type": "string"
+    },
+    "engine_version": {
+      "type": "string"
+    },
+    "date": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "duration_real_s": {
+      "type": "number",
+      "minimum": 0
+    },
+    "duration_perceived_s": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "context": {
+      "type": "object"
+    },
+    "parameters": {
+      "type": "object"
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "interpretations": {
+      "type": "object",
+      "properties": {
+        "experimental": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "symbolic": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "type": "object"
+    },
+    "safety": {
+      "type": "object"
+    },
+    "data_quality": {
+      "enum": [
+        "prospective",
+        "retrospective"
+      ]
+    },
+    "completeness": {
+      "enum": [
+        "complete",
+        "partial",
+        "minimal"
+      ]
+    }
+  }
+}

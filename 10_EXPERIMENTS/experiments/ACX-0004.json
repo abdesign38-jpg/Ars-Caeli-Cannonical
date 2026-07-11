@@ -1,0 +1,14 @@
+{
+  "id": "ACX-0004",
+  "title": "Motor Beta Ars Caeli",
+  "engine": "ACE-AEON",
+  "engine_version": "beta-0.1",
+  "duration_real_s": 240,
+  "parameters": {
+    "ACP-001": 0.08,
+    "ACP-002": 0.45,
+    "ACP-003": 0.55,
+    "ACP-009": 0.35
+  },
+  "notes": "Ecosistema cognitivo con memoria, vacíos, entropía y movimiento espacial."
+}

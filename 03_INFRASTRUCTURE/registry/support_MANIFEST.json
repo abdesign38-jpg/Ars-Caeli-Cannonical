@@ -1,0 +1,54 @@
+[
+  {
+    "path": "00_KERNEL/ACSPEC-012-CORE-DATA-TYPES.md",
+    "sha256": "0687a2e87b74ddba79ec0bb378adf84187c308a6202cf76b95cb8afeb7e57d46"
+  },
+  {
+    "path": "00_KERNEL/ACSPEC-013-UNITS.md",
+    "sha256": "f40c6b6b460039eb487881e7dd47483ed1a8bc4971240fc1b36d56e87e234261"
+  },
+  {
+    "path": "00_KERNEL/ACSPEC-014-NAMING-CONVENTIONS.md",
+    "sha256": "eb2967e81e4a1a91bcd2af3aebcccf28f17487738a2a718cde3364c17c6dd5a7"
+  },
+  {
+    "path": "00_KERNEL/ACSPEC-015-METADATA.md",
+    "sha256": "3f24763449b147bd35108ed3d1dd9e9337c680b1b9a8463f3a2abec8d36824cf"
+  },
+  {
+    "path": "00_KERNEL/ACSPEC-016-CROSS-REFERENCES.md",
+    "sha256": "9eba151aad9c2f4d651c483496892a4035b3ad12e201d71ea0a3c3df2bb8201d"
+  },
+  {
+    "path": "00_KERNEL/ACSPEC-017-VERSIONING.md",
+    "sha256": "8d6b1f9a7afac3c9cc2e4e8941ebae94fa4675501cf2490fc7e8ede5bf248024"
+  },
+  {
+    "path": "00_KERNEL/ACSPEC-018-CANONICAL-REPOSITORY.md",
+    "sha256": "9624ab1b4e72743bb05d4ab34b36d5a5ed3293804e692d7b5cb65e197b5af5c2"
+  },
+  {
+    "path": "00_KERNEL/ACSPEC-019-COMPATIBILITY.md",
+    "sha256": "745a8cbb3fddb43d9dbb7adece3ce43da5407e3c66a6b815bd1cc5998fc11018"
+  },
+  {
+    "path": "12_REFERENCE/FOLDER-MAP.md",
+    "sha256": "5c7d9721eb931beaada91450ec7f2eb98a492ab124af3da489d81838b6d9de34"
+  },
+  {
+    "path": "README.md",
+    "sha256": "a898a27ccb3745f98348d5b8ef5d53f856e371306262e36b85f04f1bedda3432"
+  },
+  {
+    "path": "registry/support_registry.json",
+    "sha256": "245441f4f69c7665093342d95a607bed18fb20c0099d44cd8823d1781a126037"
+  },
+  {
+    "path": "schemas/canonical_metadata.schema.json",
+    "sha256": "9c420c9e0daf9a9cd89221a9c638608cca4f85dcfc97126244883ae6c875c46c"
+  },
+  {
+    "path": "templates/CANONICAL_DOCUMENT_TEMPLATE.md",
+    "sha256": "3ee4efa6db61d0e5d0c8418cd8f1647d0323e84c4850d90292ca2fdbad84a4e5"
+  }
+]

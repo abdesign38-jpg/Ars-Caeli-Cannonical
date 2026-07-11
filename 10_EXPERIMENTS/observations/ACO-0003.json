@@ -1,0 +1,24 @@
+{
+  "id": "ACO-0003",
+  "experiment_id": "ACX-0003",
+  "participant_id": "P-0001",
+  "observed": {
+    "body": [
+      "temblor leve de labios",
+      "presion subjetiva en zona superior izquierda de la cabeza",
+      "sensacion electrica o densa en manos"
+    ],
+    "time": "lento; parentesis sin respuesta",
+    "imagery": "imagenes repetitivas",
+    "motion": "sensacion de movimiento sin desplazamiento",
+    "affect": "sin miedo ni dolor"
+  },
+  "interpretation": {
+    "experimental": "amplificacion propioceptiva e inmersion",
+    "symbolic": null
+  },
+  "safety": {
+    "adverse_event": false
+  },
+  "source": "retrospective conversation"
+}

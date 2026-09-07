@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ars Caeli — Sound Field MVP</title>
+<style>
+:root{
+  color-scheme:dark;--bg:#080b0d;--panel:#0f1417;--panel2:#131a1e;--line:#263139;
+  --line2:#1a2329;--text:#e7edf0;--muted:#7f9099;--soft:#aebbc1;--cyan:#78cbd4;
+  --gold:#d4b06b;--violet:#a98ed5;--green:#7abf9a;--red:#d9776b;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;--sans:Inter,"Segoe UI",Arial,sans-serif
+}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 70% 10%,rgba(120,203,212,.06),transparent 28rem),radial-gradient(circle at 15% 85%,rgba(169,142,213,.05),transparent 30rem),var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit}button{cursor:pointer}.shell{max-width:1380px;margin:0 auto;padding:22px}.topbar{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line);padding:8px 0 18px;margin-bottom:16px}
+.brand .sup{font:600 10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}.brand h1{font-size:27px;letter-spacing:-.03em;margin:4px 0 0;font-weight:650}.brand h1 span{font-weight:350;color:var(--soft)}
+.status{display:flex;align-items:center;gap:8px;font:11px var(--mono);color:var(--muted)}.led{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 0 4px rgba(217,119,107,.08)}.led.on{background:var(--green);box-shadow:0 0 0 4px rgba(122,191,154,.08)}
+.layout{display:grid;grid-template-columns:310px minmax(0,1fr) 330px;gap:12px;align-items:start}.panel{background:rgba(15,20,23,.92);border:1px solid var(--line);border-radius:9px;overflow:hidden}.ph{padding:13px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}.ph h2{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin:0}.pbody{padding:14px}
+.control{padding:11px 0;border-bottom:1px solid var(--line2)}.control:last-child{border-bottom:0}.crow{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:7px}label{font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.val{font:12px var(--mono);color:var(--cyan)}
+input[type=range]{width:100%;accent-color:var(--cyan)}select,textarea{width:100%;background:#0a0f12;border:1px solid var(--line);color:var(--text);border-radius:5px;padding:8px 9px;outline:none}select:focus,textarea:focus{border-color:var(--cyan)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--soft);border-radius:5px;padding:8px 11px;font:600 11px var(--mono);letter-spacing:.04em}.btn:hover{border-color:var(--cyan);color:var(--text)}.btn.primary{background:var(--cyan);border-color:var(--cyan);color:#071114}.btn.danger{border-color:rgba(217,119,107,.5);color:var(--red)}
+.stage{position:relative;min-height:520px;background:#090d10;border:1px solid var(--line);border-radius:9px;overflow:hidden}.stage canvas{display:block;width:100%;height:520px}.overlay{position:absolute;inset:0;pointer-events:none}.readout{position:absolute;left:16px;top:16px;background:rgba(8,12,14,.78);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:11px var(--mono);color:var(--muted);backdrop-filter:blur(8px)}.readout b{color:var(--text);font-weight:600}
+.stategrid{position:absolute;left:16px;right:16px;bottom:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}.state{background:rgba(15,20,23,.88);padding:10px 12px}.state .k{font:600 9px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.state .n{font:600 20px var(--mono);margin-top:3px}.state.time .n{color:var(--cyan)}.state.res .n{color:var(--gold)}.state.pres .n{color:var(--violet)}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:12px}.metric{background:var(--panel);padding:11px 12px}.metric .k{font:600 9px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.metric .v{font:600 15px var(--mono);margin-top:3px}
+.note{background:rgba(212,176,107,.06);border-left:3px solid var(--gold);padding:10px 12px;color:var(--soft);font-size:12px;margin-top:12px}.note strong{color:var(--text)}
+.tabs{display:flex;border-bottom:1px solid var(--line)}.tab{flex:1;border:0;background:transparent;color:var(--muted);padding:10px 4px;font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;border-bottom:2px solid transparent}.tab.on{color:var(--text);border-bottom-color:var(--cyan)}.tabpane{display:none}.tabpane.on{display:block}
+.log{max-height:300px;overflow:auto}.logitem{padding:9px 0;border-bottom:1px solid var(--line2)}.logitem .time{font:10px var(--mono);color:var(--muted)}.logitem .txt{font-size:12px;color:var(--soft);margin-top:3px}
+.scale{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:8px}.scale button{border:1px solid var(--line);background:#0a0f12;color:var(--muted);border-radius:4px;padding:7px 0;font:11px var(--mono)}.scale button.on{border-color:var(--gold);color:var(--gold);background:rgba(212,176,107,.07)}
+.mini{font-size:11px;color:var(--muted);margin-top:5px}code{font-family:var(--mono);color:var(--cyan)}
+@media(max-width:1040px){.layout{grid-template-columns:280px minmax(0,1fr)}.right{grid-column:1/-1}}@media(max-width:720px){.shell{padding:12px}.layout{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.stage{min-height:420px}.stage canvas{height:420px}.strip{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="topbar">
+  <div class="brand"><div class="sup">Ars Caeli · Experimental Interface · MVP 0.1</div><h1>Sound Field <span>/ AEON sketch</span></h1></div>
+  <div class="status"><span class="led" id="led"></span><span id="audioStatus">AUDIO IDLE</span></div>
+</header>
+
+<div class="layout">
+<aside class="panel">
+  <div class="ph"><h2>Stimulus Engine</h2><span class="val" id="clock">00:00</span></div>
+  <div class="pbody">
+    <div class="actions" style="margin-bottom:8px"><button class="btn primary" id="startBtn">▶ START</button><button class="btn danger" id="stopBtn">■ STOP</button><button class="btn" id="resetBtn">RESET</button></div>
+    <div class="control"><div class="crow"><label for="freq">Frecuencia base</label><span class="val" id="freqVal">220 Hz</span></div><input id="freq" type="range" min="40" max="880" step="1" value="220"></div>
+    <div class="control"><div class="crow"><label for="wave">Timbre</label><span class="val">OSC</span></div><select id="wave"><option value="sine">Sine / puro</option><option value="triangle">Triangle / suave</option><option value="sawtooth">Saw / brillante</option><option value="square">Square / marcado</option></select></div>
+    <div class="control"><div class="crow"><label for="time">ACSPEC-100 · Tiempo</label><span class="val" id="timeVal">1.00 Hz</span></div><input id="time" type="range" min="0.15" max="4" step="0.05" value="1"><div class="mini">MVP mapping: velocidad de pulsación temporal.</div></div>
+    <div class="control"><div class="crow"><label for="res">ACSPEC-105 · Resonancia</label><span class="val" id="resVal">35%</span></div><input id="res" type="range" min="0" max="70" step="1" value="35"><div class="mini">MVP mapping: persistencia audible con delay + feedback.</div></div>
+    <div class="control"><div class="crow"><label for="pres">ACSPEC-106 · Presencia</label><span class="val" id="presVal">45%</span></div><input id="pres" type="range" min="0" max="100" step="1" value="45"><div class="mini">MVP mapping: densidad armónica + campo estéreo.</div></div>
+    <div class="control"><div class="crow"><label for="depth">Profundidad modulación</label><span class="val" id="depthVal">32%</span></div><input id="depth" type="range" min="0" max="80" step="1" value="32"></div>
+    <div class="control"><div class="crow"><label for="volume">Salida</label><span class="val" id="volumeVal">12%</span></div><input id="volume" type="range" min="0" max="20" step="1" value="12"><div class="mini">Salida limitada intencionalmente para el MVP.</div></div>
+  </div>
+</aside>
+
+<main>
+<section class="stage">
+  <canvas id="viz"></canvas>
+  <div class="overlay">
+    <div class="readout"><div><b>FIELD</b> synthetic.audio.v0</div><div>carrier <span id="carrierRead">220.00</span> Hz</div><div>pulse <span id="pulseRead">1.00</span> Hz</div><div>session <span id="sessionRead">idle</span></div></div>
+    <div class="stategrid"><div class="state time"><div class="k">Tiempo / MVP</div><div class="n" id="timeState">1.00</div></div><div class="state res"><div class="k">Resonancia / MVP</div><div class="n" id="resState">0.35</div></div><div class="state pres"><div class="k">Presencia / MVP</div><div class="n" id="presState">0.45</div></div></div>
+  </div>
+</section>
+<div class="strip"><div class="metric"><div class="k">Layer count</div><div class="v" id="layersM">2</div></div><div class="metric"><div class="k">Feedback</div><div class="v" id="feedbackM">0.35</div></div><div class="metric"><div class="k">Stereo field</div><div class="v" id="stereoM">±0.27</div></div><div class="metric"><div class="k">Output cap</div><div class="v">0.20</div></div></div>
+<div class="note"><strong>Experimental mapping.</strong> Ars Caeli define constructos cognitivos; no define todavía una conversión canónica de esos constructos a frecuencia, armonía o audio. Esta interfaz hace esa traducción sólo para probar interacción, reproducibilidad y registro.</div>
+</main>
+
+<aside class="panel right">
+<div class="tabs"><button class="tab on" data-tab="observe">Observe</button><button class="tab" data-tab="state">State</button><button class="tab" data-tab="canon">Canon</button></div>
+<div class="pbody tabpane on" id="observe">
+  <div class="control"><label>Respuesta subjetiva · intensidad</label><div class="scale" id="rating"><button data-r="0">0</button><button data-r="1">1</button><button data-r="2">2</button><button data-r="3">3</button><button data-r="4">4</button><button data-r="5">5</button></div></div>
+  <div class="control"><label for="obs">Observación</label><textarea id="obs" rows="4" placeholder="¿Qué cambió en atención, percepción, sensación o estado?"></textarea></div>
+  <div class="actions"><button class="btn primary" id="saveObs">SAVE OBSERVATION</button><button class="btn" id="exportBtn">EXPORT JSON</button></div>
+  <div class="control"><div class="crow"><label>Session log</label><span class="val" id="obsCount">0</span></div><div class="log" id="log"><div class="mini">No observations recorded.</div></div></div>
+</div>
+<div class="pbody tabpane" id="state"><div class="control"><div class="crow"><label>APL-like state preview</label><span class="val">LOCAL</span></div><textarea id="stateText" rows="18" readonly></textarea></div><div class="mini">Representación de trabajo del MVP; no afirma ser gramática APL canónica.</div></div>
+<div class="pbody tabpane" id="canon">
+  <div class="control"><label>ACSPEC-100 · Tiempo</label><div class="mini">Relación entre tiempo físico y tiempo percibido dentro del ecosistema cognitivo.</div></div>
+  <div class="control"><label>ACSPEC-105 · Resonancia</label><div class="mini">Persistencia de un patrón en la atención.</div></div>
+  <div class="control"><label>ACSPEC-106 · Presencia</label><div class="mini">Nivel de ocupación sensorial del campo.</div></div>
+  <div class="control"><label>Boundary</label><div class="mini">Los tres están en <code>draft</code>. La interfaz no asume causalidad ni convierte el sonido en definición científica de los constructos.</div></div>
+</div>
+</aside>
+</div>
+</div>
+
+<script>
+(() => {
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const S={ctx:null,master:null,analyser:null,dry:null,wet:null,delay:null,feedback:null,oscs:[],gains:[],panners:[],lfo:null,lfoGain:null,started:false,startAt:0,timer:null,raf:null,observations:[],rating:null,sessionId:null};
+const E={canvas:$("#viz"),clock:$("#clock"),led:$("#led"),status:$("#audioStatus"),stateText:$("#stateText"),log:$("#log")};
+const num=id=>Number($(id).value);
+function p(){return{frequency:num("#freq"),waveform:$("#wave").value,tiempo_hz:num("#time"),resonancia:num("#res")/100,presencia:num("#pres")/100,modulation_depth:num("#depth")/100,output:num("#volume")/100}}
+const layers=x=>x<.18?[1]:x<.52?[1,2]:x<.82?[1,2,3]:[1,2,3,4];
+function labels(){
+ const x=p();$("#freqVal").textContent=Math.round(x.frequency)+" Hz";$("#timeVal").textContent=x.tiempo_hz.toFixed(2)+" Hz";$("#resVal").textContent=Math.round(x.resonancia*100)+"%";$("#presVal").textContent=Math.round(x.presencia*100)+"%";$("#depthVal").textContent=Math.round(x.modulation_depth*100)+"%";$("#volumeVal").textContent=Math.round(x.output*100)+"%";
+ $("#carrierRead").textContent=x.frequency.toFixed(2);$("#pulseRead").textContent=x.tiempo_hz.toFixed(2);$("#timeState").textContent=x.tiempo_hz.toFixed(2);$("#resState").textContent=x.resonancia.toFixed(2);$("#presState").textContent=x.presencia.toFixed(2);$("#layersM").textContent=layers(x.presencia).length;$("#feedbackM").textContent=x.resonancia.toFixed(2);$("#stereoM").textContent="±"+(x.presencia*.6).toFixed(2);renderState();apply();
+}
+function renderState(){const x=p();E.stateText.value=JSON.stringify({type:"ACX_AUDIO_STIMULUS_MVP",status:"experimental",canonical_basis:["ACSPEC-100","ACSPEC-105","ACSPEC-106"],mapping_status:"non-canonical MVP interpretation",session_id:S.sessionId,stimulus:{base_frequency_hz:x.frequency,waveform:x.waveform,time_mapping:{construct:"Tiempo",audio_parameter:"pulse_rate_hz",value:x.tiempo_hz},resonance_mapping:{construct:"Resonancia",audio_parameter:"delay_feedback",value:x.resonancia},presence_mapping:{construct:"Presencia",audio_parameter:"harmonic_density_stereo_width",value:x.presencia},modulation_depth:x.modulation_depth,output_gain:x.output},observations:S.observations.length},null,2)}
+function create(){if(S.ctx)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC){alert("Web Audio API no disponible.");return}const c=new AC();S.ctx=c;S.master=c.createGain();S.master.gain.value=0;S.analyser=c.createAnalyser();S.analyser.fftSize=2048;S.dry=c.createGain();S.wet=c.createGain();S.delay=c.createDelay(1);S.delay.delayTime.value=.22;S.feedback=c.createGain();S.dry.connect(S.master);S.wet.connect(S.master);S.delay.connect(S.wet);S.delay.connect(S.feedback);S.feedback.connect(S.delay);S.master.connect(S.analyser);S.analyser.connect(c.destination)}
+function rebuild(){if(!S.ctx||!S.started)return;const now=S.ctx.currentTime;S.oscs.forEach(o=>{try{o.stop(now+.02)}catch(e){}});S.oscs=[];S.gains=[];S.panners=[];const x=p();layers(x.presencia).forEach((m,i)=>{const o=S.ctx.createOscillator(),g=S.ctx.createGain(),pn=S.ctx.createStereoPanner?S.ctx.createStereoPanner():null;o.type=x.waveform;o.frequency.value=Math.min(6000,x.frequency*m);g.gain.value=(i===0?.7:.18/(i*.75+1))*(i===0?1:x.presencia);if(pn){const sp=x.presencia*.6;pn.pan.value=i===0?0:(i%2?sp:-sp);o.connect(g);g.connect(pn);pn.connect(S.dry);pn.connect(S.delay);S.panners.push(pn)}else{o.connect(g);g.connect(S.dry);g.connect(S.delay)}o.start();S.oscs.push(o);S.gains.push(g)})}
+function lfo(){if(S.lfo){try{S.lfo.stop()}catch(e){}}S.lfo=S.ctx.createOscillator();S.lfoGain=S.ctx.createGain();S.lfo.type="sine";S.lfo.connect(S.lfoGain);S.lfoGain.connect(S.master.gain);S.lfo.start()}
+function apply(){if(!S.ctx||!S.started)return;const x=p(),now=S.ctx.currentTime;if(S.oscs.length!==layers(x.presencia).length)rebuild();S.oscs.forEach((o,i)=>{o.type=x.waveform;o.frequency.setTargetAtTime(Math.min(6000,x.frequency*(i+1)),now,.03)});S.panners.forEach((pn,i)=>{const sp=x.presencia*.6;pn.pan.setTargetAtTime(i===0?0:(i%2?sp:-sp),now,.03)});S.feedback.gain.setTargetAtTime(Math.min(.68,x.resonancia),now,.03);S.wet.gain.setTargetAtTime(.12+x.resonancia*.28,now,.03);S.dry.gain.setTargetAtTime(.88-x.resonancia*.18,now,.03);S.lfo.frequency.setTargetAtTime(x.tiempo_hz,now,.03);const base=Math.min(.2,x.output);S.master.gain.cancelScheduledValues(now);S.master.gain.setValueAtTime(base,now);S.lfoGain.gain.setTargetAtTime(base*x.modulation_depth*.55,now,.03)}
+async function start(){create();if(!S.ctx)return;await S.ctx.resume();if(S.started)return;S.sessionId="ACX-AUDIO-"+new Date().toISOString().replace(/\D/g,"").slice(0,14);S.started=true;S.startAt=Date.now();rebuild();lfo();apply();S.led.classList.add("on");S.status.textContent="AUDIO ACTIVE";$("#sessionRead").textContent=S.sessionId;S.timer=setInterval(()=>{const q=Math.floor((Date.now()-S.startAt)/1000);E.clock.textContent=String(Math.floor(q/60)).padStart(2,"0")+":"+String(q%60).padStart(2,"0")},500);draw();renderState()}
+function stop(){if(!S.ctx||!S.started)return;const now=S.ctx.currentTime;S.master.gain.cancelScheduledValues(now);S.master.gain.setTargetAtTime(0,now,.03);setTimeout(()=>{S.oscs.forEach(o=>{try{o.stop()}catch(e){}});if(S.lfo){try{S.lfo.stop()}catch(e){}}S.oscs=[];S.panners=[];S.lfo=null},120);S.started=false;S.led.classList.remove("on");S.status.textContent="AUDIO IDLE";$("#sessionRead").textContent="idle";clearInterval(S.timer);if(S.raf)cancelAnimationFrame(S.raf);renderState()}
+function reset(){stop();$("#freq").value=220;$("#wave").value="sine";$("#time").value=1;$("#res").value=35;$("#pres").value=45;$("#depth").value=32;$("#volume").value=12;S.rating=null;$$("#rating button").forEach(b=>b.classList.remove("on"));labels()}
+function draw(){if(!S.started||!S.analyser)return;const c=E.canvas,r=c.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);if(c.width!==Math.floor(r.width*d)||c.height!==Math.floor(r.height*d)){c.width=Math.floor(r.width*d);c.height=Math.floor(r.height*d)}const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);const w=r.width,h=r.height;g.fillStyle="#090d10";g.fillRect(0,0,w,h);g.strokeStyle="#142026";g.lineWidth=1;for(let x=0;x<w;x+=48){g.beginPath();g.moveTo(x,0);g.lineTo(x,h);g.stroke()}for(let y=0;y<h;y+=48){g.beginPath();g.moveTo(0,y);g.lineTo(w,y);g.stroke()}const td=new Uint8Array(S.analyser.fftSize);S.analyser.getByteTimeDomainData(td);g.strokeStyle="#78cbd4";g.lineWidth=1.6;g.beginPath();td.forEach((v,i)=>{const x=i/(td.length-1)*w,y=v/255*h*.55+h*.12;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();const fd=new Uint8Array(S.analyser.frequencyBinCount);S.analyser.getByteFrequencyData(fd);g.fillStyle="rgba(212,176,107,.45)";const bars=72,bw=w/bars;for(let i=0;i<bars;i++){const ix=Math.floor(i/bars*fd.length*.35),bh=fd[ix]/255*h*.22;g.fillRect(i*bw,h*.77-bh,bw*.68,bh)}const x=p(),rr=34+x.presencia*70;g.beginPath();g.arc(w*.5,h*.46,rr,0,Math.PI*2);g.strokeStyle=`rgba(169,142,213,${.16+x.presencia*.42})`;g.stroke();g.beginPath();g.arc(w*.5,h*.46,rr*(1+x.resonancia*.7),0,Math.PI*2);g.strokeStyle=`rgba(212,176,107,${.08+x.resonancia*.32})`;g.stroke();S.raf=requestAnimationFrame(draw)}
+function esc(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function save(){const text=$("#obs").value.trim();if(!text&&S.rating===null)return;S.observations.unshift({timestamp:new Date().toISOString(),session_id:S.sessionId,rating_0_5:S.rating,observation:text,stimulus:p()});$("#obs").value="";S.rating=null;$$("#rating button").forEach(b=>b.classList.remove("on"));renderLog();renderState()}
+function renderLog(){$("#obsCount").textContent=S.observations.length;if(!S.observations.length){E.log.innerHTML='<div class="mini">No observations recorded.</div>';return}E.log.innerHTML=S.observations.map(o=>`<div class="logitem"><div class="time">${new Date(o.timestamp).toLocaleTimeString()} · rating ${o.rating_0_5??"—"}</div><div class="txt">${esc(o.observation||"(sin nota)")}</div></div>`).join("")}
+function exportJson(){const doc={schema:"ars-caeli.sound-field.mvp.0.1",exported_at:new Date().toISOString(),canonical_basis:{"ACSPEC-100":"Tiempo","ACSPEC-105":"Resonancia","ACSPEC-106":"Presencia"},caveat:"Audio mappings are experimental MVP interpretations, not canonical definitions or causal claims.",current_state:p(),observations:[...S.observations].reverse()};const b=new Blob([JSON.stringify(doc,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=(S.sessionId||"ACX-AUDIO-SESSION")+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+["#freq","#wave","#time","#res","#pres","#depth","#volume"].forEach(s=>{$(s).addEventListener("input",labels);$(s).addEventListener("change",labels)});$("#startBtn").addEventListener("click",start);$("#stopBtn").addEventListener("click",stop);$("#resetBtn").addEventListener("click",reset);$("#saveObs").addEventListener("click",save);$("#exportBtn").addEventListener("click",exportJson);
+$$("#rating button").forEach(b=>b.addEventListener("click",()=>{S.rating=Number(b.dataset.r);$$("#rating button").forEach(x=>x.classList.toggle("on",x===b))}));$$(".tab").forEach(t=>t.addEventListener("click",()=>{$$(".tab").forEach(x=>x.classList.toggle("on",x===t));$$(".tabpane").forEach(q=>q.classList.toggle("on",q.id===t.dataset.tab))}));
+labels();
+})();
+</script>
+</body>
+</html>

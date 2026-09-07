@@ -1,18 +1,18 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="Campo Sonoro AEON v0.3.1 — interfaz simbólica y experimental de sesión de Ars Caeli.">
-  <title>Ars Caeli · Campo Sonoro AEON v0.3.1</title>
+  <meta name="description" content="AEON Sound Field v0.3.1 — Ars Caeli symbolic and experimental session interface.">
+  <title>Ars Caeli · AEON Sound Field v0.3.1</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="cosmos" aria-hidden="true"></div>
 
   <header class="app-header">
-    <a class="brand" href="#inicio" aria-label="Ars Caeli inicio">
+    <a class="brand" href="#inicio" aria-label="Ars Caeli home">
       <div class="sigil" aria-hidden="true">
         <span></span><span></span><span></span>
       </div>
@@ -22,12 +22,12 @@
       </div>
     </a>
 
-    <nav class="main-nav" aria-label="Navegación principal">
-      <button data-view="inicio" class="nav-link active">Inicio</button>
-      <button data-view="descenso" class="nav-link">Descenso</button>
-      <button data-view="sesion" class="nav-link">Sesión</button>
-      <button data-view="retorno" class="nav-link">Retorno</button>
-      <button data-view="biblioteca" class="nav-link">Biblioteca</button>
+    <nav class="main-nav" aria-label="Main navigation">
+      <button data-view="inicio" class="nav-link active">Home</button>
+      <button data-view="descenso" class="nav-link">Descent</button>
+      <button data-view="sesion" class="nav-link">Session</button>
+      <button data-view="retorno" class="nav-link">Return</button>
+      <button data-view="biblioteca" class="nav-link">Library</button>
       <button data-view="atlas" class="nav-link">ATLAS</button>
     </nav>
 
@@ -42,122 +42,122 @@
     <aside class="left-panel glass">
       <section class="panel-section">
         <div class="section-title">
-          <span>Perfil de sesión</span>
-          <button class="icon-button" id="saveProfileBtn" title="Guardar perfil">↧</button>
+          <span>Session profile</span>
+          <button class="icon-button" id="saveProfileBtn" title="Save profile">↧</button>
         </div>
 
-        <label class="field-label" for="intention">Intención</label>
-        <textarea id="intention" rows="3" placeholder="¿Qué deseas transformar, comprender o integrar?"></textarea>
+        <label class="field-label" for="intention">Intention</label>
+        <textarea id="intention" rows="3" placeholder="What do you want to transform, understand, or integrate?"></textarea>
       </section>
 
       <section class="panel-section">
-        <div class="section-title"><span>Método alquímico</span></div>
+        <div class="section-title"><span>Alchemical method</span></div>
 
         <div class="alchemy-ladder">
           <div class="ladder-line" aria-hidden="true"></div>
 
           <div class="alchemy-row" data-dim="inframundo">
-            <button class="alchemy-node active" aria-label="Inframundo"></button>
-            <div class="alchemy-copy"><strong>Inframundo</strong><small>Reconocer</small></div>
+            <button class="alchemy-node active" aria-label="Underworld"></button>
+            <div class="alchemy-copy"><strong>Underworld</strong><small>Recognize</small></div>
             <output id="infraOut">40</output>
           </div>
           <div class="alchemy-row" data-dim="activacion">
-            <button class="alchemy-node" aria-label="Activación"></button>
-            <div class="alchemy-copy"><strong>Activación</strong><small>Movilizar</small></div>
+            <button class="alchemy-node" aria-label="Activation"></button>
+            <div class="alchemy-copy"><strong>Activation</strong><small>Mobilize</small></div>
             <output id="actOut">28</output>
           </div>
           <div class="alchemy-row" data-dim="disociacion">
-            <button class="alchemy-node" aria-label="Disociación"></button>
-            <div class="alchemy-copy"><strong>Disociación</strong><small>Reorientar</small></div>
+            <button class="alchemy-node" aria-label="Dissociation"></button>
+            <div class="alchemy-copy"><strong>Dissociation</strong><small>Reorient</small></div>
             <output id="disOut">16</output>
           </div>
           <div class="alchemy-row" data-dim="apertura">
-            <button class="alchemy-node" aria-label="Apertura"></button>
-            <div class="alchemy-copy"><strong>Apertura</strong><small>Integrar</small></div>
+            <button class="alchemy-node" aria-label="Opening"></button>
+            <div class="alchemy-copy"><strong>Opening</strong><small>Integrate</small></div>
             <output id="apeOut">52</output>
           </div>
         </div>
 
         <div class="slider-stack">
-          <label>Inframundo <input id="inframundo" type="range" min="0" max="100" value="40"></label>
-          <label>Activación <input id="activacion" type="range" min="0" max="100" value="28"></label>
-          <label>Disociación <input id="disociacion" type="range" min="0" max="100" value="16"></label>
-          <label>Apertura <input id="apertura" type="range" min="0" max="100" value="52"></label>
+          <label>Underworld <input id="inframundo" type="range" min="0" max="100" value="40"></label>
+          <label>Activation <input id="activacion" type="range" min="0" max="100" value="28"></label>
+          <label>Dissociation <input id="disociacion" type="range" min="0" max="100" value="16"></label>
+          <label>Opening <input id="apertura" type="range" min="0" max="100" value="52"></label>
         </div>
       </section>
 
       <section class="panel-section">
         <div class="section-title"><span>Constructo ACSPEC</span></div>
         <select id="constructSelect">
-          <option value="presencia">Presencia</option>
-          <option value="resonancia">Resonancia</option>
-          <option value="tiempo">Tiempo</option>
-          <option value="vacio">Vacío</option>
-          <option value="entropia">Entropía</option>
-          <option value="horizonte">Horizonte</option>
-          <option value="cristalizacion">Cristalización</option>
-          <option value="respiracion">Respiración Ambiental</option>
+          <option value="presencia">Presence</option>
+          <option value="resonancia">Resonance</option>
+          <option value="tiempo">Time</option>
+          <option value="vacio">Void</option>
+          <option value="entropia">Entropy</option>
+          <option value="horizonte">Horizon</option>
+          <option value="cristalizacion">Crystallization</option>
+          <option value="respiracion">Environmental Breathing</option>
         </select>
       </section>
 
       <section class="panel-section">
-        <label class="field-label">Duración <span id="durationLabel">20 min</span></label>
+        <label class="field-label">Duration <span id="durationLabel">20 min</span></label>
         <input id="duration" type="range" min="5" max="60" value="20" step="5">
 
-        <label class="field-label">Nivel de profundidad <span id="depthLabel">Medio</span></label>
+        <label class="field-label">Depth level <span id="depthLabel">Medium</span></label>
         <input id="depth" type="range" min="0" max="2" value="1" step="1">
       </section>
 
       <section class="panel-section">
-        <div class="section-title"><span>Salida</span></div>
+        <div class="section-title"><span>Output</span></div>
         <div class="segmented">
-          <button class="seg active" data-output="headphones">Auriculares</button>
-          <button class="seg" data-output="speakers">Altavoces</button>
+          <button class="seg active" data-output="headphones">Headphones</button>
+          <button class="seg" data-output="speakers">Speakers</button>
         </div>
       </section>
 
       <section class="boundary-box">
         <span class="boundary-symbol">△</span>
         <div>
-          <strong>Espacio experimental</strong>
-          <p>Escucha, observa, registra. Las correspondencias son simbólicas y no sustituyen procesos médicos o psicológicos.</p>
+          <strong>Experimental space</strong>
+          <p>Listen, observe, record. These correspondences are symbolic and do not replace medical or psychological processes.</p>
         </div>
       </section>
 
-      <blockquote>“Para subir hay que bajar.”<cite>— Ars Caeli</cite></blockquote>
+      <blockquote>“To rise, one must descend.”<cite>— Ars Caeli</cite></blockquote>
     </aside>
 
     <section class="center-stage" id="inicio">
       <div class="stage-heading">
-        <span class="eyebrow">MOTOR AEON · CAMPO SONORO DE SESIÓN</span>
-        <h1>CAMPO · SONORO</h1>
-        <p>DESCENSO · TRANSFORMACIÓN · RETORNO</p>
+        <span class="eyebrow">AEON ENGINE · SESSION SOUND FIELD</span>
+        <h1>SOUND · FIELD</h1>
+        <p>DESCENT · TRANSFORMATION · RETURN</p>
       </div>
 
       <div class="phase-rail" role="tablist">
-        <button class="phase-step active" data-phase="descenso"><span>01</span>Descenso</button>
-        <button class="phase-step" data-phase="sesion"><span>02</span>Sesión</button>
-        <button class="phase-step" data-phase="retorno"><span>03</span>Retorno</button>
+        <button class="phase-step active" data-phase="descenso"><span>01</span>Descent</button>
+        <button class="phase-step" data-phase="sesion"><span>02</span>Session</button>
+        <button class="phase-step" data-phase="retorno"><span>03</span>Return</button>
       </div>
 
       <div class="field-wrap">
-        <canvas id="fieldCanvas" aria-label="Campo simbólico de sesión animado"></canvas>
+        <canvas id="fieldCanvas" aria-label="Animated symbolic session field"></canvas>
 
         <div class="field-label descent-label">
-          <strong>DESCENSO</strong>
-          <small>Explorar</small>
+          <strong>DESCENT</strong>
+          <small>Explore</small>
         </div>
         <div class="field-label return-label">
-          <strong>RETORNO</strong>
-          <small>Integrar</small>
+          <strong>RETURN</strong>
+          <small>Integrate</small>
         </div>
         <div class="field-label shadow-label">
-          <strong>SOMBRA</strong>
-          <small>Liberar</small>
+          <strong>SHADOW</strong>
+          <small>Release</small>
         </div>
         <div class="field-label light-label">
-          <strong>LUZ</strong>
-          <small>Integración</small>
+          <strong>LIGHT</strong>
+          <small>Integration</small>
         </div>
 
         <div class="vertical-axis" aria-hidden="true">
@@ -171,23 +171,23 @@
         </div>
 
         <div class="field-readout">
-          <span><b id="phaseReadout">DESCENSO</b> fase</span>
-          <span><b id="gradientReadout">+24</b> gradiente</span>
+          <span><b id="phaseReadout">DESCENT</b> phase</span>
+          <span><b id="gradientReadout">+24</b> gradient</span>
           <span><b id="carrierReadout">174</b> Hz</span>
         </div>
       </div>
 
-      <p class="mantra">CUANDO LA FRECUENCIA ENCUENTRA PROPÓSITO,<br>LA MATERIA RECUERDA QUIÉN ES.</p>
+      <p class="mantra">WHEN FREQUENCY FINDS PURPOSE,<br>MATTER REMEMBERS WHO IT IS.</p>
 
       <div class="player glass">
         <div class="player-top">
-          <button class="player-btn" id="resetBtn">↻<span>Reiniciar campo</span></button>
+          <button class="player-btn" id="resetBtn">↻<span>Reset field</span></button>
           <div class="transport">
             <button class="circle-btn" id="prevBtn">◀</button>
             <button class="play-btn" id="playBtn">▶</button>
             <button class="circle-btn" id="nextBtn">▶</button>
           </div>
-          <button class="player-btn" id="timerBtn">◷<span>Temporizador</span></button>
+          <button class="player-btn" id="timerBtn">◷<span>Timer</span></button>
         </div>
         <div class="progress-row">
           <span id="elapsed">00:00</span>
@@ -195,67 +195,67 @@
           <span id="totalTime">20:00</span>
         </div>
         <div class="microvoid-tools">
-          <button class="microvoid-btn" id="registerMicrovoidBtn">◇ Registrar microvacío</button>
-          <span id="microvoidCount">0 eventos</span>
+          <button class="microvoid-btn" id="registerMicrovoidBtn">◇ Register microvoid</button>
+          <span id="microvoidCount">0 events</span>
         </div>
       </div>
-      <section class="microvoid-timeline glass" aria-label="Trayectoria temporal de microvacíos">
-        <div class="timeline-head"><span>Trayectoria de sesión</span><small>Descenso · Sesión · Retorno</small></div>
+      <section class="microvoid-timeline glass" aria-label="Microvoid session timeline">
+        <div class="timeline-head"><span>Session trajectory</span><small>Descent · Session · Return</small></div>
         <div class="timeline-track" id="microvoidTimeline"><div class="timeline-progress" id="timelineProgress"></div><div class="timeline-events" id="microvoidEvents"></div></div>
-        <div class="timeline-labels"><span>Presencia</span><span>Microvacíos registrados</span><span>Presencia</span></div>
+        <div class="timeline-labels"><span>Presence</span><span>Registered microvoids</span><span>Presence</span></div>
       </section>
     </section>
 
     <aside class="right-panel">
       <section class="card glass">
-        <div class="card-title">Campo de sesión en tiempo real</div>
+        <div class="card-title">Real-time session field</div>
 
         <div class="hemisphere-grid">
           <div class="hemisphere">
             <canvas id="leftBrain" width="220" height="120"></canvas>
-            <strong>Polaridad analítica</strong>
-            <small>Estructura · Análisis</small>
+            <strong>Analytical polarity</strong>
+            <small>Structure · Analysis</small>
           </div>
           <div class="divider"></div>
           <div class="hemisphere">
             <canvas id="rightBrain" width="220" height="120"></canvas>
-            <strong>Polaridad sintética</strong>
-            <small>Intuición · Síntesis</small>
+            <strong>Synthetic polarity</strong>
+            <small>Intuition · Synthesis</small>
           </div>
         </div>
 
         <div class="coherence">
-          <span>Índice de integración</span>
+          <span>Integration index</span>
           <div class="coherence-track"><div id="coherenceBar"></div></div>
           <output id="coherenceOut">78%</output>
         </div>
-        <p class="symbolic-label">Representación simbólica · no biométrica</p>
+        <p class="symbolic-label">Symbolic representation · not biometric</p>
       </section>
 
       <section class="card glass">
-        <div class="card-title">Frecuencias simbólicas</div>
+        <div class="card-title">Symbolic frequencies</div>
         <div class="frequency-list" id="frequencyList"></div>
-        <p class="micro-note">Correspondencias internas de Ars Caeli. Se muestran como lenguaje simbólico, no como hechos terapéuticos.</p>
+        <p class="micro-note">Internal Ars Caeli correspondences. Presented as symbolic language, not therapeutic facts.</p>
       </section>
 
       <section class="card glass">
         <div class="card-title row-between">
-          <span>Visualización del campo</span>
+          <span>Field visualization</span>
           <button class="icon-button" id="expandVizBtn">↗</button>
         </div>
 
         <div class="viz-tabs">
-          <button class="viz-tab active" data-viz="torus">Toroide</button>
-          <button class="viz-tab" data-viz="waves">Ondas</button>
-          <button class="viz-tab" data-viz="spectrum">Espectro</button>
-          <button class="viz-tab" data-viz="chakras">Eje</button>
+          <button class="viz-tab active" data-viz="torus">Torus</button>
+          <button class="viz-tab" data-viz="waves">Waves</button>
+          <button class="viz-tab" data-viz="spectrum">Spectrum</button>
+          <button class="viz-tab" data-viz="chakras">Axis</button>
         </div>
         <canvas id="miniViz" height="180"></canvas>
       </section>
 
       <section class="session-actions">
-        <button class="action-btn gold" id="saveSessionBtn">⇩ Guardar sesión</button>
-        <button class="action-btn cyan" id="exportAtlasBtn">△ Exportar a ATLAS</button>
+        <button class="action-btn gold" id="saveSessionBtn">⇩ Save session</button>
+        <button class="action-btn cyan" id="exportAtlasBtn">△ Export to ATLAS</button>
       </section>
     </aside>
   </main>
@@ -264,7 +264,7 @@
     <div class="drawer-head">
       <div>
         <span class="eyebrow" id="drawerEyebrow">SESION</span>
-        <h2 id="drawerTitle">Registro de sesión</h2>
+        <h2 id="drawerTitle">Session record</h2>
       </div>
       <button class="icon-button" id="closeDrawerBtn">×</button>
     </div>
@@ -272,7 +272,7 @@
   </section>
 
   <footer class="app-footer">
-    <span>ARS CAELI · MOTOR AEON · CAMPO SONORO v0.3.1</span>
+    <span>ARS CAELI · AEON ENGINE · SOUND FIELD v0.3.1</span>
     <span>VERITAS IN SONO</span>
   </footer>
 

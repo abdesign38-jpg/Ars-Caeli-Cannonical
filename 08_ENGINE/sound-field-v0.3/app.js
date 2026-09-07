@@ -28,13 +28,13 @@
   };
 
   const symbolicFreqs = [
-    [174,"Umbral corporal","#ef6c63"],
-    [285,"Restitución de estructura","#e3a34f"],
-    [396,"Liberación / descenso de carga","#e2c45d"],
-    [417,"Cambio de patrón","#edd069"],
-    [528,"Coherencia / retorno","#7dcc8d"],
-    [639,"Vínculo / integración relacional","#5fcef0"],
-    [963,"Apertura / eje superior","#9b64e6"]
+    [174,"Body threshold","#ef6c63"],
+    [285,"Structure restoration","#e3a34f"],
+    [396,"Release / descent of load","#e2c45d"],
+    [417,"Pattern change","#edd069"],
+    [528,"Coherence / return","#7dcc8d"],
+    [639,"Bond / relational integration","#5fcef0"],
+    [963,"Opening / upper axis","#9b64e6"]
   ];
 
   const S = {
@@ -93,11 +93,11 @@
     $("#coherenceOut").textContent=x.integration_index+"%";
     $("#coherenceBar").style.width=x.integration_index+"%";
     $("#carrierReadout").textContent=S.selectedHz;
-    $("#phaseReadout").textContent=S.phase.toUpperCase();
+    $("#phaseReadout").textContent={descenso:"DESCENT",sesion:"SESSION",retorno:"RETURN"}[S.phase];
     const dur=num("#duration");
     $("#durationLabel").textContent=dur+" min";
     $("#totalTime").textContent=String(dur).padStart(2,"0")+":00";
-    const depths=["Suave","Medio","Profundo"];
+    const depths=["Soft","Medium","Deep"];
     $("#depthLabel").textContent=depths[num("#depth")];
     renderMicrovoidTimeline();
     updateAudio();
@@ -231,7 +231,7 @@
     ensureSession();
     const x=derived();
     const event={id:crypto.randomUUID(),timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase:S.phase,dimensions:dimensions(),integration_index:x.integration_index,gradient:x.gradient,source:"manual"};
-    S.microvoids.push(event);renderMicrovoidTimeline();flash("Microvacío registrado.");
+    S.microvoids.push(event);renderMicrovoidTimeline();flash("Microvoid registered.");
     const timeline=$("#microvoidTimeline");timeline.classList.remove("microvoid-pulse");void timeline.offsetWidth;timeline.classList.add("microvoid-pulse");
   }
   function renderMicrovoidTimeline(){
@@ -239,14 +239,14 @@
     if(!root||!count)return;
     const total=Math.max(num("#duration")*60,1),elapsed=Math.min(elapsedMs()/1000,total);
     progress.style.width=(elapsed/total*100)+"%";
-    count.textContent=`${S.microvoids.length} evento${S.microvoids.length===1?"":"s"}`;
+    count.textContent=`${S.microvoids.length} event${S.microvoids.length===1?"":"s"}`;
     root.innerHTML=S.microvoids.map(event=>{const left=clamp(event.timestamp_s/total*100,1,99);return `<span class="microvoid-marker" data-phase="${escapeHtml(event.phase)}" style="left:${left}%" title="${escapeHtml(event.phase)} · ${event.timestamp_s}s"></span>`}).join("");
   }
   function resetSession(){
-    audioStop();S.elapsedBefore=0;$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyPhase("descenso");renderMicrovoidTimeline();flash("Campo reiniciado; sesión conservada.");
+    audioStop();S.elapsedBefore=0;$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyPhase("descenso");renderMicrovoidTimeline();flash("Field reset; session preserved.");
   }
   function newSession(){
-    audioStop();S.sessionId=createSessionId();S.sessionStartISO=new Date().toISOString();S.elapsedBefore=0;S.microvoids=[];S.phase="descenso";$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyPhase("descenso");flash("Nueva sesión iniciada.");
+    audioStop();S.sessionId=createSessionId();S.sessionStartISO=new Date().toISOString();S.elapsedBefore=0;S.microvoids=[];S.phase="descenso";$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyPhase("descenso");flash("New session started.");
   }
 
   function sessionObject(){
@@ -256,7 +256,7 @@
       session_id:S.sessionId,
       experiment_id:S.experimentId,
       participant_id:S.participantId,
-      engine:"Campo Sonoro AEON",
+      engine:"AEON Sound Field",
       engine_version:"0.3.1",
       date:S.sessionStartISO,
       duration_real_s:+(elapsedMs()/1000).toFixed(2),
@@ -284,7 +284,7 @@
         no_medical_claim:true,
         master_output_cap:0.10
       },
-      microvoid_definition:"Evento operativo registrado por la persona usuaria dentro del modelo de sesión Ars Caeli; no es una medición fisiológica.",
+      microvoid_definition:"User-registered operational event within the Ars Caeli session model; not a physiological measurement.",
       completeness:"partial"
     };
   }
@@ -299,7 +299,7 @@
     const record=sessionObject();
     const arr=JSON.parse(localStorage.getItem("arscaeli_soundfield_sessions")||"[]");
     arr.push(record);localStorage.setItem("arscaeli_soundfield_sessions",JSON.stringify(arr));
-    flash("Sesión guardada localmente.");
+    flash("Session saved locally.");
   }
   function saveProfile(){
     localStorage.setItem("arscaeli_soundfield_profile",JSON.stringify({
@@ -310,7 +310,7 @@
       ,experimentId:S.experimentId
       ,participantId:S.participantId
     }));
-    flash("Perfil guardado.");
+    flash("Profile saved.");
   }
   function loadProfile(){
     try{
@@ -336,20 +336,20 @@
     const drawer=$("#drawer"), content=$("#drawerContent");
     const eyebrow=$("#drawerEyebrow"), title=$("#drawerTitle");
     if(type==="sesion"){
-      eyebrow.textContent="SESION";title.textContent="Registro de sesión";
+      eyebrow.textContent="SESSION";title.textContent="Session record";
       const notes=loadNotes();
       content.innerHTML=`
         <div class="drawer-grid">
-          <div class="drawer-card"><h3>Intención</h3><p>${escapeHtml($("#intention").value||"Sin intención registrada.")}</p></div>
-          <div class="drawer-card"><h3>Estado actual</h3><p>Sesión: ${escapeHtml(S.sessionId)}<br>Fase: ${S.phase}<br>Gradiente: ${derived().gradient}<br>Índice de integración: ${derived().integration_index}%</p></div>
-          <div class="drawer-card full"><h3>Identificación ATLAS</h3><label class="drawer-label" for="experimentIdInput">Experimento</label><input id="experimentIdInput" value="${escapeHtml(S.experimentId)}"><label class="drawer-label" for="participantIdInput">Participante</label><input id="participantIdInput" value="${escapeHtml(S.participantId)}"><button class="action-btn cyan" id="saveIdsBtn" style="width:100%;margin-top:9px">Guardar identificación</button></div>
+          <div class="drawer-card"><h3>Intention</h3><p>${escapeHtml($("#intention").value||"No intention recorded.")}</p></div>
+          <div class="drawer-card"><h3>Current state</h3><p>Session: ${escapeHtml(S.sessionId)}<br>Phase: ${S.phase}<br>Gradient: ${derived().gradient}<br>Integration index: ${derived().integration_index}%</p></div>
+          <div class="drawer-card full"><h3>ATLAS identification</h3><label class="drawer-label" for="experimentIdInput">Experiment</label><input id="experimentIdInput" value="${escapeHtml(S.experimentId)}"><label class="drawer-label" for="participantIdInput">Participant</label><input id="participantIdInput" value="${escapeHtml(S.participantId)}"><button class="action-btn cyan" id="saveIdsBtn" style="width:100%;margin-top:9px">Save identification</button></div>
           <div class="drawer-card full">
-            <h3>Nueva observación</h3>
-            <textarea id="noteText" rows="4" placeholder="Describe lo percibido sin interpretarlo todavía."></textarea>
-            <button class="action-btn gold" id="addNoteBtn" style="width:100%;margin-top:9px">Guardar observación</button>
+            <h3>New observation</h3>
+            <textarea id="noteText" rows="4" placeholder="Describe what you perceived without interpreting it yet."></textarea>
+            <button class="action-btn gold" id="addNoteBtn" style="width:100%;margin-top:9px">Save observation</button>
           </div>
-          <div class="drawer-card full"><h3>Observaciones</h3><div id="notesList">${notes.length?notes.map(n=>`<p>• ${escapeHtml(n.text)} <small>${escapeHtml(n.phase)} · ${escapeHtml(n.at)}</small></p>`).join(""):"<p>Sin observaciones.</p>"}</div></div>
-          <div class="drawer-card full"><button class="action-btn gold" id="newSessionBtn" style="width:100%">Nueva sesión</button></div>
+          <div class="drawer-card full"><h3>Observations</h3><div id="notesList">${notes.length?notes.map(n=>`<p>• ${escapeHtml(n.text)} <small>${escapeHtml(n.phase)} · ${escapeHtml(n.at)}</small></p>`).join(""):"<p>No observations.</p>"}</div></div>
+          <div class="drawer-card full"><button class="action-btn gold" id="newSessionBtn" style="width:100%">New session</button></div>
         </div>`;
       setTimeout(()=>$("#addNoteBtn")?.addEventListener("click",()=>{
         const text=$("#noteText").value.trim();if(!text)return;
@@ -358,42 +358,42 @@
       setTimeout(()=>$("#saveIdsBtn")?.addEventListener("click",()=>{S.experimentId=$("#experimentIdInput").value.trim()||"ACX-0001";S.participantId=$("#participantIdInput").value.trim()||"P-0001";saveProfile();openDrawer("sesion");}),0);
       setTimeout(()=>$("#newSessionBtn")?.addEventListener("click",()=>{newSession();openDrawer("sesion")}),0);
     }else if(type==="biblioteca"){
-      eyebrow.textContent="BIBLIOTECA";title.textContent="Canon y correspondencias";
+      eyebrow.textContent="LIBRARY";title.textContent="Canon and correspondences";
       content.innerHTML=`
         <div class="drawer-grid">
-          <div class="drawer-card full"><h3>Frontera epistemológica</h3>
-            <p>Los documentos del repositorio son la fuente documental. Los mapeos de esta interfaz son experimentales. Las frecuencias se presentan como correspondencias simbólicas internas de Ars Caeli, no como afirmaciones clínicas.</p>
+          <div class="drawer-card full"><h3>Epistemic boundary</h3>
+            <p>Repository documents are the documentary source. This interface's mappings are experimental. Frequencies are presented as internal Ars Caeli symbolic correspondences, not clinical claims.</p>
           </div>
-          <div class="drawer-card"><h3>Fuente local</h3><p>metodo_alquimico_base.json</p></div>
-          <div class="drawer-card"><h3>Repositorio</h3><p>Ars-Caeli-Cannonical / main</p></div>
-          <div class="drawer-card full"><h3>Fuentes sincronizadas</h3><div id="repoList">${repoSources.map(p=>`<div class="repo-source"><i class="${S.canonical[p]?"ok":""}"></i>${escapeHtml(p)}</div>`).join("")}</div>
-          <button class="action-btn cyan" id="syncRepoBtn" style="width:100%;margin-top:12px">Sincronizar repositorio</button></div>
+          <div class="drawer-card"><h3>Local source</h3><p>metodo_alquimico_base.json</p></div>
+          <div class="drawer-card"><h3>Repository</h3><p>Ars-Caeli-Cannonical / main</p></div>
+          <div class="drawer-card full"><h3>Synchronized sources</h3><div id="repoList">${repoSources.map(p=>`<div class="repo-source"><i class="${S.canonical[p]?"ok":""}"></i>${escapeHtml(p)}</div>`).join("")}</div>
+          <button class="action-btn cyan" id="syncRepoBtn" style="width:100%;margin-top:12px">Sync repository</button></div>
         </div>`;
       setTimeout(()=>$("#syncRepoBtn")?.addEventListener("click",syncRepo),0);
     }else if(type==="atlas"){
-      eyebrow.textContent="ATLAS";title.textContent="Memoria de sesión";
+      eyebrow.textContent="ATLAS";title.textContent="Session memory";
       const rec=sessionObject();
       content.innerHTML=`
         <div class="drawer-grid">
           <div class="drawer-card full"><h3>Vista previa JSON</h3><pre style="white-space:pre-wrap;color:#94a5b8;font:9px/1.5 ui-monospace;max-height:420px;overflow:auto">${escapeHtml(JSON.stringify(rec,null,2))}</pre></div>
-          <div class="drawer-card full"><button class="action-btn cyan" id="downloadAtlasBtn" style="width:100%">Descargar JSON de ATLAS</button></div>
+          <div class="drawer-card full"><button class="action-btn cyan" id="downloadAtlasBtn" style="width:100%">Download ATLAS JSON</button></div>
         </div>`;
       setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.1.json")),0);
     }else if(type==="descenso"||type==="retorno"){
       applyPhase(type==="descenso"?"descenso":"retorno");
-      eyebrow.textContent=type.toUpperCase();title.textContent=type==="descenso"?"Perfil de descenso":"Perfil de retorno";
+      eyebrow.textContent=type.toUpperCase();title.textContent=type==="descenso"?"Descent profile":"Return profile";
       const d=dimensions(),x=derived();
       content.innerHTML=`
         <div class="drawer-grid">
-          <div class="drawer-card"><h3>Inframundo</h3><p>${d.inframundo}/100</p></div>
-          <div class="drawer-card"><h3>Apertura</h3><p>${d.apertura}/100</p></div>
-          <div class="drawer-card"><h3>Gradiente</h3><p>${x.gradient}</p></div>
-          <div class="drawer-card"><h3>Índice de integración</h3><p>${x.integration_index}%</p></div>
-          <div class="drawer-card full"><h3>Lectura de interfaz</h3><p>Esta vista organiza la trayectoria de la sesión. Describe un estado operativo del sistema; no diagnostica una condición clínica.</p></div>
+          <div class="drawer-card"><h3>Underworld</h3><p>${d.inframundo}/100</p></div>
+          <div class="drawer-card"><h3>Opening</h3><p>${d.apertura}/100</p></div>
+          <div class="drawer-card"><h3>Gradient</h3><p>${x.gradient}</p></div>
+          <div class="drawer-card"><h3>Integration index</h3><p>${x.integration_index}%</p></div>
+          <div class="drawer-card full"><h3>Interface reading</h3><p>This view organizes the session trajectory. It describes an operational system state; it does not diagnose a clinical condition.</p></div>
         </div>`;
     }else{
-      eyebrow.textContent="INICIO";title.textContent="Campo Sonoro AEON";
-      content.innerHTML=`<div class="drawer-card"><h3>v0.3.1</h3><p>Interfaz de sesión orientada a descenso, transformación y retorno, con registro local y exportación a ATLAS.</p></div>`;
+      eyebrow.textContent="HOME";title.textContent="AEON Sound Field";
+      content.innerHTML=`<div class="drawer-card"><h3>v0.3.1</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
     }
     drawer.classList.add("open");drawer.setAttribute("aria-hidden","false");
   }
@@ -407,8 +407,8 @@
       }catch(_){}
     }
     $("#repoDot").classList.toggle("online",ok>0);
-    $("#repoStatus").textContent=ok?`REPOSITORIO ${ok}/${repoSources.length}`:"LOCAL";
-    flash(ok?`Repositorio sincronizado: ${ok}/${repoSources.length}`:"No se pudo sincronizar. Se mantiene modo local.");
+    $("#repoStatus").textContent=ok?`REPOSITORY ${ok}/${repoSources.length}`:"LOCAL";
+    flash(ok?`Repository synchronized: ${ok}/${repoSources.length}`:"Synchronization failed. Local mode remains active.");
     if($("#drawer").classList.contains("open") && $("#drawerEyebrow").textContent==="BIBLIOTECA") openDrawer("biblioteca");
   }
 
@@ -586,8 +586,8 @@
     $("#saveProfileBtn").addEventListener("click",saveProfile);
     $("#saveSessionBtn").addEventListener("click",saveLocal);
     $("#exportAtlasBtn").addEventListener("click",()=>openDrawer("atlas"));
-    $("#timerBtn").addEventListener("click",()=>flash("La duración de sesión se controla desde el panel izquierdo."));
-    $("#expandVizBtn").addEventListener("click",()=>flash("Visualización expandida reservada para AEON v0.4."));
+    $("#timerBtn").addEventListener("click",()=>flash("Session duration is controlled from the left panel."));
+    $("#expandVizBtn").addEventListener("click",()=>flash("Expanded visualization reserved for AEON v0.4."));
     $("#closeDrawerBtn").addEventListener("click",()=>{$("#drawer").classList.remove("open");$("#drawer").setAttribute("aria-hidden","true")});
   }
 

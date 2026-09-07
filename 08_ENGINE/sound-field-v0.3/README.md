@@ -1,57 +1,53 @@
-# Campo Sonoro AEON v0.3.1
+# AEON Sound Field v0.3.1
 
-Interfaz simbólica y alquímica de sesión para Ars Caeli.
+Symbolic and alchemical session interface for Ars Caeli.
 
-## Diseño
+## Design
 
-La versión 0.3 reemplaza el panel técnico anterior por una experiencia de sesión completa:
+Version 0.3 replaces the previous technical panel with a complete session experience:
 
-- navegación `Inicio / Descenso / Sesión / Retorno / Biblioteca / ATLAS`;
-- perfil de sesión e intención;
-- cuatro dimensiones del método alquímico:
-  - Inframundo,
-  - Activación,
-  - Disociación,
-  - Apertura;
-- mandala/toroide central animado;
-- eje visual `Descenso → Sesión → Retorno`;
-- campo bilateral y gradiente de retorno;
-- frecuencias simbólicas seleccionables;
-- motor Web Audio;
-- temporizador;
-- observaciones locales;
-- guardado local;
-- exportación de sesión a JSON ATLAS;
-- sincronización opcional con Ars-Caeli-Cannonical;
-- sesiones persistentes con observaciones aisladas por sesión;
-- registro manual de microvacíos y exportación de eventos a ATLAS.
+- navigation `Home / Descent / Session / Return / Library / ATLAS`;
+- session profile and intention;
+- four dimensions of the alchemical method: Underworld, Activation, Dissociation, and Opening;
+- animated central mandala/torus;
+- visual axis `Descent → Session → Return`;
+- bilateral field and return gradient;
+- selectable symbolic frequencies;
+- Web Audio engine;
+- timer;
+- local observations;
+- local saving;
+- session export to ATLAS JSON;
+- optional synchronization with Ars-Caeli-Cannonical;
+- persistent sessions with session-scoped observations;
+- manual microvoid registration and event export to ATLAS.
 
-## Descenso, Retorno y Microvacíos
+## Descent, Return, and Microvoids
 
-AEON modela una sesión como una trayectoria y no como un estado fijo.
+AEON models a session as a trajectory rather than a fixed state.
 
-La presencia puede perder continuidad temporalmente mediante pequeñas discontinuidades operativas llamadas microvacíos.
+Presence may temporarily lose continuity through small operational discontinuities called microvoids.
 
-Un microvacío se registra como evento de sesión:
+A microvoid is recorded as a session event:
 
-`Presencia → Microvacío → Reorganización → Presencia`
+`Presence → Microvoid → Reorganization → Presence`
 
-Los microvacíos de AEON son eventos operativos y simbólicos. No se presentan como mediciones neurológicas o fisiológicas. `Descenso` no es un `Retorno` invertido: la trayectoria de retorno puede diferir estructuralmente de la trayectoria de descenso.
+AEON microvoids are operational and symbolic events. They are not presented as neurological or physiological measurements. `Descent` is not an inverted `Return`: the return trajectory may differ structurally from the descent trajectory.
 
-## Frontera epistemológica
+## Epistemic Boundary
 
-Se preservan tres capas explícitas:
+Three explicit layers are preserved:
 
-1. **Canon:** documentos Markdown/JSON del repositorio.
-2. **Operacionalización experimental:** cómo la UI convierte variables internas en parámetros de visualización y audio.
-3. **Correspondencia simbólica:** asociaciones de frecuencia propias de Ars Caeli.
+1. **Canon:** Markdown/JSON repository documents.
+2. **Experimental operationalization:** how the UI converts internal variables into visualization and audio parameters.
+3. **Symbolic correspondence:** frequency associations specific to Ars Caeli.
 
-Las asociaciones de frecuencia **no se presentan como hechos médicos, neurofisiológicos ni terapéuticos**.
+Frequency associations are **not presented as medical, neurophysiological, or therapeutic facts**.
 
-## Archivos
+## Files
 
 ```text
-campo-sonoro-v0.3/
+sound-field-v0.3/
 ├── index.html
 ├── styles.css
 ├── app.js
@@ -62,37 +58,37 @@ campo-sonoro-v0.3/
     └── metodo_alquimico_base.json
 ```
 
-## Uso local
+## Local Use
 
-Servir por HTTP:
+Serve over HTTP:
 
 ```bash
 python -m http.server 8000
 ```
 
-y abrir `http://localhost:8000`.
+then open `http://localhost:8000`.
 
 ## GitHub Pages
 
-Puedes publicar esta carpeta como reemplazo del MVP anterior.  
-Si quieres mantener la URL existente, copia su contenido dentro de la ruta actual de `sound-field-mvp/`.
+Publish this folder as a replacement for the previous MVP.
+The current public URL preserves the repository path.
 
 ## ATLAS
 
-`Exportar a ATLAS` genera un JSON con:
+`Export to ATLAS` generates JSON containing:
 
-- identificación de sesión,
-- motor y versión,
-- duración real,
-- fase,
-- intención,
-- constructo activo,
-- dimensiones,
-- gradiente,
-- índice de integración,
-- frecuencia simbólica seleccionada,
-- parámetros del campo,
-- observaciones,
-- seguridad.
+- session identification,
+- engine and version,
+- actual duration,
+- phase,
+- intention,
+- active construct,
+- dimensions,
+- gradient,
+- integration index,
+- selected symbolic frequency,
+- field parameters,
+- observations,
+- safety.
 
-ATLAS registra memoria. No decide causalidad. Los IDs de experimento y participante son editables y no requieren información personal.
+ATLAS records memory. It does not determine causality. Experiment and participant IDs are editable and do not require personal information.

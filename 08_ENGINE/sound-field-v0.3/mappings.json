@@ -2,10 +2,10 @@
   "version": "0.3.1",
   "status": "experimental_noncanonical",
   "epistemic_boundary": {
-    "canonical": "Los documentos Markdown/JSON del repositorio Ars Caeli son la fuente documental.",
-    "experimental": "Las traducciones a UI, audio, métricas y visualización son operacionales y experimentales.",
-    "symbolic": "Las correspondencias de frecuencia son internas/simbólicas del sistema y no deben presentarse como hechos médicos.",
-    "atlas": "ATLAS registra observaciones, parámetros e interpretaciones; no decide causalidad."
+    "canonical": "Ars Caeli repository Markdown/JSON documents are the documentary source.",
+    "experimental": "Translations into UI, audio, metrics, and visualization are operational and experimental.",
+    "symbolic": "Frequency correspondences are internal/symbolic to the system and must not be presented as medical facts.",
+    "atlas": "ATLAS records observations, parameters, and interpretations; it does not determine causality."
   },
   "repository": {
     "raw_base": "https://raw.githubusercontent.com/abdesign38-jpg/Ars-Caeli-Cannonical/main/",
@@ -25,29 +25,29 @@
   },
   "dimensions": {
     "inframundo": {
-      "label": "Inframundo",
-      "action": "Reconocer",
+      "label": "Underworld",
+      "action": "Recognize",
       "color": "#a88cff"
     },
     "activacion": {
-      "label": "Activación",
-      "action": "Movilizar",
+      "label": "Activation",
+      "action": "Mobilize",
       "color": "#ef8b66"
     },
     "disociacion": {
-      "label": "Disociación",
-      "action": "Reorientar",
+      "label": "Dissociation",
+      "action": "Reorient",
       "color": "#71d4f4"
     },
     "apertura": {
-      "label": "Apertura",
-      "action": "Integrar",
+      "label": "Opening",
+      "action": "Integrate",
       "color": "#e0bc73"
     }
   },
   "presets": {
     "descenso": {
-      "label": "Descenso",
+      "label": "Descent",
       "dimensions": {
         "inframundo": 72,
         "activacion": 43,
@@ -66,7 +66,7 @@
       }
     },
     "sesion": {
-      "label": "Sesión",
+      "label": "Session",
       "dimensions": {
         "inframundo": 53,
         "activacion": 31,
@@ -85,7 +85,7 @@
       }
     },
     "retorno": {
-      "label": "Retorno",
+      "label": "Return",
       "dimensions": {
         "inframundo": 29,
         "activacion": 20,
@@ -107,38 +107,38 @@
   "symbolic_frequencies": [
     {
       "hz": 174,
-      "label": "Umbral corporal",
-      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+      "label": "Body threshold",
+      "system_note": "Internal symbolic correspondence; no medical claim."
     },
     {
       "hz": 285,
-      "label": "Restitución de estructura",
-      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+      "label": "Structure restoration",
+      "system_note": "Internal symbolic correspondence; no medical claim."
     },
     {
       "hz": 396,
-      "label": "Liberación / descenso de carga",
-      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+      "label": "Release / descent of load",
+      "system_note": "Internal symbolic correspondence; no medical claim."
     },
     {
       "hz": 417,
-      "label": "Cambio de patrón",
-      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+      "label": "Pattern change",
+      "system_note": "Internal symbolic correspondence; no medical claim."
     },
     {
       "hz": 528,
-      "label": "Coherencia / retorno",
-      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+      "label": "Coherence / return",
+      "system_note": "Internal symbolic correspondence; no medical claim."
     },
     {
       "hz": 639,
-      "label": "Vínculo / integración relacional",
-      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+      "label": "Bond / relational integration",
+      "system_note": "Internal symbolic correspondence; no medical claim."
     },
     {
       "hz": 963,
-      "label": "Apertura / eje superior",
-      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+      "label": "Opening / upper axis",
+      "system_note": "Internal symbolic correspondence; no medical claim."
     }
   ],
   "audio": {
@@ -146,9 +146,9 @@
     "master_cap": 0.1,
     "fade_seconds": 0.9,
     "notes": [
-      "Iniciar a volumen bajo.",
-      "Detener ante incomodidad.",
-      "No usar como sustituto de tratamiento médico o psicológico."
+      "Start at low volume.",
+      "Stop if discomfort occurs.",
+      "Do not use as a substitute for medical or psychological treatment."
     ]
   }
 }

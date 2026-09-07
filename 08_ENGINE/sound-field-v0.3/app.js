@@ -57,6 +57,7 @@
     canonical:{},
     microvoids:[]
   };
+  const phaseLabels={descenso:"Descent",sesion:"Session",retorno:"Return"};
 
   function dimensions(){
     return {
@@ -240,7 +241,7 @@
     const total=Math.max(num("#duration")*60,1),elapsed=Math.min(elapsedMs()/1000,total);
     progress.style.width=(elapsed/total*100)+"%";
     count.textContent=`${S.microvoids.length} event${S.microvoids.length===1?"":"s"}`;
-    root.innerHTML=S.microvoids.map(event=>{const left=clamp(event.timestamp_s/total*100,1,99);return `<span class="microvoid-marker" data-phase="${escapeHtml(event.phase)}" style="left:${left}%" title="${escapeHtml(event.phase)} · ${event.timestamp_s}s"></span>`}).join("");
+    root.innerHTML=S.microvoids.map(event=>{const left=clamp(event.timestamp_s/total*100,1,99);return `<span class="microvoid-marker" data-phase="${escapeHtml(event.phase)}" style="left:${left}%" title="${escapeHtml(phaseLabels[event.phase]||event.phase)} · ${event.timestamp_s}s"></span>`}).join("");
   }
   function resetSession(){
     audioStop();S.elapsedBefore=0;$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyPhase("descenso");renderMicrovoidTimeline();flash("Field reset; session preserved.");
@@ -341,14 +342,14 @@
       content.innerHTML=`
         <div class="drawer-grid">
           <div class="drawer-card"><h3>Intention</h3><p>${escapeHtml($("#intention").value||"No intention recorded.")}</p></div>
-          <div class="drawer-card"><h3>Current state</h3><p>Session: ${escapeHtml(S.sessionId)}<br>Phase: ${S.phase}<br>Gradient: ${derived().gradient}<br>Integration index: ${derived().integration_index}%</p></div>
+          <div class="drawer-card"><h3>Current state</h3><p>Session: ${escapeHtml(S.sessionId)}<br>Phase: ${escapeHtml(phaseLabels[S.phase])}<br>Gradient: ${derived().gradient}<br>Integration index: ${derived().integration_index}%</p></div>
           <div class="drawer-card full"><h3>ATLAS identification</h3><label class="drawer-label" for="experimentIdInput">Experiment</label><input id="experimentIdInput" value="${escapeHtml(S.experimentId)}"><label class="drawer-label" for="participantIdInput">Participant</label><input id="participantIdInput" value="${escapeHtml(S.participantId)}"><button class="action-btn cyan" id="saveIdsBtn" style="width:100%;margin-top:9px">Save identification</button></div>
           <div class="drawer-card full">
             <h3>New observation</h3>
             <textarea id="noteText" rows="4" placeholder="Describe what you perceived without interpreting it yet."></textarea>
             <button class="action-btn gold" id="addNoteBtn" style="width:100%;margin-top:9px">Save observation</button>
           </div>
-          <div class="drawer-card full"><h3>Observations</h3><div id="notesList">${notes.length?notes.map(n=>`<p>• ${escapeHtml(n.text)} <small>${escapeHtml(n.phase)} · ${escapeHtml(n.at)}</small></p>`).join(""):"<p>No observations.</p>"}</div></div>
+          <div class="drawer-card full"><h3>Observations</h3><div id="notesList">${notes.length?notes.map(n=>`<p>• ${escapeHtml(n.text)} <small>${escapeHtml(phaseLabels[n.phase]||n.phase)} · ${escapeHtml(n.at)}</small></p>`).join(""):"<p>No observations.</p>"}</div></div>
           <div class="drawer-card full"><button class="action-btn gold" id="newSessionBtn" style="width:100%">New session</button></div>
         </div>`;
       setTimeout(()=>$("#addNoteBtn")?.addEventListener("click",()=>{
@@ -381,7 +382,7 @@
       setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.1.json")),0);
     }else if(type==="descenso"||type==="retorno"){
       applyPhase(type==="descenso"?"descenso":"retorno");
-      eyebrow.textContent=type.toUpperCase();title.textContent=type==="descenso"?"Descent profile":"Return profile";
+      eyebrow.textContent=phaseLabels[type].toUpperCase();title.textContent=type==="descenso"?"Descent profile":"Return profile";
       const d=dimensions(),x=derived();
       content.innerHTML=`
         <div class="drawer-grid">

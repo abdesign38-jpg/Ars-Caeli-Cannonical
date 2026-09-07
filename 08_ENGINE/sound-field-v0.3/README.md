@@ -1,4 +1,4 @@
-# AEON Sound Field v0.3.0
+# AEON Sound Field v0.3.1
 
 Interfaz neuroenergética y alquímica de sesión para Ars Caeli.
 
@@ -22,7 +22,21 @@ La versión 0.3 reemplaza el panel técnico anterior por una experiencia de sesi
 - observaciones locales;
 - guardado local;
 - exportación de sesión a JSON ATLAS;
-- sincronización opcional con Ars-Caeli-Cannonical.
+- sincronización opcional con Ars-Caeli-Cannonical;
+- sesiones persistentes con observaciones aisladas por sesión;
+- registro manual de microvacíos y exportación de eventos a ATLAS.
+
+## Descenso, Retorno y Microvacíos
+
+AEON modela una sesión como una trayectoria y no como un estado fijo.
+
+La presencia puede perder continuidad temporalmente mediante pequeñas discontinuidades operativas llamadas microvacíos.
+
+Un microvacío se registra como evento de sesión:
+
+`Presencia → Microvacío → Reorganización → Presencia`
+
+Los microvacíos de AEON son eventos operativos y simbólicos. No se presentan como mediciones neurológicas o fisiológicas. `Descenso` no es un `Retorno` invertido: la trayectoria de retorno puede diferir estructuralmente de la trayectoria de descenso.
 
 ## Frontera epistemológica
 
@@ -75,10 +89,10 @@ Si quieres mantener la URL existente, copia su contenido dentro de la ruta actua
 - constructo activo,
 - dimensiones,
 - gradiente,
-- coherencia operativa,
+- índice de integración,
 - frecuencia simbólica seleccionada,
 - parámetros del campo,
 - observaciones,
 - seguridad.
 
-ATLAS registra memoria. No decide causalidad.
+ATLAS registra memoria. No decide causalidad. Los IDs de experimento y participante son editables y no requieren información personal.

@@ -38,6 +38,10 @@
   ];
 
   const S = {
+    sessionId:null,
+    sessionStartISO:null,
+    experimentId:"ACX-0001",
+    participantId:"P-0001",
     phase:"descenso",
     field:{...presets.descenso.field},
     running:false,
@@ -50,7 +54,8 @@
     lfo:null, lfoGain:null,
     selectedHz:174,
     viz:"torus",
-    canonical:{}
+    canonical:{},
+    microvoids:[]
   };
 
   function dimensions(){
@@ -70,7 +75,7 @@
       descent:+descent.toFixed(1),
       return:+ret.toFixed(1),
       gradient:+(ret-descent).toFixed(1),
-      coherence:Math.round(clamp(45 + d.apertura*.38 - d.disociacion*.16 - Math.abs(d.activacion-35)*.05,28,96))
+      integration_index:Math.round(clamp(45 + d.apertura*.38 - d.disociacion*.16 - Math.abs(d.activacion-35)*.05,28,96))
     };
   }
 
@@ -85,8 +90,8 @@
     $("#disOut").textContent=Math.round(d.disociacion);
     $("#apeOut").textContent=Math.round(d.apertura);
     $("#gradientReadout").textContent=(x.gradient>=0?"+":"")+Math.round(x.gradient);
-    $("#coherenceOut").textContent=x.coherence+"%";
-    $("#coherenceBar").style.width=x.coherence+"%";
+    $("#coherenceOut").textContent=x.integration_index+"%";
+    $("#coherenceBar").style.width=x.integration_index+"%";
     $("#carrierReadout").textContent=S.selectedHz;
     $("#phaseReadout").textContent=S.phase.toUpperCase();
     const dur=num("#duration");
@@ -94,6 +99,7 @@
     $("#totalTime").textContent=String(dur).padStart(2,"0")+":00";
     const depths=["Suave","Medio","Profundo"];
     $("#depthLabel").textContent=depths[num("#depth")];
+    renderMicrovoidTimeline();
     updateAudio();
   }
 
@@ -203,21 +209,56 @@
     const sec=Math.floor(ms/1000);
     $("#elapsed").textContent=String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0");
     $("#progressBar").style.width=(ms/total*100)+"%";
+    renderMicrovoidTimeline();
     if(ms>=total && S.running) audioStop();
   }
+  function createSessionId(){
+    const now=new Date();
+    const date=now.getUTCFullYear().toString()+String(now.getUTCMonth()+1).padStart(2,"0")+String(now.getUTCDate()).padStart(2,"0");
+    const time=String(now.getUTCHours()).padStart(2,"0")+String(now.getUTCMinutes()).padStart(2,"0")+String(now.getUTCSeconds()).padStart(2,"0");
+    const random=crypto.getRandomValues(new Uint32Array(1))[0].toString(16).slice(0,6).toUpperCase();
+    return `ACS-${date}-${time}-${random}`;
+  }
+  function ensureSession(){
+    if(!S.sessionId){S.sessionId=createSessionId();S.sessionStartISO=new Date().toISOString();S.microvoids=[];}
+  }
+  function notesStorageKey(){return `arscaeli_soundfield_notes_${S.sessionId}`}
+  function loadNotes(){
+    if(!S.sessionId)return [];
+    try{return JSON.parse(localStorage.getItem(notesStorageKey())||"[]")}catch(_){return[]}
+  }
+  function registerMicrovoid(){
+    ensureSession();
+    const x=derived();
+    const event={id:crypto.randomUUID(),timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase:S.phase,dimensions:dimensions(),integration_index:x.integration_index,gradient:x.gradient,source:"manual"};
+    S.microvoids.push(event);renderMicrovoidTimeline();flash("Microvacío registrado.");
+    const timeline=$("#microvoidTimeline");timeline.classList.remove("microvoid-pulse");void timeline.offsetWidth;timeline.classList.add("microvoid-pulse");
+  }
+  function renderMicrovoidTimeline(){
+    const root=$("#microvoidEvents"),count=$("#microvoidCount"),progress=$("#timelineProgress");
+    if(!root||!count)return;
+    const total=Math.max(num("#duration")*60,1),elapsed=Math.min(elapsedMs()/1000,total);
+    progress.style.width=(elapsed/total*100)+"%";
+    count.textContent=`${S.microvoids.length} evento${S.microvoids.length===1?"":"s"}`;
+    root.innerHTML=S.microvoids.map(event=>{const left=clamp(event.timestamp_s/total*100,1,99);return `<span class="microvoid-marker" data-phase="${escapeHtml(event.phase)}" style="left:${left}%" title="${escapeHtml(event.phase)} · ${event.timestamp_s}s"></span>`}).join("");
+  }
   function resetSession(){
-    audioStop();S.elapsedBefore=0;$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyPhase("descenso");
+    audioStop();S.elapsedBefore=0;$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyPhase("descenso");renderMicrovoidTimeline();flash("Campo reiniciado; sesión conservada.");
+  }
+  function newSession(){
+    audioStop();S.sessionId=createSessionId();S.sessionStartISO=new Date().toISOString();S.elapsedBefore=0;S.microvoids=[];S.phase="descenso";$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyPhase("descenso");flash("Nueva sesión iniciada.");
   }
 
   function sessionObject(){
+    ensureSession();
     const x=derived();
     return {
-      session_id:"ACS-"+String(Date.now()).slice(-4),
-      experiment_id:"ACX-0001",
-      participant_id:"P-0001",
+      session_id:S.sessionId,
+      experiment_id:S.experimentId,
+      participant_id:S.participantId,
       engine:"AEON Sound Field",
-      engine_version:"0.3.0",
-      date:new Date().toISOString(),
+      engine_version:"0.3.1",
+      date:S.sessionStartISO,
       duration_real_s:+(elapsedMs()/1000).toFixed(2),
       context:{
         phase:S.phase,
@@ -234,6 +275,7 @@
         depth:["soft","medium","deep"][num("#depth")],
         planned_duration_min:num("#duration")
       },
+      events:{microvoids:S.microvoids},
       observations:loadNotes(),
       interpretations:{experimental:null,symbolic:null},
       safety:{
@@ -242,6 +284,7 @@
         no_medical_claim:true,
         master_output_cap:0.10
       },
+      microvoid_definition:"User-registered operational event within the Ars Caeli session model; not a physiological measurement.",
       completeness:"partial"
     };
   }
@@ -264,6 +307,8 @@
       dimensions:dimensions(),
       duration:num("#duration"),
       depth:num("#depth")
+      ,experimentId:S.experimentId
+      ,participantId:S.participantId
     }));
     flash("Perfil guardado.");
   }
@@ -275,13 +320,11 @@
       if(p.dimensions) Object.entries(p.dimensions).forEach(([k,v])=>$("#"+k).value=v);
       if(p.duration)$("#duration").value=p.duration;
       if(p.depth!=null)$("#depth").value=p.depth;
+      S.experimentId=p.experimentId||S.experimentId;
+      S.participantId=p.participantId||S.participantId;
       updateReadouts();
     }catch(_){}
   }
-  function loadNotes(){
-    try{return JSON.parse(localStorage.getItem("arscaeli_soundfield_notes")||"[]")}catch(_){return[]}
-  }
-
   let toastTimer;
   function flash(msg){
     let el=$("#toast");
@@ -298,18 +341,22 @@
       content.innerHTML=`
         <div class="drawer-grid">
           <div class="drawer-card"><h3>Intención</h3><p>${escapeHtml($("#intention").value||"Sin intención registrada.")}</p></div>
-          <div class="drawer-card"><h3>Estado actual</h3><p>Fase: ${S.phase}<br>Gradiente: ${derived().gradient}<br>Coherencia: ${derived().coherence}%</p></div>
+          <div class="drawer-card"><h3>Estado actual</h3><p>Sesión: ${escapeHtml(S.sessionId)}<br>Fase: ${S.phase}<br>Gradiente: ${derived().gradient}<br>Índice de integración: ${derived().integration_index}%</p></div>
+          <div class="drawer-card full"><h3>Identificación ATLAS</h3><label class="drawer-label" for="experimentIdInput">Experimento</label><input id="experimentIdInput" value="${escapeHtml(S.experimentId)}"><label class="drawer-label" for="participantIdInput">Participante</label><input id="participantIdInput" value="${escapeHtml(S.participantId)}"><button class="action-btn cyan" id="saveIdsBtn" style="width:100%;margin-top:9px">Guardar identificación</button></div>
           <div class="drawer-card full">
             <h3>Nueva observación</h3>
             <textarea id="noteText" rows="4" placeholder="Describe lo percibido sin interpretarlo todavía."></textarea>
             <button class="action-btn gold" id="addNoteBtn" style="width:100%;margin-top:9px">Guardar observación</button>
           </div>
-          <div class="drawer-card full"><h3>Observaciones</h3><div id="notesList">${notes.length?notes.map(n=>`<p>• ${escapeHtml(n.text)} <small>${escapeHtml(n.at)}</small></p>`).join(""):"<p>Sin observaciones.</p>"}</div></div>
+          <div class="drawer-card full"><h3>Observaciones</h3><div id="notesList">${notes.length?notes.map(n=>`<p>• ${escapeHtml(n.text)} <small>${escapeHtml(n.phase)} · ${escapeHtml(n.at)}</small></p>`).join(""):"<p>Sin observaciones.</p>"}</div></div>
+          <div class="drawer-card full"><button class="action-btn gold" id="newSessionBtn" style="width:100%">Nueva sesión</button></div>
         </div>`;
       setTimeout(()=>$("#addNoteBtn")?.addEventListener("click",()=>{
         const text=$("#noteText").value.trim();if(!text)return;
-        const arr=loadNotes();arr.push({at:new Date().toISOString(),text});localStorage.setItem("arscaeli_soundfield_notes",JSON.stringify(arr));openDrawer("sesion");
+        ensureSession();const arr=loadNotes();arr.push({id:crypto.randomUUID(),at:new Date().toISOString(),phase:S.phase,text});localStorage.setItem(notesStorageKey(),JSON.stringify(arr));openDrawer("sesion");
       }),0);
+      setTimeout(()=>$("#saveIdsBtn")?.addEventListener("click",()=>{S.experimentId=$("#experimentIdInput").value.trim()||"ACX-0001";S.participantId=$("#participantIdInput").value.trim()||"P-0001";saveProfile();openDrawer("sesion");}),0);
+      setTimeout(()=>$("#newSessionBtn")?.addEventListener("click",()=>{newSession();openDrawer("sesion")}),0);
     }else if(type==="biblioteca"){
       eyebrow.textContent="BIBLIOTECA";title.textContent="Canon y correspondencias";
       content.innerHTML=`
@@ -331,7 +378,7 @@
           <div class="drawer-card full"><h3>Vista previa JSON</h3><pre style="white-space:pre-wrap;color:#94a5b8;font:9px/1.5 ui-monospace;max-height:420px;overflow:auto">${escapeHtml(JSON.stringify(rec,null,2))}</pre></div>
           <div class="drawer-card full"><button class="action-btn cyan" id="downloadAtlasBtn" style="width:100%">Descargar JSON ATLAS</button></div>
         </div>`;
-      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.json")),0);
+      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.1.json")),0);
     }else if(type==="descenso"||type==="retorno"){
       applyPhase(type==="descenso"?"descenso":"retorno");
       eyebrow.textContent=type.toUpperCase();title.textContent=type==="descenso"?"Perfil de descenso":"Perfil de retorno";
@@ -341,7 +388,7 @@
           <div class="drawer-card"><h3>Inframundo</h3><p>${d.inframundo}/100</p></div>
           <div class="drawer-card"><h3>Apertura</h3><p>${d.apertura}/100</p></div>
           <div class="drawer-card"><h3>Gradiente</h3><p>${x.gradient}</p></div>
-          <div class="drawer-card"><h3>Coherencia</h3><p>${x.coherence}%</p></div>
+          <div class="drawer-card"><h3>Índice de integración</h3><p>${x.integration_index}%</p></div>
           <div class="drawer-card full"><h3>Lectura de interfaz</h3><p>Esta vista organiza la trayectoria de la sesión. Describe un estado operativo del sistema; no diagnostica una condición clínica.</p></div>
         </div>`;
     }else{
@@ -535,6 +582,7 @@
     $("#prevBtn").addEventListener("click",()=>applyPhase(S.phase==="retorno"?"sesion":"descenso"));
     $("#nextBtn").addEventListener("click",()=>applyPhase(S.phase==="descenso"?"sesion":"retorno"));
     $("#resetBtn").addEventListener("click",resetSession);
+    $("#registerMicrovoidBtn").addEventListener("click",registerMicrovoid);
     $("#saveProfileBtn").addEventListener("click",saveProfile);
     $("#saveSessionBtn").addEventListener("click",saveLocal);
     $("#exportAtlasBtn").addEventListener("click",()=>openDrawer("atlas"));
@@ -544,7 +592,7 @@
   }
 
   async function init(){
-    renderFrequencies();wire();loadProfile();updateReadouts();drawField();drawMini();animateSide();
+    ensureSession();renderFrequencies();wire();loadProfile();updateReadouts();drawField();drawMini();animateSide();
     try{
       const r=await fetch("mappings.json",{cache:"no-store"});if(r.ok){$("#repoDot").classList.add("online");$("#repoStatus").textContent="LOCAL READY"}
     }catch(_){}

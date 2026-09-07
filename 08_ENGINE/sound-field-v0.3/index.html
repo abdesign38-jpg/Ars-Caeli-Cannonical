@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="AEON Sound Field v0.3 — interfaz neuroenergética y alquímica de Ars Caeli.">
-  <title>Ars Caeli · AEON Sound Field v0.3</title>
+  <meta name="description" content="AEON Sound Field v0.3.1 — interfaz simbólica y experimental de sesión de Ars Caeli.">
+  <title>Ars Caeli · AEON Sound Field v0.3.1</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -34,7 +34,7 @@
     <div class="header-tools">
       <span class="status-dot" id="repoDot"></span>
       <span class="header-status" id="repoStatus">LOCAL</span>
-      <span class="version">v0.3.0</span>
+      <span class="version">v0.3.1</span>
     </div>
   </header>
 
@@ -141,7 +141,7 @@
       </div>
 
       <div class="field-wrap">
-        <canvas id="fieldCanvas" aria-label="Campo neuroenergético animado"></canvas>
+        <canvas id="fieldCanvas" aria-label="Campo simbólico de sesión animado"></canvas>
 
         <div class="field-label descent-label">
           <strong>DESCENSO</strong>
@@ -157,7 +157,7 @@
         </div>
         <div class="field-label light-label">
           <strong>LUZ</strong>
-          <small>Coherencia</small>
+          <small>Integración</small>
         </div>
 
         <div class="vertical-axis" aria-hidden="true">
@@ -181,7 +181,7 @@
 
       <div class="player glass">
         <div class="player-top">
-          <button class="player-btn" id="resetBtn">↻<span>Reiniciar</span></button>
+          <button class="player-btn" id="resetBtn">↻<span>Reiniciar campo</span></button>
           <div class="transport">
             <button class="circle-btn" id="prevBtn">◀</button>
             <button class="play-btn" id="playBtn">▶</button>
@@ -194,32 +194,42 @@
           <div class="progress-track"><div id="progressBar"></div></div>
           <span id="totalTime">20:00</span>
         </div>
+        <div class="microvoid-tools">
+          <button class="microvoid-btn" id="registerMicrovoidBtn">◇ Registrar microvacío</button>
+          <span id="microvoidCount">0 eventos</span>
+        </div>
       </div>
+      <section class="microvoid-timeline glass" aria-label="Trayectoria temporal de microvacíos">
+        <div class="timeline-head"><span>Trayectoria de sesión</span><small>Descenso · Sesión · Retorno</small></div>
+        <div class="timeline-track" id="microvoidTimeline"><div class="timeline-progress" id="timelineProgress"></div><div class="timeline-events" id="microvoidEvents"></div></div>
+        <div class="timeline-labels"><span>Presencia</span><span>Microvacíos registrados</span><span>Presencia</span></div>
+      </section>
     </section>
 
     <aside class="right-panel">
       <section class="card glass">
-        <div class="card-title">Campo en tiempo real</div>
+        <div class="card-title">Campo de sesión en tiempo real</div>
 
         <div class="hemisphere-grid">
           <div class="hemisphere">
             <canvas id="leftBrain" width="220" height="120"></canvas>
-            <strong>Hemisferio izquierdo</strong>
-            <small>Análisis · Estructura</small>
+            <strong>Polaridad analítica</strong>
+            <small>Estructura · Análisis</small>
           </div>
           <div class="divider"></div>
           <div class="hemisphere">
             <canvas id="rightBrain" width="220" height="120"></canvas>
-            <strong>Hemisferio derecho</strong>
+            <strong>Polaridad sintética</strong>
             <small>Intuición · Síntesis</small>
           </div>
         </div>
 
         <div class="coherence">
-          <span>Coherencia global</span>
+          <span>Índice de integración</span>
           <div class="coherence-track"><div id="coherenceBar"></div></div>
           <output id="coherenceOut">78%</output>
         </div>
+        <p class="symbolic-label">Representación simbólica · no biométrica</p>
       </section>
 
       <section class="card glass">
@@ -262,7 +272,7 @@
   </section>
 
   <footer class="app-footer">
-    <span>ARS CAELI · AEON ENGINE · SOUND FIELD v0.3</span>
+    <span>ARS CAELI · AEON ENGINE · SOUND FIELD v0.3.1</span>
     <span>VERITAS IN SONO</span>
   </footer>
 

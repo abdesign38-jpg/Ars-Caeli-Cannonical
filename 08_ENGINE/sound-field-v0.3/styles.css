@@ -154,6 +154,19 @@ blockquote cite{display:block;margin-top:6px;text-align:center;font:9px var(--fo
 .progress-row{display:grid;grid-template-columns:45px 1fr 45px;align-items:center;gap:10px;margin-top:9px;font:9px var(--font-mono);color:var(--muted)}
 .progress-track{height:5px;border-radius:99px;background:#141f36;overflow:hidden}
 .progress-track div{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--gold))}
+.microvoid-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font:8px var(--font-mono);letter-spacing:.08em;text-transform:uppercase}
+.microvoid-btn{border:1px solid rgba(225,186,115,.38);border-radius:6px;background:rgba(225,186,115,.035);padding:7px 9px;color:#dec78f;font:9px var(--font-mono);letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+.microvoid-btn:hover{border-color:var(--gold);color:var(--text)}
+.microvoid-timeline{width:min(760px,100%);margin:12px auto 0;padding:11px 14px;border-radius:10px}
+.timeline-head,.timeline-labels{display:flex;align-items:center;justify-content:space-between;color:var(--soft);font:9px var(--font-mono);letter-spacing:.08em;text-transform:uppercase}
+.timeline-head small,.timeline-labels{color:var(--muted);font-size:8px}
+.timeline-track{position:relative;height:28px;margin:10px 0 4px;border-top:1px solid rgba(160,112,247,.65);border-bottom:1px solid rgba(225,186,115,.55);background:linear-gradient(90deg,rgba(160,112,247,.12),rgba(102,215,241,.1),rgba(225,186,115,.12));overflow:hidden}
+.timeline-track::after{content:"";position:absolute;inset:12px 0 auto;height:1px;background:linear-gradient(90deg,var(--violet),var(--cyan),var(--gold));opacity:.7}
+.timeline-progress{position:absolute;z-index:1;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,rgba(160,112,247,.12),rgba(102,215,241,.1));transition:width .2s ease}
+.timeline-events{position:absolute;z-index:2;inset:0}
+.microvoid-marker{position:absolute;top:5px;width:9px;height:18px;border:1px solid #fff2c9;border-radius:50%;background:rgba(225,186,115,.7);box-shadow:0 0 13px rgba(225,186,115,.75);transform:translateX(-50%)}
+.microvoid-marker[data-phase="descenso"]{background:var(--violet)}.microvoid-marker[data-phase="sesion"]{background:var(--cyan)}.microvoid-marker[data-phase="retorno"]{background:var(--gold)}
+.symbolic-label{margin:0;padding:0 14px 10px;text-align:center;color:var(--muted);font:8px var(--font-mono);letter-spacing:.08em}
 .right-panel{padding:20px 20px 20px 10px;display:grid;gap:12px;align-content:start}
 .card{border-radius:10px;overflow:hidden}
 .card-title{padding:12px 14px;border-bottom:1px solid var(--line)}
@@ -192,6 +205,7 @@ blockquote cite{display:block;margin-top:6px;text-align:center;font:9px var(--fo
 .drawer-card ul{padding-left:18px}
 .drawer-card.full{grid-column:1/-1}
 .drawer input,.drawer textarea,.drawer select{width:100%;border:1px solid var(--line);border-radius:6px;background:#061019;color:var(--soft);padding:8px}
+.drawer-label{display:block;margin:8px 0 4px;color:var(--muted);font:8px var(--font-mono);letter-spacing:.1em;text-transform:uppercase}
 .repo-source{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font:9px var(--font-mono);color:var(--muted)}
 .repo-source i{width:7px;height:7px;border-radius:50%;background:#875f30}.repo-source i.ok{background:var(--green)}
 .app-footer{display:flex;align-items:center;justify-content:space-between;min-height:38px;padding:0 30px;border-top:1px solid var(--line);color:#505b6b;font:8px var(--font-mono);letter-spacing:.15em}
@@ -211,3 +225,6 @@ blockquote cite{display:block;margin-top:6px;text-align:center;font:9px var(--fo
   .play-btn{width:60px;height:60px}.circle-btn{width:38px;height:38px}.session-actions{grid-template-columns:1fr}.drawer{right:8px;top:92px;width:calc(100vw - 16px)}
 }
 @media(prefers-reduced-motion:reduce){.drawer{transition:none}.cosmos::before{opacity:.25}}
+.microvoid-pulse{animation:microvoidPulse .55s ease-out}
+@keyframes microvoidPulse{0%{box-shadow:0 0 0 rgba(225,186,115,0)}45%{box-shadow:0 0 24px rgba(225,186,115,.4)}100%{box-shadow:0 0 0 rgba(225,186,115,0)}}
+@media(prefers-reduced-motion:reduce){.microvoid-pulse{animation:none}}

@@ -256,7 +256,7 @@
       session_id:S.sessionId,
       experiment_id:S.experimentId,
       participant_id:S.participantId,
-      engine:"AEON Sound Field",
+      engine:"Campo Sonoro AEON",
       engine_version:"0.3.1",
       date:S.sessionStartISO,
       duration_real_s:+(elapsedMs()/1000).toFixed(2),
@@ -284,7 +284,7 @@
         no_medical_claim:true,
         master_output_cap:0.10
       },
-      microvoid_definition:"User-registered operational event within the Ars Caeli session model; not a physiological measurement.",
+      microvoid_definition:"Evento operativo registrado por la persona usuaria dentro del modelo de sesión Ars Caeli; no es una medición fisiológica.",
       completeness:"partial"
     };
   }
@@ -376,7 +376,7 @@
       content.innerHTML=`
         <div class="drawer-grid">
           <div class="drawer-card full"><h3>Vista previa JSON</h3><pre style="white-space:pre-wrap;color:#94a5b8;font:9px/1.5 ui-monospace;max-height:420px;overflow:auto">${escapeHtml(JSON.stringify(rec,null,2))}</pre></div>
-          <div class="drawer-card full"><button class="action-btn cyan" id="downloadAtlasBtn" style="width:100%">Descargar JSON ATLAS</button></div>
+          <div class="drawer-card full"><button class="action-btn cyan" id="downloadAtlasBtn" style="width:100%">Descargar JSON de ATLAS</button></div>
         </div>`;
       setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.1.json")),0);
     }else if(type==="descenso"||type==="retorno"){
@@ -392,14 +392,14 @@
           <div class="drawer-card full"><h3>Lectura de interfaz</h3><p>Esta vista organiza la trayectoria de la sesión. Describe un estado operativo del sistema; no diagnostica una condición clínica.</p></div>
         </div>`;
     }else{
-      eyebrow.textContent="INICIO";title.textContent="AEON Sound Field";
-      content.innerHTML=`<div class="drawer-card"><h3>v0.3</h3><p>Interfaz de sesión orientada a descenso, transformación y retorno, con registro local y exportación ATLAS.</p></div>`;
+      eyebrow.textContent="INICIO";title.textContent="Campo Sonoro AEON";
+      content.innerHTML=`<div class="drawer-card"><h3>v0.3.1</h3><p>Interfaz de sesión orientada a descenso, transformación y retorno, con registro local y exportación a ATLAS.</p></div>`;
     }
     drawer.classList.add("open");drawer.setAttribute("aria-hidden","false");
   }
 
   async function syncRepo(){
-    $("#repoStatus").textContent="SYNC…";let ok=0;
+    $("#repoStatus").textContent="SINCRONIZANDO…";let ok=0;
     for(const p of repoSources){
       try{
         const r=await fetch(RAW+encodeURI(p),{cache:"no-store"});if(!r.ok)throw Error(r.status);
@@ -407,7 +407,7 @@
       }catch(_){}
     }
     $("#repoDot").classList.toggle("online",ok>0);
-    $("#repoStatus").textContent=ok?`REPO ${ok}/${repoSources.length}`:"LOCAL";
+    $("#repoStatus").textContent=ok?`REPOSITORIO ${ok}/${repoSources.length}`:"LOCAL";
     flash(ok?`Repositorio sincronizado: ${ok}/${repoSources.length}`:"No se pudo sincronizar. Se mantiene modo local.");
     if($("#drawer").classList.contains("open") && $("#drawerEyebrow").textContent==="BIBLIOTECA") openDrawer("biblioteca");
   }
@@ -594,7 +594,7 @@
   async function init(){
     ensureSession();renderFrequencies();wire();loadProfile();updateReadouts();drawField();drawMini();animateSide();
     try{
-      const r=await fetch("mappings.json",{cache:"no-store"});if(r.ok){$("#repoDot").classList.add("online");$("#repoStatus").textContent="LOCAL READY"}
+      const r=await fetch("mappings.json",{cache:"no-store"});if(r.ok){$("#repoDot").classList.add("online");$("#repoStatus").textContent="LOCAL LISTO"}
     }catch(_){}
   }
   init();

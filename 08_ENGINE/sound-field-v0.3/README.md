@@ -1,6 +1,6 @@
-# AEON Sound Field v0.3.1
+# Campo Sonoro AEON v0.3.1
 
-Interfaz neuroenergética y alquímica de sesión para Ars Caeli.
+Interfaz simbólica y alquímica de sesión para Ars Caeli.
 
 ## Diseño
 
@@ -51,7 +51,7 @@ Las asociaciones de frecuencia **no se presentan como hechos médicos, neurofisi
 ## Archivos
 
 ```text
-sound-field-v0.3/
+campo-sonoro-v0.3/
 ├── index.html
 ├── styles.css
 ├── app.js

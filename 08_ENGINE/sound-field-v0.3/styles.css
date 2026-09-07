@@ -133,9 +133,9 @@ blockquote cite{display:block;margin-top:6px;text-align:center;font:9px var(--fo
 .phase-step.active{border-color:rgba(225,186,115,.5);color:var(--text);background:rgba(225,186,115,.045)}
 .field-wrap{position:relative;width:min(760px,100%);aspect-ratio:1/1;margin:0 auto}
 #fieldCanvas{position:absolute;inset:0;width:100%;height:100%}
-.field-label{position:absolute;display:grid;gap:2px;text-align:center;pointer-events:none}
-.field-label strong{font:500 10px var(--font-mono);letter-spacing:.15em}
-.field-label small{color:var(--muted);font-size:9px}
+.field-wrap .field-label{position:absolute;display:grid;gap:2px;text-align:center;pointer-events:none}
+.field-wrap .field-label strong{font:500 10px var(--font-mono);letter-spacing:.15em}
+.field-wrap .field-label small{color:var(--muted);font-size:9px}
 .descent-label{left:2%;top:20%}.return-label{right:2%;top:20%}.shadow-label{left:3%;bottom:20%}.light-label{right:3%;bottom:20%}
 .vertical-axis{position:absolute;left:50%;top:20%;bottom:19%;width:1px;background:linear-gradient(transparent,rgba(225,186,115,.6),rgba(102,215,241,.7),rgba(160,112,247,.65),transparent)}
 .orb{position:absolute;left:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,.45);box-shadow:0 0 18px currentColor}
@@ -207,7 +207,7 @@ blockquote cite{display:block;margin-top:6px;text-align:center;font:9px var(--fo
 @media(max-width:580px){
   .app-header{padding:10px 12px}.brand small{display:none}.header-status{display:none}.workspace{display:block}.left-panel{margin:8px}.right-panel{padding:0 8px 12px}
   .stage-heading h1{font-size:29px}.stage-heading p{font-size:8px;letter-spacing:.16em}.phase-step{min-width:0;flex:1;padding:7px}.phase-rail{gap:4px}
-  .field-label{display:none}.field-readout{top:auto;bottom:3%;width:90%;justify-content:center}.field-readout span{font-size:7px}.player{padding:10px}.player-btn span{display:none}
+  .field-wrap .field-label{display:none}.field-readout{top:auto;bottom:3%;width:90%;justify-content:center}.field-readout span{font-size:7px}.player{padding:10px}.player-btn span{display:none}
   .play-btn{width:60px;height:60px}.circle-btn{width:38px;height:38px}.session-actions{grid-template-columns:1fr}.drawer{right:8px;top:92px;width:calc(100vw - 16px)}
 }
 @media(prefers-reduced-motion:reduce){.drawer{transition:none}.cosmos::before{opacity:.25}}

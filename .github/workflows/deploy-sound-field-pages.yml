@@ -4,7 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - "Ars-Caeli_08_ENGINES_AEON_SoundField_MVP/08_ENGINES/AEON/sound-field-mvp/**"
+      - "index.html"
+      - "08_ENGINE/sound-field-v0.3/**"
       - ".github/workflows/deploy-sound-field-pages.yml"
   workflow_dispatch:
 
@@ -33,7 +34,7 @@ jobs:
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: Ars-Caeli_08_ENGINES_AEON_SoundField_MVP/08_ENGINES/AEON/sound-field-mvp
+          path: .
 
       - name: Deploy to Pages
         id: deployment

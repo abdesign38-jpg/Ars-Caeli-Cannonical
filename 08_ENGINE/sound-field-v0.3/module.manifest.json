@@ -1,0 +1,25 @@
+{
+  "id": "AEON-SOUND-FIELD",
+  "name": "AEON Sound Field",
+  "version": "0.3.0",
+  "status": "experimental",
+  "entry": "index.html",
+  "design": "neuroenergetic-alchemical-session-ui",
+  "repository": "https://github.com/abdesign38-jpg/Ars-Caeli-Cannonical",
+  "data": [
+    "data/metodo_alquimico_base.json",
+    "mappings.json"
+  ],
+  "features": [
+    "navigation",
+    "descent-return-axis",
+    "animated-mandala-torus",
+    "alchemical-session-profile",
+    "symbolic-frequency-library",
+    "audio-engine",
+    "timer",
+    "local-session-save",
+    "atlas-export",
+    "repository-sync"
+  ]
+}

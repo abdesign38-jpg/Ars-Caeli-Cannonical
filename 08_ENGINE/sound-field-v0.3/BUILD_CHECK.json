@@ -1,0 +1,10 @@
+{
+  "index_css": true,
+  "index_js": true,
+  "html_nav_complete": true,
+  "canvas_main": true,
+  "atlas_export": true,
+  "mappings_json_valid": true,
+  "manifest_valid": true,
+  "js_braces_rough": true
+}

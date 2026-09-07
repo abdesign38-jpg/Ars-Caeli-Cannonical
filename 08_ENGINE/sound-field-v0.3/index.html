@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="AEON Sound Field v0.3 — interfaz neuroenergética y alquímica de Ars Caeli.">
+  <title>Ars Caeli · AEON Sound Field v0.3</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="cosmos" aria-hidden="true"></div>
+
+  <header class="app-header">
+    <a class="brand" href="#inicio" aria-label="Ars Caeli inicio">
+      <div class="sigil" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <div>
+        <strong>ARS CAELI</strong>
+        <small>SCIENTIA · CONSCIENTIA · TRANSMUTATIO</small>
+      </div>
+    </a>
+
+    <nav class="main-nav" aria-label="Navegación principal">
+      <button data-view="inicio" class="nav-link active">Inicio</button>
+      <button data-view="descenso" class="nav-link">Descenso</button>
+      <button data-view="sesion" class="nav-link">Sesión</button>
+      <button data-view="retorno" class="nav-link">Retorno</button>
+      <button data-view="biblioteca" class="nav-link">Biblioteca</button>
+      <button data-view="atlas" class="nav-link">ATLAS</button>
+    </nav>
+
+    <div class="header-tools">
+      <span class="status-dot" id="repoDot"></span>
+      <span class="header-status" id="repoStatus">LOCAL</span>
+      <span class="version">v0.3.0</span>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="left-panel glass">
+      <section class="panel-section">
+        <div class="section-title">
+          <span>Perfil de sesión</span>
+          <button class="icon-button" id="saveProfileBtn" title="Guardar perfil">↧</button>
+        </div>
+
+        <label class="field-label" for="intention">Intención</label>
+        <textarea id="intention" rows="3" placeholder="¿Qué deseas transformar, comprender o integrar?"></textarea>
+      </section>
+
+      <section class="panel-section">
+        <div class="section-title"><span>Método alquímico</span></div>
+
+        <div class="alchemy-ladder">
+          <div class="ladder-line" aria-hidden="true"></div>
+
+          <div class="alchemy-row" data-dim="inframundo">
+            <button class="alchemy-node active" aria-label="Inframundo"></button>
+            <div class="alchemy-copy"><strong>Inframundo</strong><small>Reconocer</small></div>
+            <output id="infraOut">40</output>
+          </div>
+          <div class="alchemy-row" data-dim="activacion">
+            <button class="alchemy-node" aria-label="Activación"></button>
+            <div class="alchemy-copy"><strong>Activación</strong><small>Movilizar</small></div>
+            <output id="actOut">28</output>
+          </div>
+          <div class="alchemy-row" data-dim="disociacion">
+            <button class="alchemy-node" aria-label="Disociación"></button>
+            <div class="alchemy-copy"><strong>Disociación</strong><small>Reorientar</small></div>
+            <output id="disOut">16</output>
+          </div>
+          <div class="alchemy-row" data-dim="apertura">
+            <button class="alchemy-node" aria-label="Apertura"></button>
+            <div class="alchemy-copy"><strong>Apertura</strong><small>Integrar</small></div>
+            <output id="apeOut">52</output>
+          </div>
+        </div>
+
+        <div class="slider-stack">
+          <label>Inframundo <input id="inframundo" type="range" min="0" max="100" value="40"></label>
+          <label>Activación <input id="activacion" type="range" min="0" max="100" value="28"></label>
+          <label>Disociación <input id="disociacion" type="range" min="0" max="100" value="16"></label>
+          <label>Apertura <input id="apertura" type="range" min="0" max="100" value="52"></label>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <div class="section-title"><span>Constructo ACSPEC</span></div>
+        <select id="constructSelect">
+          <option value="presencia">Presencia</option>
+          <option value="resonancia">Resonancia</option>
+          <option value="tiempo">Tiempo</option>
+          <option value="vacio">Vacío</option>
+          <option value="entropia">Entropía</option>
+          <option value="horizonte">Horizonte</option>
+          <option value="cristalizacion">Cristalización</option>
+          <option value="respiracion">Respiración Ambiental</option>
+        </select>
+      </section>
+
+      <section class="panel-section">
+        <label class="field-label">Duración <span id="durationLabel">20 min</span></label>
+        <input id="duration" type="range" min="5" max="60" value="20" step="5">
+
+        <label class="field-label">Nivel de profundidad <span id="depthLabel">Medio</span></label>
+        <input id="depth" type="range" min="0" max="2" value="1" step="1">
+      </section>
+
+      <section class="panel-section">
+        <div class="section-title"><span>Salida</span></div>
+        <div class="segmented">
+          <button class="seg active" data-output="headphones">Auriculares</button>
+          <button class="seg" data-output="speakers">Altavoces</button>
+        </div>
+      </section>
+
+      <section class="boundary-box">
+        <span class="boundary-symbol">△</span>
+        <div>
+          <strong>Espacio experimental</strong>
+          <p>Escucha, observa, registra. Las correspondencias son simbólicas y no sustituyen procesos médicos o psicológicos.</p>
+        </div>
+      </section>
+
+      <blockquote>“Para subir hay que bajar.”<cite>— Ars Caeli</cite></blockquote>
+    </aside>
+
+    <section class="center-stage" id="inicio">
+      <div class="stage-heading">
+        <span class="eyebrow">AEON ENGINE · NEUROENERGETIC SESSION FIELD</span>
+        <h1>SOUND · FIELD</h1>
+        <p>DESCENSO · TRANSFORMACIÓN · RETORNO</p>
+      </div>
+
+      <div class="phase-rail" role="tablist">
+        <button class="phase-step active" data-phase="descenso"><span>01</span>Descenso</button>
+        <button class="phase-step" data-phase="sesion"><span>02</span>Sesión</button>
+        <button class="phase-step" data-phase="retorno"><span>03</span>Retorno</button>
+      </div>
+
+      <div class="field-wrap">
+        <canvas id="fieldCanvas" aria-label="Campo neuroenergético animado"></canvas>
+
+        <div class="field-label descent-label">
+          <strong>DESCENSO</strong>
+          <small>Explorar</small>
+        </div>
+        <div class="field-label return-label">
+          <strong>RETORNO</strong>
+          <small>Integrar</small>
+        </div>
+        <div class="field-label shadow-label">
+          <strong>SOMBRA</strong>
+          <small>Liberar</small>
+        </div>
+        <div class="field-label light-label">
+          <strong>LUZ</strong>
+          <small>Coherencia</small>
+        </div>
+
+        <div class="vertical-axis" aria-hidden="true">
+          <i class="orb o1"></i>
+          <i class="orb o2"></i>
+          <i class="orb o3"></i>
+          <i class="orb o4"></i>
+          <i class="orb o5"></i>
+          <i class="orb o6"></i>
+          <i class="orb o7"></i>
+        </div>
+
+        <div class="field-readout">
+          <span><b id="phaseReadout">DESCENSO</b> fase</span>
+          <span><b id="gradientReadout">+24</b> gradiente</span>
+          <span><b id="carrierReadout">174</b> Hz</span>
+        </div>
+      </div>
+
+      <p class="mantra">CUANDO LA FRECUENCIA ENCUENTRA PROPÓSITO,<br>LA MATERIA RECUERDA QUIÉN ES.</p>
+
+      <div class="player glass">
+        <div class="player-top">
+          <button class="player-btn" id="resetBtn">↻<span>Reiniciar</span></button>
+          <div class="transport">
+            <button class="circle-btn" id="prevBtn">◀</button>
+            <button class="play-btn" id="playBtn">▶</button>
+            <button class="circle-btn" id="nextBtn">▶</button>
+          </div>
+          <button class="player-btn" id="timerBtn">◷<span>Temporizador</span></button>
+        </div>
+        <div class="progress-row">
+          <span id="elapsed">00:00</span>
+          <div class="progress-track"><div id="progressBar"></div></div>
+          <span id="totalTime">20:00</span>
+        </div>
+      </div>
+    </section>
+
+    <aside class="right-panel">
+      <section class="card glass">
+        <div class="card-title">Campo en tiempo real</div>
+
+        <div class="hemisphere-grid">
+          <div class="hemisphere">
+            <canvas id="leftBrain" width="220" height="120"></canvas>
+            <strong>Hemisferio izquierdo</strong>
+            <small>Análisis · Estructura</small>
+          </div>
+          <div class="divider"></div>
+          <div class="hemisphere">
+            <canvas id="rightBrain" width="220" height="120"></canvas>
+            <strong>Hemisferio derecho</strong>
+            <small>Intuición · Síntesis</small>
+          </div>
+        </div>
+
+        <div class="coherence">
+          <span>Coherencia global</span>
+          <div class="coherence-track"><div id="coherenceBar"></div></div>
+          <output id="coherenceOut">78%</output>
+        </div>
+      </section>
+
+      <section class="card glass">
+        <div class="card-title">Frecuencias simbólicas</div>
+        <div class="frequency-list" id="frequencyList"></div>
+        <p class="micro-note">Correspondencias internas de Ars Caeli. Se muestran como lenguaje simbólico, no como hechos terapéuticos.</p>
+      </section>
+
+      <section class="card glass">
+        <div class="card-title row-between">
+          <span>Visualización del campo</span>
+          <button class="icon-button" id="expandVizBtn">↗</button>
+        </div>
+
+        <div class="viz-tabs">
+          <button class="viz-tab active" data-viz="torus">Toroide</button>
+          <button class="viz-tab" data-viz="waves">Ondas</button>
+          <button class="viz-tab" data-viz="spectrum">Espectro</button>
+          <button class="viz-tab" data-viz="chakras">Eje</button>
+        </div>
+        <canvas id="miniViz" height="180"></canvas>
+      </section>
+
+      <section class="session-actions">
+        <button class="action-btn gold" id="saveSessionBtn">⇩ Guardar sesión</button>
+        <button class="action-btn cyan" id="exportAtlasBtn">△ Exportar a ATLAS</button>
+      </section>
+    </aside>
+  </main>
+
+  <section class="drawer glass" id="drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div>
+        <span class="eyebrow" id="drawerEyebrow">SESION</span>
+        <h2 id="drawerTitle">Registro de sesión</h2>
+      </div>
+      <button class="icon-button" id="closeDrawerBtn">×</button>
+    </div>
+    <div id="drawerContent"></div>
+  </section>
+
+  <footer class="app-footer">
+    <span>ARS CAELI · AEON ENGINE · SOUND FIELD v0.3</span>
+    <span>VERITAS IN SONO</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

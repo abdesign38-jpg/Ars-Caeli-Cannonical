@@ -1,0 +1,1870 @@
+{
+  "metadata": {
+    "nombre": "Metodo Alquimico Base",
+    "version": "0.1",
+    "uso": "Fuente de datos para app de diagnostico natal-alquimico, mapa dimensional, heridas, sombras, organos, cristalizacion e intervencion sugerida.",
+    "nota_etica": "Este sistema es simbolico-clinico y de acompanamiento contemplativo. No sustituye diagnostico medico, tratamiento oncologico, psicoterapia, nutricion clinica ni supervision profesional. Hierbas y alimentos se presentan como soporte regulador general; revisar contraindicaciones, embarazo, medicamentos, alergias y condiciones medicas."
+  },
+  "dimensiones": {
+    "inframundo": {
+      "nombre": "Inframundo",
+      "descripcion": "Retencion, implosion, trauma profundo, memoria no integrada, carga somatica.",
+      "signos_clinicos": [
+        "pesadez",
+        "emocion retenida",
+        "tension corporal",
+        "fatiga",
+        "rigidez",
+        "sensacion de sostener demasiado"
+      ],
+      "riesgo_si_se_abre_demasiado": "Catarsis sin contencion, colapso, incremento de retencion o saturacion emocional.",
+      "intervencion_base": [
+        "contencion",
+        "respiracion 4-2-6",
+        "sonido grave suave",
+        "432hz",
+        "cierre con arraigo"
+      ]
+    },
+    "activacion": {
+      "nombre": "Activacion",
+      "descripcion": "Mente acelerada, alerta, ansiedad, sobreanalisis, defensa simpatica.",
+      "signos_clinicos": [
+        "insomnio",
+        "mente rapida",
+        "necesidad de controlar",
+        "habla acelerada",
+        "tension mandibular",
+        "respiracion alta"
+      ],
+      "riesgo_si_se_estimula": "Sobrecarga mental, irritabilidad, desconexion corporal.",
+      "intervencion_base": [
+        "exhalacion larga",
+        "bajar estimulo",
+        "alpha suave",
+        "tonos continuos",
+        "cuerpo antes que interpretacion"
+      ]
+    },
+    "disociacion": {
+      "nombre": "Disociacion",
+      "descripcion": "Desconexion, vacio, congelamiento, baja presencia corporal, colapso dorsal.",
+      "signos_clinicos": [
+        "mirada perdida",
+        "frio",
+        "apatia",
+        "fatiga extrema",
+        "dificultad para sentir",
+        "desconexion del cuerpo"
+      ],
+      "riesgo_si_se_usa_delta_profundo": "Mayor desconexion o cierre del sistema.",
+      "intervencion_base": [
+        "orientacion al espacio",
+        "tacto consciente",
+        "sonido tibio",
+        "alpha suave",
+        "movimiento pequeno"
+      ]
+    },
+    "apertura": {
+      "nombre": "Apertura",
+      "descripcion": "Capacidad de procesar, sentir, simbolizar e integrar sin colapsar.",
+      "signos_clinicos": [
+        "puede nombrar emociones",
+        "tolera silencio",
+        "puede llorar sin perderse",
+        "curiosidad",
+        "contacto corporal presente"
+      ],
+      "riesgo_si_se_sobreexplora": "Abrir demasiado material sin cierre.",
+      "intervencion_base": [
+        "theta suave",
+        "palabra consciente",
+        "observacion",
+        "integracion corporal",
+        "cierre obligatorio"
+      ]
+    }
+  },
+  "elementos": {
+    "aire": {
+      "simbolismo": "Mente, lenguaje, interpretacion, sistema nervioso, respiracion.",
+      "exceso": [
+        "sobreanalisis",
+        "intelectualizacion",
+        "dispersion",
+        "ansiedad mental"
+      ],
+      "deficit": [
+        "dificultad para nombrar",
+        "confusion conceptual",
+        "bloqueo comunicativo"
+      ],
+      "dimensiones_exceso": {
+        "activacion": 20,
+        "disociacion": 5
+      },
+      "organos": [
+        "sistema_nervioso",
+        "pulmones",
+        "garganta"
+      ],
+      "sombras": [
+        "intelectualizacion",
+        "dispersion",
+        "desconexion_del_sentir"
+      ]
+    },
+    "tierra": {
+      "simbolismo": "Cuerpo, estructura, materia, limites, digestion de realidad.",
+      "exceso": [
+        "rigidez",
+        "control",
+        "retencion",
+        "apego"
+      ],
+      "deficit": [
+        "falta de arraigo",
+        "inestabilidad",
+        "dificultad para sostener habitos"
+      ],
+      "dimensiones_exceso": {
+        "inframundo": 10
+      },
+      "organos": [
+        "digestivo",
+        "huesos",
+        "piel"
+      ],
+      "sombras": [
+        "control",
+        "rigidez",
+        "miedo_a_perder_seguridad"
+      ]
+    },
+    "fuego": {
+      "simbolismo": "Voluntad, accion, impulso, identidad, inflamacion simbolica.",
+      "exceso": [
+        "impulsividad",
+        "irritabilidad",
+        "confrontacion",
+        "hiperreactividad"
+      ],
+      "deficit": [
+        "baja voluntad",
+        "apatia",
+        "dificultad para iniciar"
+      ],
+      "dimensiones_exceso": {
+        "activacion": 15
+      },
+      "organos": [
+        "higado",
+        "corazon",
+        "musculos"
+      ],
+      "sombras": [
+        "defensividad",
+        "ira_no_integrada",
+        "urgencia"
+      ]
+    },
+    "agua": {
+      "simbolismo": "Emocion, memoria, vinculo, nutricion, inconsciente.",
+      "exceso": [
+        "fusion",
+        "desborde",
+        "dependencia",
+        "melancolia"
+      ],
+      "deficit": [
+        "dificultad para sentir",
+        "sequedad emocional",
+        "desconexion afectiva"
+      ],
+      "dimensiones_deficit": {
+        "inframundo": 15,
+        "disociacion": 10
+      },
+      "organos": [
+        "rinones",
+        "sistema_linfatico",
+        "pecho",
+        "reproductivo"
+      ],
+      "sombras": [
+        "evitacion_emocional",
+        "miedo_a_vulnerabilidad",
+        "retencion_afectiva"
+      ]
+    }
+  },
+  "planetas": {
+    "Sol": {
+      "funcion": "Identidad, voluntad, proposito, brillo consciente.",
+      "sombra": "Identidad condicionada por aprobacion externa.",
+      "organos": [
+        "corazon",
+        "columna"
+      ],
+      "dimensiones": {
+        "apertura": 5
+      }
+    },
+    "Luna": {
+      "funcion": "Emocion, memoria, cuerpo emocional, madre interna.",
+      "sombra": "Reactividad, apego, miedo a no ser sostenida.",
+      "organos": [
+        "pecho",
+        "estomago",
+        "sistema_linfatico"
+      ],
+      "dimensiones": {
+        "inframundo": 10,
+        "apertura": 5
+      }
+    },
+    "Mercurio": {
+      "funcion": "Mente, lenguaje, procesamiento, sistema nervioso.",
+      "sombra": "Intelectualizacion, ruido mental, racionalizacion del dolor.",
+      "organos": [
+        "sistema_nervioso",
+        "pulmones",
+        "garganta"
+      ],
+      "dimensiones": {
+        "activacion": 15
+      }
+    },
+    "Venus": {
+      "funcion": "Afecto, recepcion, placer, autoestima relacional.",
+      "sombra": "Dar para ser amada, dificultad para recibir, valor condicionado.",
+      "organos": [
+        "rinones",
+        "piel",
+        "pecho",
+        "garganta"
+      ],
+      "dimensiones": {
+        "apertura": 5,
+        "inframundo": 5
+      }
+    },
+    "Marte": {
+      "funcion": "Accion, limite, deseo, defensa.",
+      "sombra": "Ira contenida, sacrificio activo, desgaste por lucha interna.",
+      "organos": [
+        "musculos",
+        "higado",
+        "sangre"
+      ],
+      "dimensiones": {
+        "activacion": 10
+      }
+    },
+    "Jupiter": {
+      "funcion": "Expansion, fe, sentido, medicina de crecimiento.",
+      "sombra": "Exceso, evasion por optimismo, sobrepromesa.",
+      "organos": [
+        "higado",
+        "caderas"
+      ],
+      "dimensiones": {
+        "apertura": 15
+      }
+    },
+    "Saturno": {
+      "funcion": "Estructura, limite, tiempo, responsabilidad, hueso psiquico.",
+      "sombra": "Rigidez, culpa, carencia, miedo a depender.",
+      "organos": [
+        "huesos",
+        "piel",
+        "dientes",
+        "articulaciones"
+      ],
+      "dimensiones": {
+        "inframundo": 20,
+        "disociacion": 5
+      }
+    },
+    "Urano": {
+      "funcion": "Ruptura, cambio, descarga electrica, individuacion.",
+      "sombra": "Inestabilidad, shock, nerviosismo, ruptura abrupta.",
+      "organos": [
+        "sistema_nervioso",
+        "circulacion"
+      ],
+      "dimensiones": {
+        "activacion": 15,
+        "disociacion": 5
+      }
+    },
+    "Neptuno": {
+      "funcion": "Disolucion, espiritualidad, sensibilidad, niebla psiquica.",
+      "sombra": "Confusion, fusion, fuga, limites difusos.",
+      "organos": [
+        "sistema_linfatico",
+        "pies",
+        "sistema_inmune_simbolico"
+      ],
+      "dimensiones": {
+        "disociacion": 15,
+        "inframundo": 10
+      }
+    },
+    "Pluton": {
+      "funcion": "Transformacion, sombra profunda, muerte-renacimiento, intensidad.",
+      "sombra": "Control, compulsividad, acumulacion profunda, poder no integrado.",
+      "organos": [
+        "reproductivo",
+        "colon",
+        "tejidos_profundos"
+      ],
+      "dimensiones": {
+        "inframundo": 25,
+        "activacion": 5
+      }
+    }
+  },
+  "casas": {
+    "1": {
+      "tema": "Identidad, cuerpo visible, forma de entrar al mundo",
+      "sombra": "identidad reactiva",
+      "dimensiones": {
+        "activacion": 5
+      },
+      "organos": [
+        "cuerpo_general",
+        "cabeza"
+      ]
+    },
+    "2": {
+      "tema": "Valor, cuerpo, recursos, retencion material",
+      "sombra": "autoestima ligada a seguridad",
+      "dimensiones": {
+        "inframundo": 10
+      },
+      "organos": [
+        "garganta",
+        "tejidos",
+        "cuello"
+      ]
+    },
+    "3": {
+      "tema": "Mente, palabra, pensamiento cotidiano",
+      "sombra": "ruido mental",
+      "dimensiones": {
+        "activacion": 10
+      },
+      "organos": [
+        "pulmones",
+        "sistema_nervioso",
+        "manos"
+      ]
+    },
+    "4": {
+      "tema": "Raiz, madre interna, hogar, matriz emocional",
+      "sombra": "herida primaria de contencion",
+      "dimensiones": {
+        "inframundo": 25,
+        "disociacion": 10
+      },
+      "organos": [
+        "pecho",
+        "estomago",
+        "diafragma"
+      ]
+    },
+    "5": {
+      "tema": "Gozo, expresion, creatividad, nina interna",
+      "sombra": "placer condicionado",
+      "dimensiones": {
+        "apertura": 10
+      },
+      "organos": [
+        "corazon",
+        "espalda_alta"
+      ]
+    },
+    "6": {
+      "tema": "Rutina, salud, servicio, sistema de habitos",
+      "sombra": "sacrificio y desgaste",
+      "dimensiones": {
+        "activacion": 10
+      },
+      "organos": [
+        "digestivo",
+        "intestino",
+        "sistema_inmune_simbolico"
+      ]
+    },
+    "7": {
+      "tema": "Vinculo, pareja, espejo, contratos",
+      "sombra": "dependencia, conflicto, proyeccion",
+      "dimensiones": {
+        "activacion": 5,
+        "inframundo": 5
+      },
+      "organos": [
+        "rinones",
+        "piel",
+        "pecho"
+      ]
+    },
+    "8": {
+      "tema": "Intimidad, fusion, trauma, sombra, muerte-renacimiento",
+      "sombra": "miedo a entrega y perdida de control",
+      "dimensiones": {
+        "inframundo": 25,
+        "apertura": -5
+      },
+      "organos": [
+        "reproductivo",
+        "colon",
+        "tejidos_profundos"
+      ]
+    },
+    "9": {
+      "tema": "Sentido, fe, vision superior, filosofia",
+      "sombra": "evasion por creencia",
+      "dimensiones": {
+        "apertura": 15
+      },
+      "organos": [
+        "higado",
+        "caderas"
+      ]
+    },
+    "10": {
+      "tema": "Destino visible, imagen publica, autoridad",
+      "sombra": "valor ligado al rendimiento",
+      "dimensiones": {
+        "activacion": 10
+      },
+      "organos": [
+        "rodillas",
+        "columna",
+        "sistema_nervioso"
+      ]
+    },
+    "11": {
+      "tema": "Tribu, red, pertenencia, futuro",
+      "sombra": "no pertenecer",
+      "dimensiones": {
+        "disociacion": 5
+      },
+      "organos": [
+        "circulacion",
+        "sistema_nervioso"
+      ]
+    },
+    "12": {
+      "tema": "Inconsciente, encierro, memoria ancestral, disolucion",
+      "sombra": "material oculto no nombrado",
+      "dimensiones": {
+        "inframundo": 20,
+        "disociacion": 20
+      },
+      "organos": [
+        "pies",
+        "sistema_linfatico",
+        "suenio"
+      ]
+    }
+  },
+  "heridas": {
+    "matriz_fragmentada": {
+      "nombre": "Matriz Fragmentada",
+      "descripcion": "Ruptura o inconsistencia temprana del campo de contencion emocional.",
+      "indicadores": [
+        "casa_4_cargada",
+        "saturno_casa_4",
+        "neptuno_casa_4",
+        "urano_casa_4",
+        "luna_tensa",
+        "agua_baja"
+      ],
+      "activadores": [
+        "abandono",
+        "inestabilidad",
+        "frialdad",
+        "ambiguedad",
+        "falta_de_sosten"
+      ],
+      "dimensiones": {
+        "inframundo": 35,
+        "disociacion": 15,
+        "activacion": 5,
+        "apertura": -10
+      },
+      "organos": [
+        "pecho",
+        "diafragma",
+        "estomago",
+        "sistema_nervioso"
+      ],
+      "sombras": [
+        "hipervigilancia",
+        "control_emocional",
+        "miedo_a_vulnerabilidad"
+      ],
+      "cristalizaciones": [
+        "retencion_afectiva",
+        "implosion_materna"
+      ],
+      "arquetipo": "La Madre Difusa / El Contenedor Inconsistente"
+    },
+    "abandono_vincular": {
+      "nombre": "Abandono Vincular",
+      "descripcion": "Miedo a no ser elegida, sostenida o acompanada en vulnerabilidad.",
+      "indicadores": [
+        "luna_casa_7",
+        "luna_casa_8",
+        "venus_retrogrado",
+        "casa_7_activa",
+        "casa_8_activa"
+      ],
+      "activadores": [
+        "silencio",
+        "distancia",
+        "rechazo",
+        "intermitencia",
+        "pareja_ambigua"
+      ],
+      "dimensiones": {
+        "inframundo": 20,
+        "activacion": 20,
+        "apertura": -5
+      },
+      "organos": [
+        "pecho",
+        "rinones",
+        "piel",
+        "garganta"
+      ],
+      "sombras": [
+        "dar_para_ser_amado",
+        "apego_ansioso",
+        "confusion_entre_intensidad_y_amor"
+      ],
+      "cristalizaciones": [
+        "retencion_afectiva",
+        "nudo_vincular"
+      ],
+      "arquetipo": "El Espejo Inestable"
+    },
+    "intelectualizacion_del_dolor": {
+      "nombre": "Intelectualizacion del Dolor",
+      "descripcion": "La emocion se traduce en pensamiento antes de sentirse plenamente.",
+      "indicadores": [
+        "aire_dominante",
+        "geminis_dominante",
+        "mercurio_fuerte",
+        "mercurio_retrogrado",
+        "casa_3_activa",
+        "casa_10_activa"
+      ],
+      "activadores": [
+        "emocion_intensa",
+        "vulnerabilidad",
+        "conflicto",
+        "perdida_de_control"
+      ],
+      "dimensiones": {
+        "activacion": 30,
+        "disociacion": 5,
+        "apertura": -5
+      },
+      "organos": [
+        "sistema_nervioso",
+        "pulmones",
+        "garganta",
+        "mandibula"
+      ],
+      "sombras": [
+        "racionalizacion",
+        "ruido_mental",
+        "desconexion_del_sentir"
+      ],
+      "cristalizaciones": [
+        "bucle_mental",
+        "tension_respiratoria"
+      ],
+      "arquetipo": "La Intelectualizadora"
+    },
+    "sacrificio_difuso": {
+      "nombre": "Sacrificio Difuso",
+      "descripcion": "Dificultad para diferenciar servicio, amor y perdida de limites.",
+      "indicadores": [
+        "marte_piscis",
+        "neptuno_fuerte",
+        "casa_6_activa",
+        "venus_tenso",
+        "agua_exceso"
+      ],
+      "activadores": [
+        "culpa",
+        "necesidad_del_otro",
+        "conflicto",
+        "responsabilidad_excesiva"
+      ],
+      "dimensiones": {
+        "inframundo": 15,
+        "disociacion": 15,
+        "activacion": 10
+      },
+      "organos": [
+        "sistema_linfatico",
+        "digestivo",
+        "pies",
+        "sistema_inmune_simbolico"
+      ],
+      "sombras": [
+        "salvadora",
+        "limites_difusos",
+        "culpa_por_elegirse"
+      ],
+      "cristalizaciones": [
+        "drenaje_bloqueado",
+        "agotamiento_por_servicio"
+      ],
+      "arquetipo": "El Sacrificador Invisible"
+    },
+    "valor_condicionado": {
+      "nombre": "Valor Condicionado",
+      "descripcion": "La valia se organiza alrededor del rendimiento, utilidad, imagen o aprobacion externa.",
+      "indicadores": [
+        "sol_casa_10",
+        "venus_casa_10",
+        "saturno_fuerte",
+        "casa_2_activa",
+        "tierra_exceso"
+      ],
+      "activadores": [
+        "critica",
+        "fracaso",
+        "inutilidad",
+        "no_ser_vista"
+      ],
+      "dimensiones": {
+        "activacion": 15,
+        "inframundo": 15,
+        "apertura": -5
+      },
+      "organos": [
+        "columna",
+        "garganta",
+        "piel",
+        "digestivo"
+      ],
+      "sombras": [
+        "perfeccionismo",
+        "autoexigencia",
+        "desconexion_del_placer"
+      ],
+      "cristalizaciones": [
+        "rigidez_identitaria",
+        "contraccion_de_valor"
+      ],
+      "arquetipo": "La Operadora Funcional"
+    }
+  },
+  "sombras": {
+    "intelectualizacion": {
+      "nombre": "Intelectualizacion",
+      "descripcion": "Pensar la emocion para evitar sentirla completa.",
+      "indicadores": [
+        "aire_dominante",
+        "geminis_dominante",
+        "mercurio_fuerte"
+      ],
+      "organos": [
+        "sistema_nervioso",
+        "pulmones",
+        "garganta"
+      ],
+      "intervencion": "Bajar al cuerpo antes de interpretar; respiracion y silencio guiado."
+    },
+    "hipervigilancia": {
+      "nombre": "Hipervigilancia",
+      "descripcion": "Sistema en alerta buscando anticipar perdida, peligro o abandono.",
+      "indicadores": [
+        "urano_casa_4",
+        "luna_aries",
+        "activacion_alta"
+      ],
+      "organos": [
+        "sistema_nervioso",
+        "suprarrenales_simbolicas",
+        "mandibula"
+      ],
+      "intervencion": "Contencion, exhalacion larga, evitar preguntas invasivas."
+    },
+    "retencion_afectiva": {
+      "nombre": "Retencion Afectiva",
+      "descripcion": "Guardar emocion por miedo a desbordar, molestar o no ser recibida.",
+      "indicadores": [
+        "casa_4_activa",
+        "casa_8_activa",
+        "pluton_fuerte",
+        "agua_baja"
+      ],
+      "organos": [
+        "pecho",
+        "diafragma",
+        "estomago",
+        "colon"
+      ],
+      "intervencion": "Coherencia del pecho, mano al corazon, permiso de recibir."
+    },
+    "sacrificio": {
+      "nombre": "Sacrificio",
+      "descripcion": "Dar energia sin registrar limite o necesidad propia.",
+      "indicadores": [
+        "marte_piscis",
+        "neptuno_fuerte",
+        "casa_6_activa"
+      ],
+      "organos": [
+        "digestivo",
+        "sistema_linfatico",
+        "pies"
+      ],
+      "intervencion": "Restituir limites, nombrar necesidad propia, cierre energetico."
+    },
+    "control_emocional": {
+      "nombre": "Control Emocional",
+      "descripcion": "Contener para no perder forma o no depender.",
+      "indicadores": [
+        "saturno_fuerte",
+        "capricornio_dominante",
+        "pluton_fuerte"
+      ],
+      "organos": [
+        "huesos",
+        "piel",
+        "diafragma",
+        "colon"
+      ],
+      "intervencion": "Micro-apertura, no catarsis; sostener sin forzar."
+    },
+    "desconexion_del_sentir": {
+      "nombre": "Desconexion del Sentir",
+      "descripcion": "Separacion mente-cuerpo como mecanismo de supervivencia.",
+      "indicadores": [
+        "aire_exceso",
+        "agua_baja",
+        "neptuno_tenso",
+        "disociacion_alta"
+      ],
+      "organos": [
+        "sistema_nervioso",
+        "piel",
+        "pies"
+      ],
+      "intervencion": "Orientacion sensorial, tacto, temperatura, textura, presente."
+    }
+  },
+  "organos_sistemas": {
+    "sistema_nervioso": {
+      "simbolismo": "Procesamiento, alerta, traduccion de realidad, electricidad interna.",
+      "indicadores": [
+        "aire_dominante",
+        "mercurio_fuerte",
+        "urano_fuerte",
+        "activacion_alta"
+      ],
+      "sombras_asociadas": [
+        "intelectualizacion",
+        "hipervigilancia",
+        "desconexion_del_sentir"
+      ],
+      "frecuencias": [
+        "alpha_8_10hz",
+        "432hz",
+        "delta_suave_2hz"
+      ],
+      "soporte_ayurveda": [
+        "vata_alto"
+      ],
+      "precaucion": "Evitar tonos altos o estimulantes si hay ansiedad."
+    },
+    "pulmones": {
+      "simbolismo": "Intercambio, palabra, permiso de ocupar espacio, duelo no expresado.",
+      "indicadores": [
+        "geminis_dominante",
+        "casa_3_activa",
+        "mercurio_fuerte"
+      ],
+      "sombras_asociadas": [
+        "intelectualizacion",
+        "expresion_contenida"
+      ],
+      "frecuencias": [
+        "respiracion_6_por_minuto",
+        "432hz"
+      ],
+      "soporte_ayurveda": [
+        "vata_alto"
+      ],
+      "precaucion": "No forzar respiraciones profundas si hay ansiedad; iniciar suave."
+    },
+    "pecho": {
+      "simbolismo": "Nutricion emocional, recibir, dar, pertenencia afectiva, madre interna.",
+      "indicadores": [
+        "luna_fuerte",
+        "casa_4_activa",
+        "venus_tenso",
+        "agua_baja"
+      ],
+      "sombras_asociadas": [
+        "retencion_afectiva",
+        "abandono_vincular",
+        "miedo_a_vulnerabilidad"
+      ],
+      "frecuencias": [
+        "432hz",
+        "528hz",
+        "coherencia_cardiaca"
+      ],
+      "soporte_ayurveda": [
+        "vata_alto",
+        "kapha_retenido"
+      ],
+      "precaucion": "Acompanamiento contemplativo; no interpretar sintomas medicos desde simbolismo."
+    },
+    "diafragma": {
+      "simbolismo": "Puente entre pecho y abdomen; compuerta de emocion contenida.",
+      "indicadores": [
+        "casa_4_activa",
+        "saturno_fuerte",
+        "control_emocional"
+      ],
+      "sombras_asociadas": [
+        "control_emocional",
+        "retencion_afectiva"
+      ],
+      "frecuencias": [
+        "respiracion_4_2_6",
+        "136hz",
+        "432hz"
+      ],
+      "soporte_ayurveda": [
+        "vata_alto"
+      ],
+      "precaucion": "Evitar hiperventilacion."
+    },
+    "digestivo": {
+      "simbolismo": "Procesamiento de experiencia, digestion emocional, habitos y servicio.",
+      "indicadores": [
+        "casa_6_activa",
+        "tierra_exceso",
+        "marte_piscis",
+        "ansiedad"
+      ],
+      "sombras_asociadas": [
+        "sacrificio",
+        "control",
+        "procesamiento_no_integrado"
+      ],
+      "frecuencias": [
+        "136hz",
+        "delta_suave_2hz",
+        "sonidos_naturales"
+      ],
+      "soporte_ayurveda": [
+        "vata_alto",
+        "kapha_retenido",
+        "pitta_alto"
+      ],
+      "precaucion": "Derivar a nutricion o medicina si hay sintomas persistentes."
+    },
+    "rinones": {
+      "simbolismo": "Relacion, miedo, equilibrio, recepcion y filtrado emocional.",
+      "indicadores": [
+        "venus_tenso",
+        "casa_7_activa",
+        "miedo_abandono"
+      ],
+      "sombras_asociadas": [
+        "abandono_vincular",
+        "dar_para_ser_amado"
+      ],
+      "frecuencias": [
+        "432hz",
+        "coherencia_cardiaca"
+      ],
+      "soporte_ayurveda": [
+        "vata_alto"
+      ],
+      "precaucion": "Cuidado con hierbas diureticas si hay condicion renal o tratamiento medico."
+    },
+    "higado": {
+      "simbolismo": "Fuego, direccion, frustracion, exceso, expansion contenida.",
+      "indicadores": [
+        "marte_fuerte",
+        "jupiter_fuerte",
+        "fuego_exceso",
+        "pitta_alto"
+      ],
+      "sombras_asociadas": [
+        "ira_no_integrada",
+        "urgencia",
+        "sobreexigencia"
+      ],
+      "frecuencias": [
+        "alpha_8_10hz",
+        "sonidos_naturales"
+      ],
+      "soporte_ayurveda": [
+        "pitta_alto"
+      ],
+      "precaucion": "Evitar recomendaciones herbales hepaticas si hay medicacion sin supervision."
+    },
+    "piel": {
+      "simbolismo": "Limite, frontera, contacto, separacion entre yo y mundo.",
+      "indicadores": [
+        "saturno_fuerte",
+        "venus_tenso",
+        "limites_difusos"
+      ],
+      "sombras_asociadas": [
+        "control_emocional",
+        "limites_difusos"
+      ],
+      "frecuencias": [
+        "136hz",
+        "432hz"
+      ],
+      "soporte_ayurveda": [
+        "vata_alto",
+        "pitta_alto"
+      ],
+      "precaucion": "Observar irritacion como simbolo y tambien como posible condicion medica."
+    },
+    "reproductivo": {
+      "simbolismo": "Creacion, intimidad, deseo, poder profundo, memoria transgeneracional.",
+      "indicadores": [
+        "pluton_fuerte",
+        "casa_8_activa",
+        "escorpio_dominante"
+      ],
+      "sombras_asociadas": [
+        "control",
+        "miedo_a_fusion",
+        "trauma_intimo"
+      ],
+      "frecuencias": [
+        "theta_suave",
+        "136hz",
+        "cierre_con_arraigo"
+      ],
+      "soporte_ayurveda": [
+        "vata_alto",
+        "kapha_retenido"
+      ],
+      "precaucion": "No abrir trauma sexual sin formacion y contencion adecuada."
+    },
+    "colon": {
+      "simbolismo": "Soltar, eliminar, liberar residuos emocionales.",
+      "indicadores": [
+        "pluton_fuerte",
+        "control_emocional",
+        "tierra_exceso"
+      ],
+      "sombras_asociadas": [
+        "retencion",
+        "control",
+        "resistencia_a_soltar"
+      ],
+      "frecuencias": [
+        "136hz",
+        "respiracion_lenta"
+      ],
+      "soporte_ayurveda": [
+        "vata_alto",
+        "kapha_retenido"
+      ],
+      "precaucion": "No sugerir laxantes o purgas; solo soporte alimentario general."
+    }
+  },
+  "cristalizaciones": {
+    "retencion_afectiva": {
+      "nombre": "Retencion Afectiva",
+      "descripcion": "Emocion guardada que se vuelve patron de contencion corporal.",
+      "patron_numerico": "2-4-8",
+      "dimensiones": {
+        "inframundo": 25,
+        "activacion": 10,
+        "apertura": -5
+      },
+      "organos": [
+        "pecho",
+        "diafragma",
+        "estomago"
+      ],
+      "intervencion": [
+        "coherencia_del_pecho",
+        "432hz",
+        "528hz",
+        "permiso_de_recibir",
+        "cierre_con_136hz"
+      ]
+    },
+    "bucle_mental": {
+      "nombre": "Bucle Mental",
+      "descripcion": "Pensamiento que repite el patron sin metabolizar emocion.",
+      "patron_numerico": "3-6-9",
+      "dimensiones": {
+        "activacion": 30,
+        "disociacion": 5
+      },
+      "organos": [
+        "sistema_nervioso",
+        "pulmones",
+        "garganta"
+      ],
+      "intervencion": [
+        "alpha_8_10hz",
+        "respiracion_lenta",
+        "escritura_breve",
+        "no_sobreanalizar"
+      ]
+    },
+    "implosion_materna": {
+      "nombre": "Implosion Materna",
+      "descripcion": "Campo afectivo que colapsa hacia dentro por falta de contencion primaria.",
+      "patron_numerico": "4-8-16",
+      "dimensiones": {
+        "inframundo": 35,
+        "disociacion": 10,
+        "apertura": -10
+      },
+      "organos": [
+        "pecho",
+        "estomago",
+        "diafragma",
+        "sistema_linfatico"
+      ],
+      "intervencion": [
+        "delta_suave",
+        "contencion",
+        "mano_al_pecho",
+        "no_catarsis",
+        "arraigo"
+      ]
+    },
+    "rigidez_identitaria": {
+      "nombre": "Rigidez Identitaria",
+      "descripcion": "Yo construido desde rendimiento, control o deber.",
+      "patron_numerico": "1-4-10",
+      "dimensiones": {
+        "activacion": 15,
+        "inframundo": 20
+      },
+      "organos": [
+        "columna",
+        "piel",
+        "huesos",
+        "mandibula"
+      ],
+      "intervencion": [
+        "movimiento_suave",
+        "placer_sin_meta",
+        "respiracion",
+        "frecuencias_graves"
+      ]
+    },
+    "drenaje_bloqueado": {
+      "nombre": "Drenaje Bloqueado",
+      "descripcion": "Dificultad para dejar circular emocion, descanso o necesidad propia.",
+      "patron_numerico": "6-12",
+      "dimensiones": {
+        "disociacion": 15,
+        "inframundo": 15
+      },
+      "organos": [
+        "sistema_linfatico",
+        "pies",
+        "digestivo"
+      ],
+      "intervencion": [
+        "movimiento_suave",
+        "agua_tibia",
+        "limites",
+        "sonidos_naturales"
+      ]
+    }
+  },
+  "arquetipos_entidades_simbolicas": {
+    "madre_difusa": {
+      "nombre": "La Madre Difusa",
+      "funcion": "Representa contencion inconsistente o amor no predecible.",
+      "heridas": [
+        "matriz_fragmentada"
+      ],
+      "dimension": "inframundo",
+      "intervencion": "Crear seguridad antes de preguntar por origen."
+    },
+    "retenedor": {
+      "nombre": "El Retenedor",
+      "funcion": "Acumula emocion no expresada y la comprime.",
+      "heridas": [
+        "abandono_vincular",
+        "matriz_fragmentada"
+      ],
+      "dimension": "inframundo",
+      "intervencion": "Mover poco, no romper; respiracion y coherencia."
+    },
+    "guardiana_dolor": {
+      "nombre": "La Guardiana del Dolor No Expresado",
+      "funcion": "Protege el nucleo vulnerable mediante contencion corporal.",
+      "heridas": [
+        "retencion_afectiva"
+      ],
+      "dimension": "inframundo",
+      "intervencion": "Agradecer funcion, suavizar, permiso de recibir."
+    },
+    "intelectualizadora": {
+      "nombre": "La Intelectualizadora",
+      "funcion": "Convierte emocion en analisis para mantener control.",
+      "heridas": [
+        "intelectualizacion_del_dolor"
+      ],
+      "dimension": "activacion",
+      "intervencion": "Menos explicacion, mas cuerpo."
+    },
+    "sacrificador_invisible": {
+      "nombre": "El Sacrificador Invisible",
+      "funcion": "Entrega energia sin limite y confunde amor con desgaste.",
+      "heridas": [
+        "sacrificio_difuso"
+      ],
+      "dimension": "disociacion",
+      "intervencion": "Restituir limite, cerrar fuga energetica."
+    }
+  },
+  "frecuencias": {
+    "delta_suave_2hz": {
+      "uso": "Contencion profunda sin hundir demasiado.",
+      "dimensiones": [
+        "inframundo"
+      ],
+      "duracion_sugerida_min": [
+        5,
+        12
+      ],
+      "precaucion": "Evitar en disociacion alta o colapso profundo."
+    },
+    "theta_4_7hz": {
+      "uso": "Apertura emocional suave, memoria simbolica, imaginacion segura.",
+      "dimensiones": [
+        "apertura",
+        "inframundo"
+      ],
+      "duracion_sugerida_min": [
+        5,
+        15
+      ],
+      "precaucion": "Solo si hay regulacion previa."
+    },
+    "alpha_8_10hz": {
+      "uso": "Integracion mente-cuerpo, calma y observacion.",
+      "dimensiones": [
+        "activacion",
+        "disociacion",
+        "apertura"
+      ],
+      "duracion_sugerida_min": [
+        8,
+        15
+      ],
+      "precaucion": "Generalmente seguro si volumen bajo."
+    },
+    "136hz": {
+      "uso": "Arraigo, cierre, retorno al cuerpo.",
+      "dimensiones": [
+        "inframundo",
+        "disociacion"
+      ],
+      "duracion_sugerida_min": [
+        5,
+        10
+      ],
+      "precaucion": "Usar como cierre, no como apertura emocional."
+    },
+    "432hz": {
+      "uso": "Coherencia, descanso, contencion del pecho.",
+      "dimensiones": [
+        "inframundo",
+        "activacion"
+      ],
+      "duracion_sugerida_min": [
+        10,
+        20
+      ],
+      "precaucion": "No atribuir efecto curativo celular directo."
+    },
+    "528hz": {
+      "uso": "Reorganizacion simbolica, suavizacion emocional, apertura del pecho.",
+      "dimensiones": [
+        "apertura",
+        "inframundo"
+      ],
+      "duracion_sugerida_min": [
+        8,
+        15
+      ],
+      "precaucion": "Usar como ancla contemplativa, no como tratamiento medico."
+    },
+    "900hz_sutil": {
+      "uso": "Brillo de campo, claridad, expansion ligera.",
+      "dimensiones": [
+        "apertura"
+      ],
+      "duracion_sugerida_min": [
+        1,
+        4
+      ],
+      "precaucion": "Solo como capa baja en volumen; evitar en ansiedad, hiperactivacion o sistema fragil."
+    }
+  },
+  "ayurveda_soporte": {
+    "vata_alto": {
+      "correlacion_modelo": [
+        "activacion",
+        "disociacion",
+        "aire_exceso",
+        "sistema_nervioso"
+      ],
+      "descripcion": "Exceso de movimiento, mente rapida, frio, ansiedad, irregularidad o desconexion.",
+      "tes_sugeridos": [
+        "manzanilla",
+        "melisa",
+        "lavanda suave",
+        "jengibre suave"
+      ],
+      "alimentos_favorecer": [
+        "caliente",
+        "cocido",
+        "suave",
+        "caldos",
+        "raices",
+        "avena",
+        "guisos ligeros"
+      ],
+      "alimentos_evitar_o_reducir": [
+        "cafe",
+        "azucar refinada",
+        "exceso de crudos",
+        "bebidas frias",
+        "ayunos prolongados"
+      ],
+      "precauciones": [
+        "lavanda o melisa pueden sedar en algunas personas",
+        "jengibre puede no ser adecuado en gastritis fuerte, anticoagulantes o indicacion medica especifica"
+      ]
+    },
+    "kapha_retenido": {
+      "correlacion_modelo": [
+        "inframundo",
+        "retencion_afectiva",
+        "pesadez",
+        "drenaje_bloqueado"
+      ],
+      "descripcion": "Retencion, pesadez, lentitud, acumulacion emocional o corporal.",
+      "tes_sugeridos": [
+        "jengibre",
+        "canela",
+        "curcuma",
+        "cardamomo"
+      ],
+      "alimentos_favorecer": [
+        "tibio",
+        "ligero",
+        "cocido",
+        "especias suaves",
+        "sopas ligeras"
+      ],
+      "alimentos_evitar_o_reducir": [
+        "lacteos en exceso",
+        "frio",
+        "frito",
+        "muy pesado",
+        "exceso de harinas"
+      ],
+      "precauciones": [
+        "curcuma y jengibre pueden interactuar con anticoagulantes o cirugias",
+        "canela en exceso no es adecuada para todos"
+      ]
+    },
+    "pitta_alto": {
+      "correlacion_modelo": [
+        "fuego_exceso",
+        "irritabilidad",
+        "inflamacion_simbolica",
+        "higado"
+      ],
+      "descripcion": "Calor, irritabilidad, intensidad, urgencia o sobrecalentamiento emocional.",
+      "tes_sugeridos": [
+        "menta",
+        "hinojo",
+        "rosa",
+        "manzanilla"
+      ],
+      "alimentos_favorecer": [
+        "templado",
+        "hidratante",
+        "suave",
+        "verduras cocidas",
+        "frutas no acidas"
+      ],
+      "alimentos_evitar_o_reducir": [
+        "picante excesivo",
+        "alcohol",
+        "exceso de cafe",
+        "frito",
+        "muy acido"
+      ],
+      "precauciones": [
+        "menta puede agravar reflujo en algunas personas",
+        "evitar extremos si hay tratamiento medico"
+      ]
+    }
+  },
+  "protocolos_por_distribucion": {
+    "inframundo_dominante": {
+      "condicion": "inframundo >= 35 && apertura < 30",
+      "lectura": "Sistema en retencion o implosion. Priorizar seguridad y coherencia. No abrir trauma profundo.",
+      "secuencia": [
+        "contencion",
+        "432hz",
+        "mano_al_pecho",
+        "micro_apertura_opcional",
+        "136hz"
+      ],
+      "hierbas_eje": [
+        "vata_alto",
+        "kapha_retenido"
+      ],
+      "evitar": [
+        "catarsis",
+        "frecuencias_altas",
+        "preguntas_invasivas",
+        "delta_extremo"
+      ]
+    },
+    "activacion_dominante": {
+      "condicion": "activacion >= 35",
+      "lectura": "Sistema en alerta mental o defensa simpatica. Priorizar exhalacion, ritmo y cuerpo.",
+      "secuencia": [
+        "exhalacion_larga",
+        "alpha_8_10hz",
+        "432hz",
+        "orientacion_corporal"
+      ],
+      "hierbas_eje": [
+        "vata_alto",
+        "pitta_alto"
+      ],
+      "evitar": [
+        "900hz",
+        "estimulos_rapidos",
+        "interpretacion_excesiva"
+      ]
+    },
+    "disociacion_dominante": {
+      "condicion": "disociacion >= 30",
+      "lectura": "Sistema desconectado o en colapso. Priorizar presencia sensorial suave.",
+      "secuencia": [
+        "orientacion_al_espacio",
+        "tacto_consciente",
+        "alpha_suave",
+        "136hz_corto"
+      ],
+      "hierbas_eje": [
+        "vata_alto"
+      ],
+      "evitar": [
+        "delta_profundo",
+        "silencio_prolongado",
+        "exploracion_del_inframundo"
+      ]
+    },
+    "apertura_suficiente": {
+      "condicion": "apertura >= 35 && inframundo < 40",
+      "lectura": "Hay capacidad de procesar. Abrir con regulacion previa y cierre obligatorio.",
+      "secuencia": [
+        "regulacion_breve",
+        "theta_suave",
+        "palabra_consciente",
+        "integracion_corporal",
+        "136hz"
+      ],
+      "hierbas_eje": [
+        "pitta_alto",
+        "vata_alto"
+      ],
+      "evitar": [
+        "sobreexploracion",
+        "dejar_proceso_abierto"
+      ]
+    }
+  },
+  "reglas_astrologico_alquimicas": [
+    {
+      "id": "casa_4_cargada",
+      "si": {
+        "tipo": "casa",
+        "casa": 4,
+        "min_planetas": 2
+      },
+      "entonces": {
+        "heridas": [
+          "matriz_fragmentada"
+        ],
+        "dimensiones": {
+          "inframundo": 25,
+          "disociacion": 10
+        },
+        "organos": [
+          "pecho",
+          "diafragma",
+          "estomago"
+        ],
+        "sombras": [
+          "hipervigilancia",
+          "control_emocional"
+        ],
+        "cristalizaciones": [
+          "implosion_materna"
+        ]
+      }
+    },
+    {
+      "id": "saturno_casa_4",
+      "si": {
+        "planeta": "Saturno",
+        "casa": 4
+      },
+      "entonces": {
+        "heridas": [
+          "matriz_fragmentada"
+        ],
+        "dimensiones": {
+          "inframundo": 20,
+          "disociacion": 8,
+          "apertura": -5
+        },
+        "organos": [
+          "pecho",
+          "piel",
+          "huesos",
+          "diafragma"
+        ],
+        "sombras": [
+          "control_emocional",
+          "miedo_a_vulnerabilidad"
+        ],
+        "cristalizaciones": [
+          "rigidez_identitaria",
+          "implosion_materna"
+        ]
+      }
+    },
+    {
+      "id": "neptuno_casa_4",
+      "si": {
+        "planeta": "Neptuno",
+        "casa": 4
+      },
+      "entonces": {
+        "heridas": [
+          "matriz_fragmentada",
+          "sacrificio_difuso"
+        ],
+        "dimensiones": {
+          "inframundo": 15,
+          "disociacion": 15
+        },
+        "organos": [
+          "sistema_linfatico",
+          "pecho",
+          "pies"
+        ],
+        "sombras": [
+          "limites_difusos",
+          "desconexion_del_sentir"
+        ],
+        "cristalizaciones": [
+          "drenaje_bloqueado"
+        ]
+      }
+    },
+    {
+      "id": "urano_casa_4",
+      "si": {
+        "planeta": "Urano",
+        "casa": 4
+      },
+      "entonces": {
+        "heridas": [
+          "matriz_fragmentada"
+        ],
+        "dimensiones": {
+          "activacion": 15,
+          "disociacion": 10,
+          "inframundo": 10
+        },
+        "organos": [
+          "sistema_nervioso",
+          "pecho"
+        ],
+        "sombras": [
+          "hipervigilancia"
+        ],
+        "cristalizaciones": [
+          "implosion_materna"
+        ]
+      }
+    },
+    {
+      "id": "aire_dominante",
+      "si": {
+        "elemento_dominante": "aire"
+      },
+      "entonces": {
+        "heridas": [
+          "intelectualizacion_del_dolor"
+        ],
+        "dimensiones": {
+          "activacion": 25,
+          "disociacion": 5
+        },
+        "organos": [
+          "sistema_nervioso",
+          "pulmones",
+          "garganta"
+        ],
+        "sombras": [
+          "intelectualizacion",
+          "desconexion_del_sentir"
+        ],
+        "cristalizaciones": [
+          "bucle_mental"
+        ]
+      }
+    },
+    {
+      "id": "agua_baja",
+      "si": {
+        "elemento_bajo": "agua"
+      },
+      "entonces": {
+        "heridas": [
+          "matriz_fragmentada",
+          "abandono_vincular"
+        ],
+        "dimensiones": {
+          "inframundo": 15,
+          "disociacion": 10,
+          "apertura": -5
+        },
+        "organos": [
+          "pecho",
+          "rinones",
+          "sistema_linfatico"
+        ],
+        "sombras": [
+          "retencion_afectiva",
+          "miedo_a_vulnerabilidad"
+        ],
+        "cristalizaciones": [
+          "retencion_afectiva"
+        ]
+      }
+    },
+    {
+      "id": "geminis_dominante",
+      "si": {
+        "signo_dominante": "Geminis"
+      },
+      "entonces": {
+        "heridas": [
+          "intelectualizacion_del_dolor"
+        ],
+        "dimensiones": {
+          "activacion": 20
+        },
+        "organos": [
+          "pulmones",
+          "sistema_nervioso",
+          "garganta"
+        ],
+        "sombras": [
+          "intelectualizacion"
+        ],
+        "cristalizaciones": [
+          "bucle_mental"
+        ]
+      }
+    },
+    {
+      "id": "mercurio_retrogrado",
+      "si": {
+        "planeta": "Mercurio",
+        "retrogrado": true
+      },
+      "entonces": {
+        "heridas": [
+          "intelectualizacion_del_dolor"
+        ],
+        "dimensiones": {
+          "activacion": 10,
+          "disociacion": 5
+        },
+        "organos": [
+          "sistema_nervioso",
+          "garganta"
+        ],
+        "sombras": [
+          "racionalizacion",
+          "expresion_contenida"
+        ],
+        "cristalizaciones": [
+          "bucle_mental"
+        ]
+      }
+    },
+    {
+      "id": "venus_retrogrado",
+      "si": {
+        "planeta": "Venus",
+        "retrogrado": true
+      },
+      "entonces": {
+        "heridas": [
+          "abandono_vincular",
+          "valor_condicionado"
+        ],
+        "dimensiones": {
+          "inframundo": 10,
+          "activacion": 10,
+          "apertura": -5
+        },
+        "organos": [
+          "pecho",
+          "rinones",
+          "garganta",
+          "piel"
+        ],
+        "sombras": [
+          "dar_para_ser_amado",
+          "dificultad_para_recibir"
+        ],
+        "cristalizaciones": [
+          "retencion_afectiva"
+        ]
+      }
+    },
+    {
+      "id": "luna_casa_7_8",
+      "si": {
+        "planeta": "Luna",
+        "casas_posibles": [
+          7,
+          8
+        ]
+      },
+      "entonces": {
+        "heridas": [
+          "abandono_vincular"
+        ],
+        "dimensiones": {
+          "inframundo": 15,
+          "activacion": 15,
+          "apertura": -5
+        },
+        "organos": [
+          "pecho",
+          "rinones",
+          "estomago"
+        ],
+        "sombras": [
+          "apego_ansioso",
+          "confusion_entre_intensidad_y_amor"
+        ],
+        "cristalizaciones": [
+          "nudo_vincular",
+          "retencion_afectiva"
+        ]
+      }
+    },
+    {
+      "id": "marte_piscis_casa_6_7",
+      "si": {
+        "planeta": "Marte",
+        "signo": "Piscis",
+        "casas_posibles": [
+          6,
+          7
+        ]
+      },
+      "entonces": {
+        "heridas": [
+          "sacrificio_difuso"
+        ],
+        "dimensiones": {
+          "disociacion": 15,
+          "activacion": 10,
+          "inframundo": 5
+        },
+        "organos": [
+          "digestivo",
+          "sistema_linfatico",
+          "pies"
+        ],
+        "sombras": [
+          "sacrificio",
+          "limites_difusos"
+        ],
+        "cristalizaciones": [
+          "drenaje_bloqueado"
+        ]
+      }
+    },
+    {
+      "id": "pluton_casa_2_3",
+      "si": {
+        "planeta": "Pluton",
+        "casas_posibles": [
+          2,
+          3
+        ]
+      },
+      "entonces": {
+        "heridas": [
+          "valor_condicionado",
+          "intelectualizacion_del_dolor"
+        ],
+        "dimensiones": {
+          "inframundo": 20,
+          "activacion": 10
+        },
+        "organos": [
+          "garganta",
+          "colon",
+          "tejidos_profundos",
+          "sistema_nervioso"
+        ],
+        "sombras": [
+          "control",
+          "retencion_afectiva",
+          "palabra_intensa"
+        ],
+        "cristalizaciones": [
+          "retencion_afectiva",
+          "bucle_mental"
+        ]
+      }
+    },
+    {
+      "id": "sol_casa_10",
+      "si": {
+        "planeta": "Sol",
+        "casa": 10
+      },
+      "entonces": {
+        "heridas": [
+          "valor_condicionado"
+        ],
+        "dimensiones": {
+          "activacion": 10,
+          "apertura": 5
+        },
+        "organos": [
+          "columna",
+          "sistema_nervioso"
+        ],
+        "sombras": [
+          "rendimiento_como_valor",
+          "autoexigencia"
+        ],
+        "cristalizaciones": [
+          "rigidez_identitaria"
+        ]
+      }
+    },
+    {
+      "id": "jupiter_tauro_casa_9",
+      "si": {
+        "planeta": "Jupiter",
+        "signo": "Tauro",
+        "casa": 9
+      },
+      "entonces": {
+        "recursos": [
+          "cuerpo_como_medicina",
+          "espiritualidad_encarnada",
+          "placer_simple",
+          "ritmo_lento"
+        ],
+        "dimensiones": {
+          "apertura": 20,
+          "inframundo": -5
+        },
+        "organos": [
+          "higado",
+          "garganta",
+          "cuerpo_sensorial"
+        ],
+        "intervenciones_favorables": [
+          "arraigo",
+          "alimentos_tibios",
+          "ritual_sensorial",
+          "136hz"
+        ]
+      }
+    }
+  ],
+  "formato_entrada_carta": {
+    "paciente": "Nombre",
+    "fecha_nacimiento": "YYYY-MM-DD",
+    "hora_nacimiento": "HH:mm",
+    "lugar_nacimiento": "Ciudad, Estado, Pais",
+    "elementos_orden": [
+      "aire",
+      "tierra",
+      "fuego",
+      "agua"
+    ],
+    "polaridad": "positiva|negativa|mixta",
+    "posiciones": [
+      {
+        "planeta": "Sol",
+        "signo": "Geminis",
+        "grado": 18.18,
+        "retrogrado": false,
+        "casa": 10,
+        "casa_transicion": null
+      }
+    ],
+    "casas_vacias": [
+      1,
+      5,
+      11,
+      12
+    ],
+    "observaciones_intuitivas": []
+  },
+  "algoritmo_sugerido": {
+    "paso_1": "Inicializar dimensiones en 0: inframundo, activacion, disociacion, apertura.",
+    "paso_2": "Leer carta natal y activar reglas_astrologico_alquimicas.",
+    "paso_3": "Sumar pesos dimensionales de reglas activadas.",
+    "paso_4": "Recolectar heridas, sombras, organos, cristalizaciones y arquetipos asociados.",
+    "paso_5": "Aplicar recursos: si una regla aporta apertura o reduce inframundo, ajustar suavemente.",
+    "paso_6": "Normalizar porcentajes a 100, evitando valores negativos.",
+    "paso_7": "Elegir protocolo segun distribucion dominante y apertura disponible.",
+    "paso_8": "Generar reporte editable por la alquimista; la intuicion puede corregir el mapa."
+  }
+}

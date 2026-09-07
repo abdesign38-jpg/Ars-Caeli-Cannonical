@@ -1,0 +1,154 @@
+{
+  "version": "0.3.0",
+  "status": "experimental_noncanonical",
+  "epistemic_boundary": {
+    "canonical": "Los documentos Markdown/JSON del repositorio Ars Caeli son la fuente documental.",
+    "experimental": "Las traducciones a UI, audio, métricas y visualización son operacionales y experimentales.",
+    "symbolic": "Las correspondencias de frecuencia son internas/simbólicas del sistema y no deben presentarse como hechos médicos.",
+    "atlas": "ATLAS registra observaciones, parámetros e interpretaciones; no decide causalidad."
+  },
+  "repository": {
+    "raw_base": "https://raw.githubusercontent.com/abdesign38-jpg/Ars-Caeli-Cannonical/main/",
+    "sources": [
+      "04_PHYSICS/ACSPEC-100-Tiempo.md",
+      "04_PHYSICS/ACSPEC-101-Vacío.md",
+      "04_PHYSICS/ACSPEC-102-Entropía.md",
+      "04_PHYSICS/ACSPEC-103-Horizonte.md",
+      "04_PHYSICS/ACSPEC-105-Resonancia.md",
+      "04_PHYSICS/ACSPEC-106-Presencia.md",
+      "04_PHYSICS/ACSPEC-109-Elasticidad_Cognitiva.md",
+      "04_PHYSICS/ACSPEC-110-Cristalización.md",
+      "04_PHYSICS/ACSPEC-111-Gradiente_Atencional.md",
+      "04_PHYSICS/ACSPEC-114-Respiración_Ambiental.md",
+      "09_ATLAS/schemas/session.schema.json"
+    ]
+  },
+  "dimensions": {
+    "inframundo": {
+      "label": "Inframundo",
+      "action": "Reconocer",
+      "color": "#a88cff"
+    },
+    "activacion": {
+      "label": "Activación",
+      "action": "Movilizar",
+      "color": "#ef8b66"
+    },
+    "disociacion": {
+      "label": "Disociación",
+      "action": "Reorientar",
+      "color": "#71d4f4"
+    },
+    "apertura": {
+      "label": "Apertura",
+      "action": "Integrar",
+      "color": "#e0bc73"
+    }
+  },
+  "presets": {
+    "descenso": {
+      "label": "Descenso",
+      "dimensions": {
+        "inframundo": 72,
+        "activacion": 43,
+        "disociacion": 26,
+        "apertura": 28
+      },
+      "field": {
+        "pulse": 0.62,
+        "void": 62,
+        "entropy": 26,
+        "horizon": 36,
+        "resonance": 50,
+        "presence": 40,
+        "crystallization": 54,
+        "breath": 0.105
+      }
+    },
+    "sesion": {
+      "label": "Sesión",
+      "dimensions": {
+        "inframundo": 53,
+        "activacion": 31,
+        "disociacion": 18,
+        "apertura": 55
+      },
+      "field": {
+        "pulse": 0.48,
+        "void": 69,
+        "entropy": 14,
+        "horizon": 52,
+        "resonance": 44,
+        "presence": 50,
+        "crystallization": 68,
+        "breath": 0.088
+      }
+    },
+    "retorno": {
+      "label": "Retorno",
+      "dimensions": {
+        "inframundo": 29,
+        "activacion": 20,
+        "disociacion": 10,
+        "apertura": 80
+      },
+      "field": {
+        "pulse": 0.38,
+        "void": 44,
+        "entropy": 8,
+        "horizon": 67,
+        "resonance": 32,
+        "presence": 60,
+        "crystallization": 65,
+        "breath": 0.073
+      }
+    }
+  },
+  "symbolic_frequencies": [
+    {
+      "hz": 174,
+      "label": "Umbral corporal",
+      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+    },
+    {
+      "hz": 285,
+      "label": "Restitución de estructura",
+      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+    },
+    {
+      "hz": 396,
+      "label": "Liberación / descenso de carga",
+      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+    },
+    {
+      "hz": 417,
+      "label": "Cambio de patrón",
+      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+    },
+    {
+      "hz": 528,
+      "label": "Coherencia / retorno",
+      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+    },
+    {
+      "hz": 639,
+      "label": "Vínculo / integración relacional",
+      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+    },
+    {
+      "hz": 963,
+      "label": "Apertura / eje superior",
+      "system_note": "Correspondencia simbólica interna; sin afirmación médica."
+    }
+  ],
+  "audio": {
+    "master_default": 0.035,
+    "master_cap": 0.1,
+    "fade_seconds": 0.9,
+    "notes": [
+      "Iniciar a volumen bajo.",
+      "Detener ante incomodidad.",
+      "No usar como sustituto de tratamiento médico o psicológico."
+    ]
+  }
+}

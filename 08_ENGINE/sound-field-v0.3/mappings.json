@@ -1,5 +1,5 @@
 {
-  "version": "0.3.4",
+  "version": "0.3.4.1",
   "status": "experimental_noncanonical",
   "epistemic_boundary": {
     "canonical": "Ars Caeli repository Markdown/JSON documents are the documentary source.",
@@ -143,7 +143,7 @@
     "resonance": {"id": "ACSPEC-105", "audio": "delay feedback capped at 0.55", "visual": "persistence rings"},
     "time": {"id": "ACSPEC-100", "field_key": "pulse", "audio_mapping": "none in v0.3.4; audio protocol modulation is independent", "visual_mapping": "field animation cadence", "status": "experimental_noncanonical"},
     "void": {"id": "ACSPEC-101", "audio": "delay spacing", "visual": "field sparsity"},
-    "entropy": {"id": "ACSPEC-102", "audio": "none in v0.3.2", "visual": "deterministic irregularity"},
+    "entropy": {"id": "ACSPEC-102", "audio": "none in v0.3.4.1; no reproducible audio mapping is currently defined.", "visual": "deterministic irregularity"},
     "horizon": {"id": "ACSPEC-103", "audio": "stereo width", "visual": "torus horizontal spread"},
     "crystallization": {"id": "ACSPEC-110", "audio": "filter Q", "visual": "rigidity attenuates entropy"},
     "breath": {"id": "ACSPEC-114", "audio": "slow envelope <=4%", "visual": "global expansion/contraction"}

@@ -42,7 +42,7 @@
     resonancia:{id:"ACSPEC-105",definition:"Persistencia de un patrón en la atención.",fieldKey:"resonance",min:0,max:100,step:1,unit:"%",audio:"delay feedback, capped at 0.55.",visual:"persistence / echo rings."},
     tiempo:{id:"ACSPEC-100",definition:"Relación entre el tiempo físico y el tiempo percibido dentro del ecosistema cognitivo.",fieldKey:"pulse",min:.1,max:12,step:.1,unit:"rate",audio:"None in v0.3.4. Audio protocol modulation is controlled separately in Signal sources.",visual:"Field animation cadence / temporal motion.",status:"experimental_noncanonical"},
     vacio:{id:"ACSPEC-101",definition:"Estructura de baja información utilizada para modular expectativa.",fieldKey:"void",min:0,max:100,step:1,unit:"%",audio:"delay time / temporal spacing.",visual:"field sparsity / spacing."},
-    entropia:{id:"ACSPEC-102",definition:"Imprevisibilidad controlada del entorno.",fieldKey:"entropy",min:0,max:100,step:1,unit:"%",audio:"none in v0.3.2; reserved until a reproducible audio rule exists.",visual:"deterministic geometric irregularity; no random audio jitter."},
+    entropia:{id:"ACSPEC-102",definition:"Imprevisibilidad controlada del entorno.",fieldKey:"entropy",min:0,max:100,step:1,unit:"%",audio:"none in v0.3.4.1; no reproducible audio mapping is currently defined.",visual:"deterministic geometric irregularity; no random audio jitter."},
     horizonte:{id:"ACSPEC-103",definition:"Profundidad espacial percibida del ecosistema.",fieldKey:"horizon",min:0,max:100,step:1,unit:"%",audio:"stereo width.",visual:"torus horizontal depth/spread."},
     cristalizacion:{id:"ACSPEC-110",definition:"Estabilización prolongada de una interpretación.",fieldKey:"crystallization",min:0,max:100,step:1,unit:"%",audio:"filter Q.",visual:"geometric rigidity; higher values reduce entropy deformation."},
     respiracion:{id:"ACSPEC-114",definition:"Oscilación lenta de la energía perceptiva global.",fieldKey:"breath",min:.03,max:.15,step:.001,unit:"Hz",audio:"slow global gain envelope with depth capped at 4%.",visual:"slow global expansion/contraction."}
@@ -98,7 +98,9 @@
     oscA:null, oscB:null, gainA:null, gainB:null,
     delay:null, feedback:null, filter:null, panA:null, panB:null,
     lfo:null, lfoGain:null, breathOsc:null, breathGain:null,
+    modulationTransitionUntil:0,
     signal:cloneSignal(defaultSignal),
+    uiCarrierLibrary:"corpus_wound",
     phaseSignalMode:"LOCKED",
     phaseSignalPlan:Object.fromEntries(PHASE_ORDER.map(phase=>[phase,{approved:true,signal:cloneSignal(defaultSignal),status:"READY"}])),
     draftPlan:null,
@@ -178,38 +180,42 @@
   }
 
   function renderMethodGuidance(){
-    const d=dimensions(),matches=Object.entries(methodProtocols).filter(([,protocol])=>protocol.condition(d));
-    const root=$("#methodMatches");if(root)root.innerHTML=matches.length?matches.map(([key,protocol])=>`<article><strong>✓ ${key}</strong><small>${protocol.reading}</small><small>Sequence: ${protocol.sequence.join(" · ")}</small><small>Avoid: ${protocol.avoid.join(" · ")}</small><button data-method="${key}">Use suggestion</button></article>`).join(""):"<span>— No documented match</span>";
-    root?.querySelectorAll("button[data-method]").forEach(button=>button.addEventListener("click",()=>useMethodSuggestion(button.dataset.method)));
+    const d=dimensions(),matches=methodMatchesForDimensions(d);
+    const root=$("#methodMatches");if(root)root.innerHTML=`<small>CURRENT STATE MATCHES</small>`+(matches.length?matches.map(([key,protocol])=>`<article><strong>✓ ${key}</strong><small>${protocol.reading}</small><small>Sequence: ${protocol.sequence.join(" · ")}</small><small>Avoid: ${protocol.avoid.join(" · ")}</small></article>`).join(""):"<span>— No documented match</span>");
     const caution=$("#methodCautions");if(caution)caution.textContent=[d.disociacion>=30?"Delta 2 Hz: avoid with high dissociation / deep collapse per Method Base.":"",d.activacion>=70?"900 Hz subtle: avoid with hyperactivation / fragile system per Method Base.":"",d.apertura>=35?"Theta / opening: use prior regulation.":""].filter(Boolean).join(" ")||"No automatic method advisory.";
   }
-  function useMethodSuggestion(key){
+  function methodMatchesForDimensions(d){return Object.entries(methodProtocols).filter(([,protocol])=>protocol.condition(d))}
+  function methodMatchesForPhase(phase){return methodMatchesForDimensions(phaseTargets[phase].dimensions)}
+  function useMethodSuggestion(key,phase=S.phase){
     const protocol=methodProtocols[key];if(!protocol)return;
     const carrier=protocol.sequence.includes("432 Hz")?methodCarriers.find(item=>item.source_key==="method_432"):protocol.sequence.includes("136 Hz")?methodCarriers.find(item=>item.source_key==="method_136"):null;
     const modulation=protocol.sequence.some(item=>item.includes("alpha"))?modulationOptions.find(item=>item.key==="alpha_8"):protocol.sequence.some(item=>item.includes("theta"))?modulationOptions.find(item=>item.key==="theta_6"):null;
-    const signal=cloneSignal(S.signal);if(carrier)signal.carrier={source:"method_base",key:carrier.source_key,hz:carrier.value};if(modulation)signal.modulation={source:modulation.source,key:modulation.key,mode:modulation.mode,hz:modulation.hz};
-    const phase=S.phase;S.phaseSignalPlan[phase]={approved:true,signal,status:"APPROVED BY USER"};S.planEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase,from:S.signal,to:signal,mode:S.phaseSignalMode,source:key});
-    if(S.phaseSignalMode==="METHOD GUIDED")transitionSignalTo(signal,{phase,source:"method_guided_user"});renderPhaseSignalPlan();updateReadouts();
+    const signal=cloneSignal((S.draftPlan?.[phase]||S.phaseSignalPlan[phase]).signal);if(carrier)signal.carrier={source:"method_base",key:carrier.source_key,hz:carrier.value};if(modulation)signal.modulation={source:modulation.source,key:modulation.key,mode:modulation.mode,hz:modulation.hz};
+    if(!S.draftPlan)S.draftPlan=structuredClone(S.phaseSignalPlan);
+    const before=cloneSignal(S.draftPlan[phase].signal);S.draftPlan[phase]={approved:false,signal,status:"DRAFT"};S.planEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase,from:before,to:signal,mode:S.phaseSignalMode,source:key});
+    renderPhaseSignalPlan();
   }
   function renderPhaseSignalPlan(){
     $("#planBadge").textContent=S.phaseSignalMode==="LOCKED"?"LOCKED · SAME SIGNAL THROUGH ALL PHASES":S.phaseSignalMode;
     const phaseIndex=PHASE_ORDER.indexOf(S.phase),next=PHASE_ORDER[Math.min(phaseIndex+1,PHASE_ORDER.length-1)];
-    const currentSignal=S.phaseSignalPlan[S.phase].signal,nextSignal=S.phaseSignalPlan[next].signal;
+    const plan=S.draftPlan&&S.phaseSignalMode!=="LOCKED"?S.draftPlan:S.phaseSignalPlan;
+    const currentSignal=plan[S.phase].signal,nextSignal=plan[next].signal;
     $("#planCurrentNext").innerHTML=`CURRENT · ${phaseLabels[S.phase]} · ${currentSignal.carrier.hz} Hz · ${currentSignal.modulation.source} ${currentSignal.modulation.hz} Hz<br>NEXT · ${phaseLabels[next]} · ${nextSignal.carrier.hz} Hz · ${nextSignal.modulation.source} ${nextSignal.modulation.hz} Hz`;
     PHASE_ORDER.forEach(phase=>{
       const target=$("#plan"+phase.charAt(0).toUpperCase()+phase.slice(1));
-      const row=S.phaseSignalPlan[phase],signal=row.signal;
+      const row=plan[phase],signal=row.signal;
       if(!target)return;
       if(S.phaseSignalMode==="LOCKED")target.textContent=`${signal.carrier.hz} Hz · ${signal.modulation.mode} ${signal.modulation.hz} Hz · LOCKED`;
-      else target.innerHTML=`<select data-plan-carrier="${phase}">${[...methodCarriers,...symbolicFreqs.map(([value,label])=>({value,label,source_layer:"corpus_wound",source_key:"wound_"+value}))].map(item=>`<option value="${item.source_key}" ${item.source_key===signal.carrier.key?"selected":""}>${item.value} Hz · ${item.source_key}</option>`).join("")}</select><select data-plan-modulation="${phase}">${modulationOptions.map(item=>`<option value="${item.key}" ${item.key===signal.modulation.key?"selected":""}>${item.label}</option>`).join("")}</select><button data-plan-apply="${phase}">${phase===S.phase?"Apply now":"Use next time"}</button><small>${row.status}</small>`;
+      else target.innerHTML=`<select data-plan-carrier="${phase}">${[...methodCarriers,...symbolicFreqs.map(([value,label])=>({value,label,source_layer:"corpus_wound",source_key:"wound_"+value}))].map(item=>`<option value="${item.source_key}" ${item.source_key===signal.carrier.key?"selected":""}>${item.value} Hz · ${item.source_key}</option>`).join("")}</select><select data-plan-modulation="${phase}">${[{key:"manual",label:"Manual"},...modulationOptions].map(item=>`<option value="${item.key}" ${item.key===signal.modulation.key?"selected":""}>${item.label}</option>`).join("")}</select><button data-plan-apply="${phase}">${phase===S.phase?"Apply now":"Use next time"}</button><small>${row.status}</small>${S.phaseSignalMode==="METHOD GUIDED"?`<div class="phase-target-matches">PHASE TARGET MATCHES ${methodMatchesForPhase(phase).map(([key])=>`<button data-method="${key}" data-method-phase="${phase}">${key}</button>`).join("")||"— none"}</div>`:""}`;
     });
     $$("[data-plan-carrier]").forEach(select=>select.addEventListener("change",event=>editPlanCarrier(event.target.dataset.planCarrier,event.target.value)));
     $$("[data-plan-modulation]").forEach(select=>select.addEventListener("change",event=>editPlanModulation(event.target.dataset.planModulation,event.target.value)));
     $$("[data-plan-apply]").forEach(button=>button.addEventListener("click",()=>applyPlanRow(button.dataset.planApply)));
+    $$('[data-method-phase]').forEach(button=>button.addEventListener("click",()=>useMethodSuggestion(button.dataset.method,button.dataset.methodPhase)));
   }
-  function editPlanCarrier(phase,key){const item=[...methodCarriers,...symbolicFreqs.map(([value,label])=>({value,label,source_layer:"corpus_wound",source_key:"wound_"+value}))].find(candidate=>candidate.source_key===key);if(!item)return;const before=cloneSignal(S.phaseSignalPlan[phase].signal);S.phaseSignalPlan[phase].signal.carrier={source:item.source_layer,key:item.source_key,hz:item.value};S.phaseSignalPlan[phase].status="READY";S.planEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase,from:before,to:S.phaseSignalPlan[phase].signal,mode:S.phaseSignalMode,source:"plan_edit"});renderPhaseSignalPlan()}
-  function editPlanModulation(phase,key){const item=modulationOptions.find(candidate=>candidate.key===key);if(!item)return;const before=cloneSignal(S.phaseSignalPlan[phase].signal);S.phaseSignalPlan[phase].signal.modulation={source:item.source,key:item.key,mode:item.mode,hz:item.hz};S.phaseSignalPlan[phase].status="READY";S.planEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase,from:before,to:S.phaseSignalPlan[phase].signal,mode:S.phaseSignalMode,source:"plan_edit"});renderPhaseSignalPlan()}
-  function applyPlanRow(phase){const planned=plannedSignalForPhase(phase);if(!planned)return;S.phaseSignalPlan[phase].approved=true;S.phaseSignalPlan[phase].status="APPROVED BY USER";if(phase===S.phase)transitionSignalTo(planned,{phase,source:"plan_apply_now"});renderPhaseSignalPlan()}
+  function editPlanCarrier(phase,key){const item=[...methodCarriers,...symbolicFreqs.map(([value,label])=>({value,label,source_layer:"corpus_wound",source_key:"wound_"+value}))].find(candidate=>candidate.source_key===key);if(!item)return;if(!S.draftPlan)S.draftPlan=structuredClone(S.phaseSignalPlan);const before=cloneSignal(S.draftPlan[phase].signal);S.draftPlan[phase].signal.carrier={source:item.source_layer,key:item.source_key,hz:item.value};S.draftPlan[phase].approved=false;S.draftPlan[phase].status="DRAFT";S.planEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase,from:before,to:S.draftPlan[phase].signal,mode:S.phaseSignalMode,source:"plan_edit"});renderPhaseSignalPlan()}
+  function editPlanModulation(phase,key){const item=key==="manual"?{key:"manual",source:"manual",mode:"manual",hz:Number($("#manualModulation").value)}:modulationOptions.find(candidate=>candidate.key===key);if(!item)return;if(!S.draftPlan)S.draftPlan=structuredClone(S.phaseSignalPlan);const before=cloneSignal(S.draftPlan[phase].signal);S.draftPlan[phase].signal.modulation={source:item.source,key:item.key,mode:item.mode,hz:item.hz};S.draftPlan[phase].approved=false;S.draftPlan[phase].status="DRAFT";S.planEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase,from:before,to:S.draftPlan[phase].signal,mode:S.phaseSignalMode,source:"plan_edit"});renderPhaseSignalPlan()}
+  function applyPlanRow(phase){if(!S.draftPlan)return;const committed=structuredClone(S.draftPlan[phase]);committed.approved=true;committed.status="READY";S.phaseSignalPlan[phase]=committed;S.draftPlan[phase]=structuredClone(committed);if(phase===S.phase)transitionSignalTo(committed.signal,{phase,source:"plan_apply_now"});renderPhaseSignalPlan()}
   function updateLockedPlan(){
     if(S.phaseSignalMode!=="LOCKED")return;
     PHASE_ORDER.forEach(phase=>{S.phaseSignalPlan[phase]={approved:true,signal:cloneSignal(S.signal),status:"READY"}});
@@ -265,25 +271,33 @@
   }
   function createAudioBank(ctx,signal,gainValue=0){
     const bank={gain:ctx.createGain(),oscA:ctx.createOscillator(),oscB:ctx.createOscillator(),gainA:ctx.createGain(),gainB:ctx.createGain(),panA:ctx.createStereoPanner(),panB:ctx.createStereoPanner()};
+    bank.signal=cloneSignal(signal);
     bank.gain.gain.value=gainValue;bank.oscA.type="sine";bank.oscB.type="triangle";
     bank.oscA.connect(bank.gainA).connect(bank.panA).connect(bank.gain);bank.oscB.connect(bank.gainB).connect(bank.panB).connect(bank.gain);bank.gain.connect(S.filter);
     bank.oscA.frequency.value=signal.carrier.hz;bank.oscB.frequency.value=signal.carrier.hz*2;
     bank.oscA.start();bank.oscB.start();return bank;
   }
+  function activeAudioBank(){return S.banks?.[S.activeBank]??null}
+  function disposeBank(bank,when=0){
+    if(!bank)return;
+    const stop=()=>{for(const osc of [bank.oscA,bank.oscB]){try{osc.stop()}catch(_){}try{osc.disconnect()}catch(_){}}for(const node of [bank.gainA,bank.gainB,bank.panA,bank.panB,bank.gain]){try{node.disconnect()}catch(_){}}};
+    if(when>0)setTimeout(stop,when);else stop();
+  }
+  function equalPowerCurves(steps=128){const out=new Float32Array(steps),incoming=new Float32Array(steps);for(let i=0;i<steps;i++){const x=i/(steps-1);out[i]=Math.cos(x*Math.PI/2);incoming[i]=Math.sin(x*Math.PI/2)}return {out,incoming}}
+  function signalsEqual(a,b){return a.carrier.source===b.carrier.source&&a.carrier.key===b.carrier.key&&Number(a.carrier.hz)===Number(b.carrier.hz)&&a.modulation.source===b.modulation.source&&a.modulation.key===b.modulation.key&&a.modulation.mode===b.modulation.mode&&Number(a.modulation.hz)===Number(b.modulation.hz)}
   function transitionSignalTo(signal,{phase=S.phase,source="phase_plan"}={}){
     if(!signal)return;
-    const from=cloneSignal(S.signal);S.signal=cloneSignal(signal);
+    const from=cloneSignal(S.signal);if(signalsEqual(from,signal)){updateSignalMonitor();return}S.signal=cloneSignal(signal);
     if(!S.running||!S.ctx){recordSignalEvent(from,S.signal,source);return}
     const t=S.ctx.currentTime;
     if(from.carrier.hz!==signal.carrier.hz){
-      const inactive=1-S.activeBank,next=createAudioBank(S.ctx,signal,0),current=S.banks[S.activeBank];
+      const inactive=1-S.activeBank,old=S.banks[inactive];if(old)disposeBank(old);const next=createAudioBank(S.ctx,signal,0),current=S.banks[S.activeBank];
       const d=dimensions(),f=S.field,width=clamp(.16+(f.horizon/100)*.72,0,.9);
       next.gainA.gain.value=.24;next.gainB.gain.value=clamp(.025+(f.presence/100)*.075+(d.apertura/100)*.025,.02,.13);next.panA.pan.value=-width;next.panB.pan.value=width;
-      S.lfoGain.connect(next.gainA.gain);S.banks[inactive]=next;next.gain.gain.setValueAtTime(0,t);current.gain.gain.cancelScheduledValues(t);next.gain.gain.cancelScheduledValues(t);
-      current.gain.gain.setValueAtTime(1,t);current.gain.gain.linearRampToValueAtTime(0,t+4);next.gain.gain.linearRampToValueAtTime(1,t+4);
-      setTimeout(()=>{S.activeBank=inactive;S.oscA=next.oscA;S.oscB=next.oscB;S.gainA=next.gainA;S.gainB=next.gainB;S.panA=next.panA;S.panB=next.panB},4100);
+      S.lfoGain.connect(next.gainA.gain);S.banks[inactive]=next;const curves=equalPowerCurves();current.gain.gain.cancelScheduledValues(t);next.gain.gain.cancelScheduledValues(t);current.gain.gain.setValueCurveAtTime(curves.out,t,4);next.gain.gain.setValueCurveAtTime(curves.incoming,t,4);
+      setTimeout(()=>{disposeBank(current);S.activeBank=inactive;S.banks[1-S.activeBank]=null},4100);
     }
-    S.lfo.frequency.cancelScheduledValues(t);S.lfo.frequency.setValueAtTime(S.lfo.frequency.value,t);S.lfo.frequency.linearRampToValueAtTime(signal.modulation.hz,t+4);
+    S.lfo.frequency.cancelScheduledValues(t);S.lfo.frequency.setValueAtTime(S.lfo.frequency.value,t);S.lfo.frequency.linearRampToValueAtTime(signal.modulation.hz,t+4);S.modulationTransitionUntil=t+4;
     recordSignalEvent(from,S.signal,source);S.signalEvents[S.signalEvents.length-1].phase=phase;
   }
   function applyPhaseSignal(phase,source="phase_plan"){const planned=plannedSignalForPhase(phase);if(planned)transitionSignalTo(planned,{phase,source})}
@@ -296,7 +310,7 @@
   function renderFrequencies(){
     const root=$("#frequencyList");
     root.innerHTML="";
-    const source=S.signal.carrier.source==="method_base"?methodCarriers:symbolicFreqs.map(([value,label,color])=>({value,label,source_layer:"corpus_wound",source_key:`wound_${value}`,status:"documented_symbolic_protocol",color}));
+    const source=(S.uiCarrierLibrary||S.signal.carrier.source)==="method_base"?methodCarriers:symbolicFreqs.map(([value,label,color])=>({value,label,source_layer:"corpus_wound",source_key:`wound_${value}`,status:"documented_symbolic_protocol",color}));
     source.forEach((item,idx)=>{
       const hz=item.value,label=item.label,color=item.color||"#e1ba73";
       const row=document.createElement("button");
@@ -307,7 +321,7 @@
         <span class="freq-hz">${hz} Hz</span>
         <span class="freq-label">${label}</span>
         <canvas class="freq-wave" width="110" height="20"></canvas>`;
-      row.addEventListener("click",()=>{const previous=cloneSignal(S.signal);S.signal.carrier={source:item.source_layer,key:item.source_key,hz};updateLockedPlan();recordParameterChange("carrier",previous.carrier.hz,hz);recordSignalEvent(previous,S.signal);$("#carrierReadout").textContent=hz;updateAudio();});
+      row.addEventListener("click",()=>{const next=cloneSignal(S.signal);next.carrier={source:item.source_layer,key:item.source_key,hz};recordParameterChange("carrier",S.signal.carrier.hz,hz);transitionSignalTo(next,{source:"carrier_selection"});if(S.phaseSignalMode==="LOCKED")updateLockedPlan();else flash("Audition signal changed; scheduled plan unchanged.");$("#carrierReadout").textContent=hz;updateAudio();});
       root.appendChild(row);
       const c=row.querySelector("canvas"),cx=c.getContext("2d");
       cx.strokeStyle=color;cx.lineWidth=1.3;cx.beginPath();
@@ -343,7 +357,7 @@
     S.delay.connect(S.feedback).connect(S.delay);
     S.master.connect(S.analyser);
     S.analyser.connect(ctx.destination);
-    S.lfo.connect(S.lfoGain).connect(S.gainA.gain);
+    S.lfo.connect(S.lfoGain);S.banks.forEach(bank=>S.lfoGain.connect(bank.gainA.gain));
     S.breathOsc.connect(S.breathGain).connect(S.master.gain);
 
     [S.lfo,S.breathOsc].forEach(o=>o.start());
@@ -361,9 +375,11 @@
       S.master.gain.cancelScheduledValues(ctx.currentTime);
       S.master.gain.setTargetAtTime(0,ctx.currentTime,.15);
       S.breathGain.gain.setTargetAtTime(0,ctx.currentTime,.15);
-      setTimeout(()=>ctx.close().catch(()=>{}),600);
+      S.banks?.forEach(bank=>disposeBank(bank,600));
+      try{S.lfo?.stop();S.lfo?.disconnect();S.lfoGain?.disconnect();S.breathOsc?.stop();S.breathOsc?.disconnect();S.breathGain?.disconnect()}catch(_){ }
+      setTimeout(()=>ctx.close().catch(()=>{}),650);
     }catch(_){}
-    S.running=false;S.ctx=null;$("#playBtn").textContent="▶";
+    S.running=false;S.ctx=null;S.banks=null;S.activeBank=0;S.oscA=S.oscB=S.gainA=S.gainB=S.panA=S.panB=null;$("#playBtn").textContent="▶";
     clearInterval(S.timer);S.timer=null;
   }
 
@@ -371,18 +387,13 @@
     if(!S.running||!S.ctx) return;
     const d=dimensions(), f=S.field, t=S.ctx.currentTime;
     const depth=num("#depth");
-    const carrierHz=clamp(S.signal.carrier.hz,40,2000);
-    S.oscA.frequency.setTargetAtTime(carrierHz,t,.16);
-    S.oscB.frequency.setTargetAtTime(carrierHz*2,t,.16);
-    S.gainA.gain.setTargetAtTime(.24,t,.18);
-    S.gainB.gain.setTargetAtTime(clamp(.025+(f.presence/100)*.075+(d.apertura/100)*.025,.02,.13),t,.18);
+    S.banks?.forEach(bank=>updateBankFieldParams(bank,d,f,t));
     const width=clamp(.16+(f.horizon/100)*.72,0,.9);
-    S.panA.pan.setTargetAtTime(-width,t,.18);S.panB.pan.setTargetAtTime(width,t,.18);
     S.delay.delayTime.setTargetAtTime(.06+(f.void/100)*.42,t,.18);
     S.feedback.gain.setTargetAtTime(clamp(f.resonance/100,0,.55),t,.18);
     S.filter.frequency.setTargetAtTime(clamp(650+(100-d.inframundo)*25+d.apertura*10,420,4200),t,.18);
     S.filter.Q.setTargetAtTime(1+(f.crystallization/100)*7,t,.18);
-    S.lfo.frequency.setTargetAtTime(S.signal.modulation.hz,t,.18);
+    if(t>=S.modulationTransitionUntil)S.lfo.frequency.setTargetAtTime(S.signal.modulation.hz,t,.18);
     S.lfoGain.gain.setTargetAtTime(.035+d.activacion/100*.10,t,.18);
     const baseMaster=[.025,.035,.045][depth];
     S.master.gain.setTargetAtTime(baseMaster,t,.2);
@@ -390,6 +401,7 @@
     S.breathGain.gain.setTargetAtTime(baseMaster*.04,t,.25);
     updateSignalMonitor();
   }
+  function updateBankFieldParams(bank,d,f,t){if(!bank)return;const width=clamp(.16+(f.horizon/100)*.72,0,.9);bank.gainA.gain.setTargetAtTime(.24,t,.18);bank.gainB.gain.setTargetAtTime(clamp(.025+(f.presence/100)*.075+(d.apertura/100)*.025,.02,.13),t,.18);bank.panA.pan.setTargetAtTime(-width,t,.18);bank.panB.pan.setTargetAtTime(width,t,.18)}
 
   function dominantFftHz(){
     if(!S.running||!S.analyser||!S.ctx)return null;
@@ -408,6 +420,7 @@
     $("#signalCarrier").textContent=format(signal.carrier.target_hz);
     $("#signalHarmonic").textContent=`AEON synthesis · ${format(signal.harmonic_b.target_hz)}`;
     $("#signalPulse").textContent=`${signal.modulation.source} · ${format(signal.modulation.target_hz,2)}`;
+    $("#signalFieldTime").textContent=`${S.field.pulse.toFixed(2)} rate`;
     $("#signalBreath").textContent=format(signal.environmental_breath.target_hz,3);
     $("#signalSampleRate").textContent=signal.sample_rate_hz?`${signal.sample_rate_hz} Hz`:"—";
     $("#signalPeak").textContent=format(signal.dominant_fft_hz);
@@ -475,7 +488,7 @@
     audioStop();S.elapsedBefore=0;S.phase="descenso";S.transition=null;S.manualOverride=null;S.phaseEvents=[];S.parameterEvents=[];S.signalEvents=[];S.planEvents=[];updateLockedPlan();syncPhaseUi();applyState(phaseTargets.descenso.dimensions,phaseTargets.descenso.field);$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";renderMicrovoidTimeline();flash("Field reset; session preserved.");
   }
   function newSession(){
-    audioStop();S.sessionId=createSessionId();S.sessionStartISO=new Date().toISOString();S.elapsedBefore=0;S.microvoids=[];S.phaseEvents=[];S.parameterEvents=[];S.signalEvents=[];S.planEvents=[];S.transition=null;S.manualOverride=null;S.phase="descenso";updateLockedPlan();syncPhaseUi();$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyState(phaseTargets.descenso.dimensions,phaseTargets.descenso.field);flash("New session started.");
+    audioStop();S.sessionId=createSessionId();S.sessionStartISO=new Date().toISOString();S.elapsedBefore=0;S.microvoids=[];S.phaseEvents=[];S.parameterEvents=[];S.signalEvents=[];S.planEvents=[];S.transition=null;S.manualOverride=null;S.phase="descenso";updateLockedPlan();syncPhaseUi();$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyState(phaseTargets.descenso.dimensions,phaseTargets.descenso.field);flash("New session · existing signal plan retained");
   }
 
   function sessionObject(){
@@ -486,8 +499,8 @@
       experiment_id:S.experimentId,
       participant_id:S.participantId,
       engine:"AEON Sound Field",
-      engine_version:"0.3.4",
-      engine_build:"0.3.4",
+      engine_version:"0.3.4.1",
+      engine_build:"0.3.4.1",
       date:S.sessionStartISO,
       duration_real_s:+(elapsedMs()/1000).toFixed(2),
       context:{
@@ -505,12 +518,11 @@
         field:S.field,
         depth:["soft","medium","deep"][num("#depth")],
         planned_duration_min:num("#duration")
-        ,signal:signalSnapshot()
         ,phase_plan:{order:PHASE_ORDER,fractions:PHASE_FRACTIONS,transition_ms:8000,status:"experimental_noncanonical"}
         ,phase_signal_plan:{mode:S.phaseSignalMode,phases:S.phaseSignalPlan,provenance_boundary:"Source identity remains separate for carrier, modulation, harmonic synthesis and environmental breath.",method_match_policy:"show_all_no_priority",status:"experimental_noncanonical"}
         ,acspec_time_audio_link:false
         ,matched_method_protocols:methodMatches()
-        ,construct_mapping_version:"0.3.4"
+        ,construct_mapping_version:"0.3.4.1"
       },
       events:{phase_transitions:S.phaseEvents,signal_transitions:S.signalEvents,parameter_changes:S.parameterEvents,plan_changes:S.planEvents,microvoids:S.microvoids},
       observations:loadNotes(),
@@ -629,7 +641,7 @@
           <div class="drawer-card full"><h3>Vista previa JSON</h3><pre style="white-space:pre-wrap;color:#94a5b8;font:9px/1.5 ui-monospace;max-height:420px;overflow:auto">${escapeHtml(JSON.stringify(rec,null,2))}</pre></div>
           <div class="drawer-card full"><button class="action-btn cyan" id="downloadAtlasBtn" style="width:100%">Download ATLAS JSON</button></div>
         </div>`;
-      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.4.json")),0);
+      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.4.1.json")),0);
     }else if(type==="descenso"||type==="retorno"){
       transitionToPhase(type==="descenso"?"descenso":"retorno","manual");
       eyebrow.textContent=phaseLabels[type].toUpperCase();title.textContent=type==="descenso"?"Descent profile":"Return profile";
@@ -644,7 +656,7 @@
         </div>`;
     }else{
       eyebrow.textContent="HOME";title.textContent="AEON Sound Field";
-      content.innerHTML=`<div class="drawer-card"><h3>v0.3.4</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
+      content.innerHTML=`<div class="drawer-card"><h3>v0.3.4.1</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
     }
     drawer.classList.add("open");drawer.setAttribute("aria-hidden","false");
   }
@@ -681,7 +693,7 @@
 
   function drawField(){
     fit(fc);const W=fc.clientWidth,H=fc.clientHeight,cx=fcx,d=dimensions(),x=derived();
-    cx.clearRect(0,0,W,H);anim+=.006;
+    cx.clearRect(0,0,W,H);const nowSec=performance.now()/1000;anim=nowSec*S.field.pulse*Math.PI*2;
     const X=W/2,Y=H/2,R=Math.min(W,H)*.34;
     const gold="rgba(225,186,115,",cyan="rgba(102,215,241,",vio="rgba(160,112,247,";
 
@@ -710,7 +722,7 @@
 
     // torus curves
     const f=S.field, entropyEffective=(f.entropy/100)*(1-(f.crystallization/100)*.75), torusCount=Math.round(10+(f.presence/100)*22), cadence=.25+f.pulse*.8;
-    const breathScale=1+Math.sin(performance.now()/1000*Math.PI*2*f.breath)*.05, rotation=anim*cadence;
+    const breathScale=1+Math.sin(nowSec*Math.PI*2*f.breath)*.05, rotation=nowSec*cadence;
     for(let j=0;j<torusCount;j++){
       const off=(j-10.5)/10.5, alpha=.035+(1-Math.abs(off))*.035;
       cx.strokeStyle=cyan+alpha+")";cx.beginPath();
@@ -792,12 +804,13 @@
     fit(mc);const W=mc.clientWidth,H=mc.clientHeight;mcx.clearRect(0,0,W,H);
     const X=W/2,Y=H/2;
     if(S.viz==="torus"){
-      const f=S.field, count=Math.round(8+f.presence/100*18), spread=1+f.horizon/100*.35, entropy=(f.entropy/100)*(1-f.crystallization/100*.75), scale=1+Math.sin(performance.now()/1000*Math.PI*2*f.breath)*.05, cadence=.25+f.pulse*.8;
+        const f=S.field, nowSec=performance.now()/1000, count=Math.round(8+f.presence/100*18), spread=1+f.horizon/100*.35, entropy=(f.entropy/100)*(1-f.crystallization/100*.75), scale=1+Math.sin(nowSec*Math.PI*2*f.breath)*.05, cadence=.25+f.pulse*.8;
       for(let i=0;i<count;i++){
-        const rr=(20+i*3.5)*scale, deformation=1+Math.sin(anim*cadence*3+i)*entropy*.12;
+          const rr=(20+i*3.5)*scale, deformation=1+Math.sin(nowSec*cadence*3+i)*entropy*.12;
         mcx.strokeStyle=`rgba(${110+i*2},${95+i*3},230,${.05+i*.012})`;
-        mcx.beginPath();mcx.ellipse(X,Y,rr*2.15,rr*.85,0,0,Math.PI*2);mcx.stroke();
-        mcx.save();mcx.translate(X,Y);mcx.rotate(anim*cadence);mcx.scale(spread,deformation);mcx.stroke();mcx.restore();
+          mcx.save();mcx.translate(X,Y);mcx.rotate(nowSec*cadence+i*.03);mcx.scale(spread,deformation);mcx.beginPath();
+          for(let p=0;p<=120;p++){const a=p/120*Math.PI*2,px=Math.cos(a)*rr*2.15,py=Math.sin(a)*rr*.85;p?mcx.lineTo(px,py):mcx.moveTo(px,py)}
+          mcx.stroke();mcx.restore();
       }
       for(let ring=0;ring<Math.round(f.resonance/25);ring++){mcx.strokeStyle=`rgba(225,186,115,${.08+f.resonance/600})`;mcx.beginPath();mcx.arc(X,Y,(30+ring*18)*scale,0,Math.PI*2);mcx.stroke()}
       mcx.strokeStyle="rgba(170,100,250,.8)";mcx.beginPath();mcx.moveTo(X,10);mcx.lineTo(X,H-10);mcx.stroke();
@@ -851,14 +864,14 @@
     $("#timerBtn").addEventListener("click",()=>flash("Session duration is controlled from the left panel."));
     $("#expandVizBtn").addEventListener("click",()=>flash("Expanded visualization reserved for AEON v0.4."));
     $("#closeDrawerBtn").addEventListener("click",()=>{$("#drawer").classList.remove("open");$("#drawer").setAttribute("aria-hidden","true")});
-    $("#carrierSource").addEventListener("change",event=>{const previous=cloneSignal(S.signal);S.signal.carrier.source=event.target.value==="method"?"method_base":"corpus_wound";renderFrequencies();updateLockedPlan();recordParameterChange("carrier_source",previous.carrier.source,S.signal.carrier.source);recordSignalEvent(previous,S.signal);});
-    $("#modulationSelect").addEventListener("change",event=>{const option=modulationOptions.find(item=>item.key===event.target.value);if(!option)return;const previous=cloneSignal(S.signal);S.signal.modulation={source:option.source,key:option.key,mode:option.mode,hz:option.hz};$("#manualModulation").value=option.hz;updateLockedPlan();recordParameterChange("modulation",previous.modulation,S.signal.modulation);recordSignalEvent(previous,S.signal);updateAudio();updateReadouts()});
-    $("#manualModulation").addEventListener("input",event=>{const previous=cloneSignal(S.signal);S.signal.modulation={source:"manual",key:"manual",mode:"manual",hz:Number(event.target.value)};$("#modulationSelect").value="legacy_0_62";updateLockedPlan();recordParameterChangeDebounced("modulation",previous.modulation,S.signal.modulation);recordSignalEvent(previous,S.signal);updateAudio();updateReadouts()});
-    $("#phaseSignalMode").addEventListener("change",event=>{S.phaseSignalMode=event.target.value;recordParameterChange("phase_signal_mode",null,S.phaseSignalMode);if(S.phaseSignalMode==="LOCKED")updateLockedPlan();if(S.phaseSignalMode==="METHOD GUIDED")PHASE_ORDER.forEach(phase=>{S.phaseSignalPlan[phase].approved=false;S.phaseSignalPlan[phase].status="UNRESOLVED"});updateReadouts()});
+    $("#carrierSource").addEventListener("change",event=>{S.uiCarrierLibrary=event.target.value==="method"?"method_base":"corpus_wound";renderFrequencies();recordParameterChange("carrier_library",null,S.uiCarrierLibrary)});
+    $("#modulationSelect").addEventListener("change",event=>{const option=event.target.value==="manual"?{key:"manual",source:"manual",mode:"manual",hz:Number($("#manualModulation").value)}:modulationOptions.find(item=>item.key===event.target.value);if(!option)return;const next=cloneSignal(S.signal);next.modulation={source:option.source,key:option.key,mode:option.mode,hz:option.hz};$("#manualModulation").value=option.hz;recordParameterChange("modulation",S.signal.modulation,next.modulation);transitionSignalTo(next,{source:"modulation_selection"});if(S.phaseSignalMode==="LOCKED")updateLockedPlan();else flash("Audition signal changed; scheduled plan unchanged.");updateAudio();updateReadouts()});
+    $("#manualModulation").addEventListener("input",event=>{const value=Number(event.target.value),next=cloneSignal(S.signal);next.modulation={source:"manual",key:`manual_${value.toFixed(2).replace(".","_")}`,mode:"manual",hz:value};$("#modulationSelect").value="manual";recordParameterChangeDebounced("modulation",S.signal.modulation,next.modulation);transitionSignalTo(next,{source:"manual_modulation"});if(S.phaseSignalMode==="LOCKED")updateLockedPlan();updateAudio();updateReadouts()});
+    $("#phaseSignalMode").addEventListener("change",event=>{S.phaseSignalMode=event.target.value;S.draftPlan=event.target.value==="LOCKED"?null:structuredClone(S.phaseSignalPlan);recordParameterChange("phase_signal_mode",null,S.phaseSignalMode);if(S.phaseSignalMode==="LOCKED")updateLockedPlan();if(S.phaseSignalMode==="METHOD GUIDED")PHASE_ORDER.forEach(phase=>{S.phaseSignalPlan[phase].approved=false;S.phaseSignalPlan[phase].status="UNRESOLVED";S.draftPlan[phase].approved=false;S.draftPlan[phase].status="UNRESOLVED"});updateReadouts()});
   }
 
   async function init(){
-    ensureSession();renderFrequencies();wire();loadProfile();$("#carrierSource").value=S.signal.carrier.source==="method_base"?"method":"wound_symbolic";$("#modulationSelect").value=modulationOptions.some(item=>item.key===S.signal.modulation.key)?S.signal.modulation.key:"legacy_0_62";$("#manualModulation").value=S.signal.modulation.hz;updateLockedPlan();renderFrequencies();syncPhaseUi();updateReadouts();drawField();drawMini();animateSide();
+    ensureSession();renderFrequencies();wire();loadProfile();S.uiCarrierLibrary=S.signal.carrier.source;$("#carrierSource").value=S.uiCarrierLibrary==="method_base"?"method":"wound_symbolic";$("#modulationSelect").value=modulationOptions.some(item=>item.key===S.signal.modulation.key)?S.signal.modulation.key:"manual";$("#manualModulation").value=S.signal.modulation.hz;updateLockedPlan();renderFrequencies();syncPhaseUi();updateReadouts();drawField();drawMini();animateSide();
     try{
       const r=await fetch("mappings.json",{cache:"no-store"});if(r.ok){$("#repoDot").classList.add("online");$("#repoStatus").textContent="LOCAL LISTO"}
     }catch(_){}

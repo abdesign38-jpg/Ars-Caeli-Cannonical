@@ -1,7 +1,7 @@
 {
   "id": "AEON-SOUND-FIELD",
   "name": "AEON Sound Field",
-  "version": "0.3.4",
+  "version": "0.3.4.1",
   "status": "experimental",
   "entry": "index.html",
   "design": "neuroenergetic-alchemical-session-ui",

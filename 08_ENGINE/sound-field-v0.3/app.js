@@ -26,6 +26,27 @@
     sesion:{dimensions:{inframundo:53,activacion:31,disociacion:18,apertura:55}, field:{pulse:.48,void:69,entropy:14,horizon:52,resonance:44,presence:50,crystallization:68,breath:.088}},
     retorno:{dimensions:{inframundo:29,activacion:20,disociacion:10,apertura:80}, field:{pulse:.38,void:44,entropy:8,horizon:67,resonance:32,presence:60,crystallization:65,breath:.073}}
   };
+  const PHASE_ORDER=["descenso","shadow","light","retorno"];
+  const PHASE_FRACTIONS={descenso:.2,shadow:.3,light:.3,retorno:.2};
+  const lerp=(a,b,t)=>a+(b-a)*t;
+  const lerpObject=(a,b,t)=>Object.fromEntries(Object.keys(b).map(k=>[k,lerp(Number(a[k]??0),Number(b[k]),t)]));
+  const midpoint=(a,b)=>({dimensions:lerpObject(a.dimensions,b.dimensions,.5),field:lerpObject(a.field,b.field,.5)});
+  const phaseTargets={
+    descenso:presets.descenso,
+    shadow:midpoint(presets.descenso,presets.sesion),
+    light:midpoint(presets.sesion,presets.retorno),
+    retorno:presets.retorno
+  };
+  const constructRegistry={
+    presencia:{id:"ACSPEC-106",definition:"Nivel de ocupación sensorial del campo.",fieldKey:"presence",min:0,max:100,step:1,unit:"%",audio:"harmonic B gain/density; supporting stereo occupancy.",visual:"torus line density + particle density."},
+    resonancia:{id:"ACSPEC-105",definition:"Persistencia de un patrón en la atención.",fieldKey:"resonance",min:0,max:100,step:1,unit:"%",audio:"delay feedback, capped at 0.55.",visual:"persistence / echo rings."},
+    tiempo:{id:"ACSPEC-100",definition:"Relación entre el tiempo físico y el tiempo percibido dentro del ecosistema cognitivo.",fieldKey:"pulse",min:.1,max:12,step:.1,unit:"Hz",audio:"amplitude-modulation LFO rate.",visual:"animation cadence only; the session timer is unchanged."},
+    vacio:{id:"ACSPEC-101",definition:"Estructura de baja información utilizada para modular expectativa.",fieldKey:"void",min:0,max:100,step:1,unit:"%",audio:"delay time / temporal spacing.",visual:"field sparsity / spacing."},
+    entropia:{id:"ACSPEC-102",definition:"Imprevisibilidad controlada del entorno.",fieldKey:"entropy",min:0,max:100,step:1,unit:"%",audio:"none in v0.3.2; reserved until a reproducible audio rule exists.",visual:"deterministic geometric irregularity; no random audio jitter."},
+    horizonte:{id:"ACSPEC-103",definition:"Profundidad espacial percibida del ecosistema.",fieldKey:"horizon",min:0,max:100,step:1,unit:"%",audio:"stereo width.",visual:"torus horizontal depth/spread."},
+    cristalizacion:{id:"ACSPEC-110",definition:"Estabilización prolongada de una interpretación.",fieldKey:"crystallization",min:0,max:100,step:1,unit:"%",audio:"filter Q.",visual:"geometric rigidity; higher values reduce entropy deformation."},
+    respiracion:{id:"ACSPEC-114",definition:"Oscilación lenta de la energía perceptiva global.",fieldKey:"breath",min:.03,max:.15,step:.001,unit:"Hz",audio:"slow global gain envelope with depth capped at 4%.",visual:"slow global expansion/contraction."}
+  };
 
   const symbolicFreqs = [
     [174,"Body threshold","#ef6c63"],
@@ -51,13 +72,13 @@
     ctx:null, master:null, analyser:null,
     oscA:null, oscB:null, gainA:null, gainB:null,
     delay:null, feedback:null, filter:null, panA:null, panB:null,
-    lfo:null, lfoGain:null,
+    lfo:null, lfoGain:null, breathOsc:null, breathGain:null,
     selectedHz:174,
     viz:"torus",
     canonical:{},
-    microvoids:[]
+    microvoids:[], phaseEvents:[], transition:null
   };
-  const phaseLabels={descenso:"Descent",sesion:"Session",retorno:"Return"};
+  const phaseLabels={descenso:"Descent",shadow:"Shadow",light:"Light",retorno:"Return"};
 
   function dimensions(){
     return {
@@ -94,24 +115,56 @@
     $("#coherenceOut").textContent=x.integration_index+"%";
     $("#coherenceBar").style.width=x.integration_index+"%";
     $("#carrierReadout").textContent=S.selectedHz;
-    $("#phaseReadout").textContent={descenso:"DESCENT",sesion:"SESSION",retorno:"RETURN"}[S.phase];
+    $("#phaseReadout").textContent=phaseLabels[S.phase].toUpperCase();
     const dur=num("#duration");
     $("#durationLabel").textContent=dur+" min";
     $("#totalTime").textContent=String(dur).padStart(2,"0")+":00";
     const depths=["Soft","Medium","Deep"];
     $("#depthLabel").textContent=depths[num("#depth")];
+    updateConstructInspector();
     renderMicrovoidTimeline();
     updateAudio();
+    updateSignalMonitor();
   }
 
-  function applyPhase(p){
-    if(!presets[p]) return;
-    S.phase=p;
-    $$(".phase-step").forEach(b=>b.classList.toggle("active",b.dataset.phase===p));
-    const d=presets[p].dimensions;
-    ["inframundo","activacion","disociacion","apertura"].forEach(k=>{ $("#"+k).value=d[k]; });
-    S.field={...presets[p].field};
+  function updateConstructInspector(){
+    const select=$("#constructSelect"), inspector=$("#constructInspector");
+    if(!select||!inspector)return;
+    const c=constructRegistry[select.value], slider=$("#constructValue");
+    slider.min=c.min;slider.max=c.max;slider.step=c.step;slider.value=S.field[c.fieldKey];
+    $("#constructId").textContent=c.id;$("#constructDefinition").textContent=c.definition;
+    $("#constructValueLabel").textContent=`${Number(S.field[c.fieldKey]).toFixed(c.step<.01?3:c.step<1?2:0)} ${c.unit}`;
+    $("#constructAudioMap").textContent=c.audio;$("#constructVisualMap").textContent=c.visual;
+  }
+
+  function phaseForProgress(progress){
+    if(progress>=.8)return "retorno";
+    if(progress>=.5)return "light";
+    if(progress>=.2)return "shadow";
+    return "descenso";
+  }
+
+  function applyState(dimensionsState,fieldState){
+    ["inframundo","activacion","disociacion","apertura"].forEach(k=>$("#"+k).value=dimensionsState[k]);
+    S.field={...fieldState};
     updateReadouts();
+  }
+
+  function transitionToPhase(nextPhase,source="automatic"){
+    if(!phaseTargets[nextPhase]||nextPhase===S.phase&& !S.transition)return;
+    const start={dimensions:dimensions(),field:{...S.field}};
+    S.phase=nextPhase;
+    S.transition={start,target:phaseTargets[nextPhase],startedAt:performance.now(),duration:8000};
+    $(".phase-step").forEach(b=>b.classList.toggle("active",b.dataset.phase===nextPhase));
+    S.phaseEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase:nextPhase,source});
+    applyState(start.dimensions,start.field);
+  }
+
+  function updateTransition(){
+    if(!S.transition)return;
+    const t=clamp((performance.now()-S.transition.startedAt)/S.transition.duration,0,1), target=S.transition.target;
+    applyState(lerpObject(S.transition.start.dimensions,target.dimensions,t),lerpObject(S.transition.start.field,target.field,t));
+    if(t>=1)S.transition=null;
   }
 
   function renderFrequencies(){
@@ -153,6 +206,7 @@
     S.gainA=ctx.createGain();S.gainB=ctx.createGain();
     S.panA=ctx.createStereoPanner();S.panB=ctx.createStereoPanner();
     S.lfo=ctx.createOscillator();S.lfoGain=ctx.createGain();
+    S.breathOsc=ctx.createOscillator();S.breathGain=ctx.createGain();
 
     S.oscA.type="sine";S.oscB.type="triangle";
     S.oscA.connect(S.gainA).connect(S.panA).connect(S.filter);
@@ -162,8 +216,9 @@
     S.delay.connect(S.analyser);
     S.analyser.connect(S.master).connect(ctx.destination);
     S.lfo.connect(S.lfoGain).connect(S.gainA.gain);
+    S.breathOsc.connect(S.breathGain).connect(S.master.gain);
 
-    [S.oscA,S.oscB,S.lfo].forEach(o=>o.start());
+    [S.oscA,S.oscB,S.lfo,S.breathOsc].forEach(o=>o.start());
     S.running=true;S.startedAt=performance.now();
     $("#playBtn").textContent="Ⅱ";
     updateAudio();
@@ -177,6 +232,7 @@
     try{
       S.master.gain.cancelScheduledValues(ctx.currentTime);
       S.master.gain.setTargetAtTime(0,ctx.currentTime,.15);
+      S.breathGain.gain.setTargetAtTime(0,ctx.currentTime,.15);
       setTimeout(()=>ctx.close().catch(()=>{}),600);
     }catch(_){}
     S.running=false;S.ctx=null;$("#playBtn").textContent="▶";
@@ -187,11 +243,11 @@
     if(!S.running||!S.ctx) return;
     const d=dimensions(), f=S.field, t=S.ctx.currentTime;
     const depth=num("#depth");
-    const base=clamp(S.selectedHz*(1-d.inframundo*.0017+d.activacion*.0007),60,1000);
-    S.oscA.frequency.setTargetAtTime(base,t,.16);
-    S.oscB.frequency.setTargetAtTime(base*2,t,.16);
+    const carrierHz=clamp(S.selectedHz,40,2000);
+    S.oscA.frequency.setTargetAtTime(carrierHz,t,.16);
+    S.oscB.frequency.setTargetAtTime(carrierHz*2,t,.16);
     S.gainA.gain.setTargetAtTime(.24,t,.18);
-    S.gainB.gain.setTargetAtTime(.035+(d.apertura/100)*.08,t,.18);
+    S.gainB.gain.setTargetAtTime(clamp(.025+(f.presence/100)*.075+(d.apertura/100)*.025,.02,.13),t,.18);
     const width=clamp(.16+(f.horizon/100)*.72,0,.9);
     S.panA.pan.setTargetAtTime(-width,t,.18);S.panB.pan.setTargetAtTime(width,t,.18);
     S.delay.delayTime.setTargetAtTime(.06+(f.void/100)*.42,t,.18);
@@ -200,13 +256,42 @@
     S.filter.Q.setTargetAtTime(1+(f.crystallization/100)*7,t,.18);
     S.lfo.frequency.setTargetAtTime(f.pulse,t,.18);
     S.lfoGain.gain.setTargetAtTime(.035+d.activacion/100*.10,t,.18);
-    S.master.gain.setTargetAtTime([.025,.035,.045][depth],t,.2);
+    const baseMaster=[.025,.035,.045][depth];
+    S.master.gain.setTargetAtTime(baseMaster,t,.2);
+    S.breathOsc.frequency.setTargetAtTime(f.breath,t,.25);
+    S.breathGain.gain.setTargetAtTime(baseMaster*.04,t,.25);
+    updateSignalMonitor();
+  }
+
+  function dominantFftHz(){
+    if(!S.running||!S.analyser||!S.ctx)return null;
+    const data=new Uint8Array(S.analyser.frequencyBinCount);S.analyser.getByteFrequencyData(data);
+    let peak=0,index=0;
+    data.forEach((value,i)=>{if(value>peak){peak=value;index=i}});
+    return +(index*S.ctx.sampleRate/(S.analyser.fftSize)).toFixed(2);
+  }
+  function signalSnapshot(){
+    const carrier=clamp(S.selectedHz,40,2000);
+    return {symbolic_target_hz:S.selectedHz,oscillator_a_hz:carrier,oscillator_b_hz:carrier*2,modulation_hz:S.field.pulse,environmental_breath_hz:S.field.breath,sample_rate_hz:S.ctx?.sampleRate??null,dominant_fft_hz:dominantFftHz()};
+  }
+  function updateSignalMonitor(){
+    const signal=signalSnapshot(),format=(value,digits=2)=>value==null?"—":`${Number(value).toFixed(digits)} Hz`;
+    $("#signalSymbolic").textContent=format(signal.symbolic_target_hz);
+    $("#signalCarrier").textContent=format(signal.oscillator_a_hz);
+    $("#signalHarmonic").textContent=format(signal.oscillator_b_hz);
+    $("#signalPulse").textContent=format(signal.modulation_hz,2);
+    $("#signalBreath").textContent=format(signal.environmental_breath_hz,3);
+    $("#signalSampleRate").textContent=signal.sample_rate_hz?`${signal.sample_rate_hz} Hz`:"—";
+    $("#signalPeak").textContent=format(signal.dominant_fft_hz);
   }
 
   function elapsedMs(){ return S.elapsedBefore + (S.running ? performance.now()-S.startedAt : 0); }
   function updateTimer(){
     const total=num("#duration")*60*1000;
     const ms=Math.min(elapsedMs(),total);
+    updateTransition();
+    const progress=total>0?ms/total:0,resolved=phaseForProgress(progress);
+    if(resolved!==S.phase&&!S.transition)transitionToPhase(resolved,"automatic");
     const sec=Math.floor(ms/1000);
     $("#elapsed").textContent=String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0");
     $("#progressBar").style.width=(ms/total*100)+"%";
@@ -231,7 +316,7 @@
   function registerMicrovoid(){
     ensureSession();
     const x=derived();
-    const event={id:crypto.randomUUID(),timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase:S.phase,dimensions:dimensions(),integration_index:x.integration_index,gradient:x.gradient,source:"manual"};
+    const event={id:crypto.randomUUID(),timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase:S.phase,signal_snapshot:signalSnapshot(),construct_snapshot:{selected:$("#constructSelect").value,field:{...S.field}},field:{...S.field},dimensions:dimensions(),integration_index:x.integration_index,gradient:x.gradient,source:"manual"};
     S.microvoids.push(event);renderMicrovoidTimeline();flash("Microvoid registered.");
     const timeline=$("#microvoidTimeline");timeline.classList.remove("microvoid-pulse");void timeline.offsetWidth;timeline.classList.add("microvoid-pulse");
   }
@@ -244,10 +329,10 @@
     root.innerHTML=S.microvoids.map(event=>{const left=clamp(event.timestamp_s/total*100,1,99);return `<span class="microvoid-marker" data-phase="${escapeHtml(event.phase)}" style="left:${left}%" title="${escapeHtml(phaseLabels[event.phase]||event.phase)} · ${event.timestamp_s}s"></span>`}).join("");
   }
   function resetSession(){
-    audioStop();S.elapsedBefore=0;$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyPhase("descenso");renderMicrovoidTimeline();flash("Field reset; session preserved.");
+    audioStop();S.elapsedBefore=0;S.phase="descenso";S.transition=null;S.phaseEvents=[];applyState(phaseTargets.descenso.dimensions,phaseTargets.descenso.field);$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";renderMicrovoidTimeline();flash("Field reset; session preserved.");
   }
   function newSession(){
-    audioStop();S.sessionId=createSessionId();S.sessionStartISO=new Date().toISOString();S.elapsedBefore=0;S.microvoids=[];S.phase="descenso";$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyPhase("descenso");flash("New session started.");
+    audioStop();S.sessionId=createSessionId();S.sessionStartISO=new Date().toISOString();S.elapsedBefore=0;S.microvoids=[];S.phaseEvents=[];S.transition=null;S.phase="descenso";$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyState(phaseTargets.descenso.dimensions,phaseTargets.descenso.field);flash("New session started.");
   }
 
   function sessionObject(){
@@ -258,7 +343,7 @@
       experiment_id:S.experimentId,
       participant_id:S.participantId,
       engine:"AEON Sound Field",
-      engine_version:"0.3.1",
+      engine_version:"0.3.2",
       date:S.sessionStartISO,
       duration_real_s:+(elapsedMs()/1000).toFixed(2),
       context:{
@@ -275,8 +360,11 @@
         field:S.field,
         depth:["soft","medium","deep"][num("#depth")],
         planned_duration_min:num("#duration")
+        ,signal:signalSnapshot()
+        ,phase_plan:{order:PHASE_ORDER,fractions:PHASE_FRACTIONS,transition_ms:8000,status:"experimental_noncanonical"}
+        ,construct_mapping_version:"0.3.2"
       },
-      events:{microvoids:S.microvoids},
+      events:{phase_transitions:S.phaseEvents,microvoids:S.microvoids},
       observations:loadNotes(),
       interpretations:{experimental:null,symbolic:null},
       safety:{
@@ -286,6 +374,7 @@
         master_output_cap:0.10
       },
       microvoid_definition:"User-registered operational event within the Ars Caeli session model; not a physiological measurement.",
+      signal_measurement_boundary:"AnalyserNode describes the generated browser signal; it is not an acoustic calibration or physiological measurement.",
       completeness:"partial"
     };
   }
@@ -379,9 +468,9 @@
           <div class="drawer-card full"><h3>Vista previa JSON</h3><pre style="white-space:pre-wrap;color:#94a5b8;font:9px/1.5 ui-monospace;max-height:420px;overflow:auto">${escapeHtml(JSON.stringify(rec,null,2))}</pre></div>
           <div class="drawer-card full"><button class="action-btn cyan" id="downloadAtlasBtn" style="width:100%">Download ATLAS JSON</button></div>
         </div>`;
-      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.1.json")),0);
+      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.2.json")),0);
     }else if(type==="descenso"||type==="retorno"){
-      applyPhase(type==="descenso"?"descenso":"retorno");
+      transitionToPhase(type==="descenso"?"descenso":"retorno","manual");
       eyebrow.textContent=phaseLabels[type].toUpperCase();title.textContent=type==="descenso"?"Descent profile":"Return profile";
       const d=dimensions(),x=derived();
       content.innerHTML=`
@@ -394,7 +483,7 @@
         </div>`;
     }else{
       eyebrow.textContent="HOME";title.textContent="AEON Sound Field";
-      content.innerHTML=`<div class="drawer-card"><h3>v0.3.1</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
+      content.innerHTML=`<div class="drawer-card"><h3>v0.3.2</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
     }
     drawer.classList.add("open");drawer.setAttribute("aria-hidden","false");
   }
@@ -459,13 +548,15 @@
     }
 
     // torus curves
-    for(let j=0;j<22;j++){
+    const f=S.field, entropyEffective=(f.entropy/100)*(1-(f.crystallization/100)*.75), torusCount=Math.round(10+(f.presence/100)*22);
+    const breathScale=1+Math.sin(performance.now()/1000*Math.PI*2*f.breath)*.05;
+    for(let j=0;j<torusCount;j++){
       const off=(j-10.5)/10.5, alpha=.035+(1-Math.abs(off))*.035;
       cx.strokeStyle=cyan+alpha+")";cx.beginPath();
       for(let i=0;i<=140;i++){
         const t=i/140*Math.PI*2;
-        const px=X+Math.cos(t)*R*(.77+off*.12);
-        const py=Y+Math.sin(t)*R*.48 + Math.sin(t*2+anim*8+j)*R*.045*off;
+        const px=X+Math.cos(t)*R*(.77+off*.12)*(1+f.horizon/100*.16)*breathScale;
+        const py=Y+Math.sin(t)*R*.48*breathScale + Math.sin(t*2+anim*8+j)*R*.045*off*entropyEffective;
         i?cx.lineTo(px,py):cx.moveTo(px,py);
       }cx.stroke();
     }
@@ -500,7 +591,7 @@
     }
 
     // subtle particles
-    for(let i=0;i<70;i++){
+    for(let i=0;i<Math.round(25+(f.presence/100)*85);i++){
       const a=i*2.399+anim*.6,r=R*(.2+(i%17)/17*.95);
       const px=X+Math.cos(a)*r,py=Y+Math.sin(a)*r;
       cx.fillStyle=i%7===0?gold+".25)":cyan+".13)";cx.fillRect(px,py,1,1);
@@ -534,27 +625,25 @@
     fit(mc);const W=mc.clientWidth,H=mc.clientHeight;mcx.clearRect(0,0,W,H);
     const X=W/2,Y=H/2;
     if(S.viz==="torus"){
-      for(let i=0;i<18;i++){
-        const rr=20+i*3.5;
+      const f=S.field, count=Math.round(8+f.presence/100*18), spread=1+f.horizon/100*.35, entropy=(f.entropy/100)*(1-f.crystallization/100*.75), scale=1+Math.sin(performance.now()/1000*Math.PI*2*f.breath)*.05;
+      for(let i=0;i<count;i++){
+        const rr=(20+i*3.5)*scale;
         mcx.strokeStyle=`rgba(${110+i*2},${95+i*3},230,${.05+i*.012})`;
         mcx.beginPath();mcx.ellipse(X,Y,rr*2.15,rr*.85,0,0,Math.PI*2);mcx.stroke();
       }
       mcx.strokeStyle="rgba(170,100,250,.8)";mcx.beginPath();mcx.moveTo(X,10);mcx.lineTo(X,H-10);mcx.stroke();
     }else if(S.viz==="waves"){
-      ["#66d7f1","#a070f7","#e1ba73"].forEach((c,j)=>{
-        mcx.strokeStyle=c;mcx.globalAlpha=.55;mcx.beginPath();
-        for(let i=0;i<W;i++){const y=Y+(j-1)*24+Math.sin(i*.04+j+anim*18)*12; i?mcx.lineTo(i,y):mcx.moveTo(i,y)}mcx.stroke();
-      });mcx.globalAlpha=1;
+      mcx.strokeStyle="#66d7f1";mcx.globalAlpha=.8;mcx.beginPath();
+      if(S.running&&S.analyser){const data=new Uint8Array(S.analyser.fftSize);S.analyser.getByteTimeDomainData(data);for(let i=0;i<W;i++){const y=data[Math.floor(i/W*data.length)]/255*H;i?mcx.lineTo(i,y):mcx.moveTo(i,y)}}else{mcx.moveTo(0,Y);mcx.lineTo(W,Y);mcx.fillStyle="#717d8d";mcx.font="10px ui-monospace";mcx.fillText("NO LIVE SIGNAL",12,20)}mcx.stroke();mcx.globalAlpha=1;
     }else if(S.viz==="spectrum"){
-      for(let i=0;i<48;i++){
-        const h=(.25+.75*Math.abs(Math.sin(i*.43+anim*12)))*H*.65;
-        mcx.fillStyle=i<16?"rgba(160,112,247,.45)":i<34?"rgba(102,215,241,.45)":"rgba(225,186,115,.45)";
-        mcx.fillRect(i/48*W,H-h,W/48-2,h);
+      const data=S.analyser&&S.running?new Uint8Array(S.analyser.frequencyBinCount):null, visibleHz=2500, bins=data?Math.min(data.length,Math.floor(visibleHz/(S.ctx.sampleRate/2)*data.length)):48;
+      for(let i=0;i<bins;i++){
+        const h=data?data[i]/255*H*.8:0;mcx.fillStyle="rgba(102,215,241,.55)";mcx.fillRect(i/bins*W,H-h,Math.max(1,W/bins-1),h);
       }
+      const carrier=clamp(S.selectedHz,40,2000);[carrier,carrier*2].forEach((hz,i)=>{if(hz<=visibleHz){const x=hz/visibleHz*W;mcx.strokeStyle=i?"#e1ba73":"#a070f7";mcx.beginPath();mcx.moveTo(x,0);mcx.lineTo(x,H);mcx.stroke()}});
     }else{
-      const cols=["#e1ba73","#a070f7","#5f8fe8","#66d7f1","#a5cf6e","#e69b54","#ef7467"];
-      cols.forEach((c,i)=>{const y=18+i*(H-36)/6;mcx.fillStyle=c;mcx.beginPath();mcx.arc(X,y,7,0,Math.PI*2);mcx.fill()});
-      mcx.strokeStyle="rgba(225,186,115,.5)";mcx.beginPath();mcx.moveTo(X,10);mcx.lineTo(X,H-10);mcx.stroke();
+      const labels=["Underworld","Activation","Dissociation","Opening"],values=dimensions(),keys=["inframundo","activacion","disociacion","apertura"];
+      labels.forEach((label,i)=>{const y=18+i*(H-42)/3;mcx.fillStyle="#e1ba73";mcx.fillText(`${label} ${Math.round(values[keys[i]])}`,10,y);mcx.fillStyle="#26344a";mcx.fillRect(10,y+7,W-20,5);mcx.fillStyle="#66d7f1";mcx.fillRect(10,y+7,(W-20)*values[keys[i]]/100,5)});
     }
     requestAnimationFrame(drawMini);
   }
@@ -567,7 +656,9 @@
 
   function wire(){
     ["#inframundo","#activacion","#disociacion","#apertura","#duration","#depth"].forEach(id=>$(id).addEventListener("input",updateReadouts));
-    $$(".phase-step").forEach(b=>b.addEventListener("click",()=>applyPhase(b.dataset.phase)));
+    $$(".phase-step").forEach(b=>b.addEventListener("click",()=>transitionToPhase(b.dataset.phase,"manual")));
+    $("#constructSelect").addEventListener("change",updateConstructInspector);
+    $("#constructValue").addEventListener("input",()=>{const c=constructRegistry[$("#constructSelect").value];S.field[c.fieldKey]=Number($("#constructValue").value);updateConstructInspector();updateAudio()});
     $$(".seg").forEach(b=>b.addEventListener("click",()=>{$$(".seg").forEach(x=>x.classList.remove("active"));b.classList.add("active")}));
     $$(".viz-tab").forEach(b=>b.addEventListener("click",()=>{$$(".viz-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");S.viz=b.dataset.viz}));
     $$(".nav-link").forEach(b=>b.addEventListener("click",()=>{
@@ -580,8 +671,8 @@
       else openDrawer(v);
     }));
     $("#playBtn").addEventListener("click",()=>S.running?audioStop():audioStart());
-    $("#prevBtn").addEventListener("click",()=>applyPhase(S.phase==="retorno"?"sesion":"descenso"));
-    $("#nextBtn").addEventListener("click",()=>applyPhase(S.phase==="descenso"?"sesion":"retorno"));
+    $("#prevBtn").addEventListener("click",()=>{const i=PHASE_ORDER.indexOf(S.phase);if(i>0)transitionToPhase(PHASE_ORDER[i-1],"manual")});
+    $("#nextBtn").addEventListener("click",()=>{const i=PHASE_ORDER.indexOf(S.phase);if(i<PHASE_ORDER.length-1)transitionToPhase(PHASE_ORDER[i+1],"manual")});
     $("#resetBtn").addEventListener("click",resetSession);
     $("#registerMicrovoidBtn").addEventListener("click",registerMicrovoid);
     $("#saveProfileBtn").addEventListener("click",saveProfile);

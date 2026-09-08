@@ -1,5 +1,5 @@
 {
-  "version": "0.3.1",
+  "version": "0.3.2",
   "status": "experimental_noncanonical",
   "epistemic_boundary": {
     "canonical": "Ars Caeli repository Markdown/JSON documents are the documentary source.",
@@ -103,6 +103,42 @@
         "breath": 0.073
       }
     }
+  },
+  "phase_machine": {
+    "order": ["descenso", "shadow", "light", "retorno"],
+    "fractions": {"descenso": 0.2, "shadow": 0.3, "light": 0.3, "retorno": 0.2},
+    "transition_ms": 8000,
+    "status": "experimental_noncanonical",
+    "shadow_and_light": "Derived mechanically as midpoints from the retained descenso, sesion, and retorno control points."
+  },
+  "signal_layers": {
+    "symbolic_carrier_hz": "Selected symbolic target; Oscillator A equals this value.",
+    "harmonic_b_hz": "Triangle Oscillator B equals 2 x carrier.",
+    "modulation_hz": "S.field.pulse controls the amplitude LFO independently.",
+    "environmental_breath_hz": "S.field.breath controls a slow envelope with <=4% depth.",
+    "measurement_boundary": "AnalyserNode describes generated browser signal, not acoustic calibration or physiology."
+  },
+  "construct_operational_mappings": {
+    "definition": "Source ACSPEC construct; operational mapping is an experimental AEON implementation.",
+    "presence": {"id": "ACSPEC-106", "audio": "harmonic B density and supporting stereo occupancy", "visual": "torus and particle density"},
+    "resonance": {"id": "ACSPEC-105", "audio": "delay feedback capped at 0.55", "visual": "persistence rings"},
+    "time": {"id": "ACSPEC-100", "audio": "amplitude LFO rate", "visual": "animation cadence; timer unchanged"},
+    "void": {"id": "ACSPEC-101", "audio": "delay spacing", "visual": "field sparsity"},
+    "entropy": {"id": "ACSPEC-102", "audio": "none in v0.3.2", "visual": "deterministic irregularity"},
+    "horizon": {"id": "ACSPEC-103", "audio": "stereo width", "visual": "torus horizontal spread"},
+    "crystallization": {"id": "ACSPEC-110", "audio": "filter Q", "visual": "rigidity attenuates entropy"},
+    "breath": {"id": "ACSPEC-114", "audio": "slow envelope <=4%", "visual": "global expansion/contraction"}
+  },
+  "visualization_contract": {
+    "waves": "AnalyserNode time-domain data while running; explicit idle baseline otherwise.",
+    "spectrum": "AnalyserNode frequency-domain data with carrier and harmonic markers.",
+    "axis": "Current Underworld, Activation, Dissociation, and Opening values; no body claims.",
+    "torus": "Coupled to current presence, resonance, horizon, entropy, crystallization, breath, and pulse."
+  },
+  "observation_contract": {
+    "microvoid": "User-registered operational event, not physiological measurement.",
+    "phase_transitions": "Stored separately from microvoids with automatic/manual source.",
+    "causality": "The UI does not infer that a generated signal caused a reported sensation."
   },
   "symbolic_frequencies": [
     {

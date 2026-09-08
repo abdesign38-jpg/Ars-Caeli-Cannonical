@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="AEON Sound Field v0.3.1 — Ars Caeli symbolic and experimental session interface.">
-  <title>Ars Caeli · AEON Sound Field v0.3.1</title>
-  <link rel="stylesheet" href="styles.css?v=0.3.1">
+  <meta name="description" content="AEON Sound Field v0.3.2 — Ars Caeli symbolic and experimental session interface.">
+  <title>Ars Caeli · AEON Sound Field v0.3.2</title>
+  <link rel="stylesheet" href="styles.css?v=0.3.2">
 </head>
 <body>
   <div class="cosmos" aria-hidden="true"></div>
@@ -34,7 +34,7 @@
     <div class="header-tools">
       <span class="status-dot" id="repoDot"></span>
       <span class="header-status" id="repoStatus">LOCAL</span>
-      <span class="version">v0.3.1</span>
+      <span class="version">v0.3.2</span>
     </div>
   </header>
 
@@ -98,6 +98,14 @@
           <option value="cristalizacion">Crystallization</option>
           <option value="respiracion">Environmental Breathing</option>
         </select>
+        <div class="construct-inspector" id="constructInspector">
+          <div class="construct-meta"><span id="constructId">ACSPEC-106</span><span class="experimental-badge">EXPERIMENTAL MAPPING</span></div>
+          <p id="constructDefinition">Nivel de ocupación sensorial del campo.</p>
+          <label class="field-label" for="constructValue">Operational value <span id="constructValueLabel"></span></label>
+          <input id="constructValue" type="range" min="0" max="100" step="1" value="40">
+          <div class="construct-map"><div><small>Audio</small><p id="constructAudioMap"></p></div><div><small>Field</small><p id="constructVisualMap"></p></div></div>
+          <p class="micro-note">ACSPEC defines the construct; this audio/visual translation is an experimental AEON mapping.</p>
+        </div>
       </section>
 
       <section class="panel-section">
@@ -134,10 +142,11 @@
         <p>DESCENT · TRANSFORMATION · RETURN</p>
       </div>
 
-      <div class="phase-rail" role="tablist">
+      <div class="phase-rail" role="tablist" aria-label="Session phases">
         <button class="phase-step active" data-phase="descenso"><span>01</span>Descent</button>
-        <button class="phase-step" data-phase="sesion"><span>02</span>Session</button>
-        <button class="phase-step" data-phase="retorno"><span>03</span>Return</button>
+        <button class="phase-step" data-phase="shadow"><span>02</span>Shadow</button>
+        <button class="phase-step" data-phase="light"><span>03</span>Light</button>
+        <button class="phase-step" data-phase="retorno"><span>04</span>Return</button>
       </div>
 
       <div class="field-wrap">
@@ -200,7 +209,7 @@
         </div>
       </div>
       <section class="microvoid-timeline glass" aria-label="Microvoid session timeline">
-        <div class="timeline-head"><span>Session trajectory</span><small>Descent · Session · Return</small></div>
+        <div class="timeline-head"><span>Session trajectory</span><small>Descent · Shadow · Light · Return</small></div>
         <div class="timeline-track" id="microvoidTimeline"><div class="timeline-progress" id="timelineProgress"></div><div class="timeline-events" id="microvoidEvents"></div></div>
         <div class="timeline-labels"><span>Presence</span><span>Registered microvoids</span><span>Presence</span></div>
       </section>
@@ -239,6 +248,20 @@
       </section>
 
       <section class="card glass">
+        <div class="card-title">Signal monitor</div>
+        <div class="signal-grid">
+          <div class="signal-item"><small>Symbolic target</small><strong id="signalSymbolic">174.00 Hz</strong></div>
+          <div class="signal-item"><small>Actual carrier A</small><strong id="signalCarrier">174.00 Hz</strong></div>
+          <div class="signal-item"><small>Harmonic B</small><strong id="signalHarmonic">348.00 Hz</strong></div>
+          <div class="signal-item"><small>Modulation / pulse</small><strong id="signalPulse">0.62 Hz</strong></div>
+          <div class="signal-item"><small>Environmental breath</small><strong id="signalBreath">0.105 Hz</strong></div>
+          <div class="signal-item"><small>Sample rate</small><strong id="signalSampleRate">—</strong></div>
+          <div class="signal-item"><small>Dominant FFT peak</small><strong id="signalPeak">—</strong></div>
+        </div>
+        <p class="micro-note">Browser signal monitor · not an acoustic calibration of headphones/speakers.</p>
+      </section>
+
+      <section class="card glass">
         <div class="card-title row-between">
           <span>Field visualization</span>
           <button class="icon-button" id="expandVizBtn">↗</button>
@@ -248,7 +271,7 @@
           <button class="viz-tab active" data-viz="torus">Torus</button>
           <button class="viz-tab" data-viz="waves">Waves</button>
           <button class="viz-tab" data-viz="spectrum">Spectrum</button>
-          <button class="viz-tab" data-viz="chakras">Axis</button>
+          <button class="viz-tab" data-viz="axis">Axis</button>
         </div>
         <canvas id="miniViz" height="180"></canvas>
       </section>
@@ -272,10 +295,10 @@
   </section>
 
   <footer class="app-footer">
-    <span>ARS CAELI · AEON ENGINE · SOUND FIELD v0.3.1</span>
+    <span>ARS CAELI · AEON ENGINE · SOUND FIELD v0.3.2</span>
     <span>VERITAS IN SONO</span>
   </footer>
 
-  <script src="app.js?v=0.3.1"></script>
+  <script src="app.js?v=0.3.2"></script>
 </body>
 </html>

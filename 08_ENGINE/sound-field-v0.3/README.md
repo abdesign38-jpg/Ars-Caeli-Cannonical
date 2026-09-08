@@ -1,6 +1,8 @@
-# AEON Sound Field v0.3.3
+# AEON Sound Field v0.3.4
 
 Symbolic and alchemical session interface for Ars Caeli.
+
+Signal provenance is separated across independent carrier, modulation, AEON harmonic synthesis, and environmental breath layers. Phase signal plans are explicit operational choices; Method Base matches are documentary suggestions, never automatic prescriptions.
 
 ## Design
 

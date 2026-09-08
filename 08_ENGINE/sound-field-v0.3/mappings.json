@@ -1,5 +1,5 @@
 {
-  "version": "0.3.3",
+  "version": "0.3.4",
   "status": "experimental_noncanonical",
   "epistemic_boundary": {
     "canonical": "Ars Caeli repository Markdown/JSON documents are the documentary source.",
@@ -112,15 +112,26 @@
     "shadow_and_light": "Derived mechanically as midpoints from the retained descenso, sesion, and retorno control points."
   },
   "signal_layers": {
-    "symbolic_carrier_hz": "Selected symbolic target; Oscillator A equals this value.",
-    "harmonic_b_hz": "Triangle Oscillator B equals 2 x carrier.",
-    "modulation_hz": "S.field.pulse controls the amplitude LFO independently.",
+    "carrier": "Independent carrier source/key/target; Oscillator A equals this value.",
+    "harmonic_b_hz": "AEON synthesis; Triangle Oscillator B equals 2 x carrier.",
+    "modulation_hz": "S.signal.modulation.hz controls the audio amplitude-modulation LFO independently.",
     "environmental_breath_hz": "S.field.breath controls a slow envelope with <=4% depth.",
     "measurement_boundary": "AnalyserNode describes generated browser signal, not acoustic calibration or physiology.",
     "fft_resolution": "sample_rate / fft_size",
     "quality_metrics": ["RMS dBFS", "peak dBFS", "near clipping"],
     "method_protocol": ["136 Hz", "432 Hz", "528 Hz", "900 Hz subtle", "Delta-soft 2 Hz", "Theta 4-7 Hz", "Alpha 8-10 Hz"],
     "corpus_wound_symbolic": [174, 285, 396, 417, 528, 639, 963]
+  },
+  "signal_provenance": {
+    "carrier_source": "independent",
+    "modulation_source": "independent",
+    "harmonic_b": "aeon_synthesis",
+    "environmental_breath": "aeon_field_mapping"
+  },
+  "phase_signal_plan": {
+    "modes": ["LOCKED", "CUSTOM_PHASE_PLAN", "METHOD_GUIDED"],
+    "automatic_prescription": false,
+    "user_approval_required_for_method_guided": true
   },
   "derived_metrics": {
     "gradient": {"formula": "(return_score - descent_score)", "status": "experimental_noncanonical"},
@@ -130,7 +141,7 @@
     "definition": "Source ACSPEC construct; operational mapping is an experimental AEON implementation.",
     "presence": {"id": "ACSPEC-106", "audio": "harmonic B density and supporting stereo occupancy", "visual": "torus and particle density"},
     "resonance": {"id": "ACSPEC-105", "audio": "delay feedback capped at 0.55", "visual": "persistence rings"},
-    "time": {"id": "ACSPEC-100", "audio": "amplitude LFO rate", "visual": "animation cadence; timer unchanged"},
+    "time": {"id": "ACSPEC-100", "field_key": "pulse", "audio_mapping": "none in v0.3.4; audio protocol modulation is independent", "visual_mapping": "field animation cadence", "status": "experimental_noncanonical"},
     "void": {"id": "ACSPEC-101", "audio": "delay spacing", "visual": "field sparsity"},
     "entropy": {"id": "ACSPEC-102", "audio": "none in v0.3.2", "visual": "deterministic irregularity"},
     "horizon": {"id": "ACSPEC-103", "audio": "stereo width", "visual": "torus horizontal spread"},

@@ -40,7 +40,7 @@
   const constructRegistry={
     presencia:{id:"ACSPEC-106",definition:"Nivel de ocupación sensorial del campo.",fieldKey:"presence",min:0,max:100,step:1,unit:"%",audio:"harmonic B gain/density; supporting stereo occupancy.",visual:"torus line density + particle density."},
     resonancia:{id:"ACSPEC-105",definition:"Persistencia de un patrón en la atención.",fieldKey:"resonance",min:0,max:100,step:1,unit:"%",audio:"delay feedback, capped at 0.55.",visual:"persistence / echo rings."},
-    tiempo:{id:"ACSPEC-100",definition:"Relación entre el tiempo físico y el tiempo percibido dentro del ecosistema cognitivo.",fieldKey:"pulse",min:.1,max:12,step:.1,unit:"Hz",audio:"amplitude-modulation LFO rate.",visual:"animation cadence only; the session timer is unchanged."},
+    tiempo:{id:"ACSPEC-100",definition:"Relación entre el tiempo físico y el tiempo percibido dentro del ecosistema cognitivo.",fieldKey:"pulse",min:.1,max:12,step:.1,unit:"rate",audio:"None in v0.3.4. Audio protocol modulation is controlled separately in Signal sources.",visual:"Field animation cadence / temporal motion.",status:"experimental_noncanonical"},
     vacio:{id:"ACSPEC-101",definition:"Estructura de baja información utilizada para modular expectativa.",fieldKey:"void",min:0,max:100,step:1,unit:"%",audio:"delay time / temporal spacing.",visual:"field sparsity / spacing."},
     entropia:{id:"ACSPEC-102",definition:"Imprevisibilidad controlada del entorno.",fieldKey:"entropy",min:0,max:100,step:1,unit:"%",audio:"none in v0.3.2; reserved until a reproducible audio rule exists.",visual:"deterministic geometric irregularity; no random audio jitter."},
     horizonte:{id:"ACSPEC-103",definition:"Profundidad espacial percibida del ecosistema.",fieldKey:"horizon",min:0,max:100,step:1,unit:"%",audio:"stereo width.",visual:"torus horizontal depth/spread."},
@@ -58,21 +58,29 @@
     [963,"Opening / upper axis","#9b64e6"]
   ];
   const methodCarriers = [
-    {value:136,label:"136 Hz — grounding / closure",source_layer:"method_base",source_key:"grounding_closure",status:"documented_symbolic_protocol"},
-    {value:432,label:"432 Hz — coherence / containment",source_layer:"method_base",source_key:"coherence_containment",status:"documented_symbolic_protocol"},
-    {value:528,label:"528 Hz — symbolic reorganization / opening anchor",source_layer:"method_base",source_key:"reorganization_opening",status:"documented_symbolic_protocol"},
-    {value:900,label:"900 Hz subtle — high-layer clarity; caution",source_layer:"method_base",source_key:"subtle_high_layer",status:"documented_symbolic_protocol"}
+    {value:136,label:"136 Hz — grounding / closure",source_layer:"method_base",source_key:"method_136",status:"documented_symbolic_protocol"},
+    {value:432,label:"432 Hz — coherence / containment",source_layer:"method_base",source_key:"method_432",status:"documented_symbolic_protocol"},
+    {value:528,label:"528 Hz — symbolic reorganization / opening anchor",source_layer:"method_base",source_key:"method_528",status:"documented_symbolic_protocol"},
+    {value:900,label:"900 Hz subtle — high-layer clarity; caution",source_layer:"method_base",source_key:"method_900_subtle",status:"documented_symbolic_protocol"}
   ];
-  const modulationBands = [
-    {value:2,mode:"delta",label:"Delta-soft — 2 Hz",source_key:"delta_soft"},
-    {value:4,mode:"theta",label:"Theta — 4 Hz operational midpoint",source_key:"theta_4"},
-    {value:6,mode:"theta",label:"Theta — 6 Hz operational midpoint",source_key:"theta_6"},
-    {value:7,mode:"theta",label:"Theta — 7 Hz",source_key:"theta_7"},
-    {value:8,mode:"alpha",label:"Alpha — 8 Hz",source_key:"alpha_8"},
-    {value:9,mode:"alpha",label:"Alpha — 9 Hz operational midpoint",source_key:"alpha_9"},
-    {value:10,mode:"alpha",label:"Alpha — 10 Hz",source_key:"alpha_10"}
+  const modulationOptions = [
+    {key:"legacy_0_62",source:"legacy_experimental",mode:"manual",hz:.62,label:"Legacy experimental — 0.62 Hz"},
+    {key:"delta_soft_2",source:"method_base",mode:"delta_soft",hz:2,label:"Delta-soft — 2 Hz"},
+    {key:"theta_4",source:"method_base",mode:"theta",hz:4,label:"Theta — 4 Hz · lower boundary"},
+    {key:"theta_6",source:"method_base",mode:"theta",hz:6,label:"Theta — 6 Hz · operational midpoint"},
+    {key:"theta_7",source:"method_base",mode:"theta",hz:7,label:"Theta — 7 Hz · upper boundary"},
+    {key:"alpha_8",source:"method_base",mode:"alpha",hz:8,label:"Alpha — 8 Hz · lower boundary"},
+    {key:"alpha_9",source:"method_base",mode:"alpha",hz:9,label:"Alpha — 9 Hz · operational midpoint"},
+    {key:"alpha_10",source:"method_base",mode:"alpha",hz:10,label:"Alpha — 10 Hz · upper boundary"}
   ];
-  const phaseSignalPlan=Object.fromEntries(PHASE_ORDER.map(phase=>[phase,{carrierSource:"wound_symbolic",carrierHz:174,modulationMode:"manual",modulationHz:.62}]));
+  const cloneSignal=signal=>structuredClone(signal);
+  const defaultSignal={carrier:{source:"corpus_wound",key:"wound_174",hz:174},modulation:{source:"legacy_experimental",key:"legacy_0_62",mode:"manual",hz:.62}};
+  const methodProtocols={
+    inframundo_dominante:{condition:d=>d.inframundo>=35&&d.apertura<30,reading:"Sistema en retención o implosión. Priorizar seguridad y coherencia. No abrir trauma profundo.",sequence:["contención","432 Hz","mano al pecho","micro-apertura opcional","136 Hz"],avoid:["catarsis","frecuencias altas","preguntas invasivas","delta extremo"]},
+    activacion_dominante:{condition:d=>d.activacion>=35,reading:"Sistema en alerta mental o defensa simpática. Priorizar exhalación, ritmo y cuerpo.",sequence:["exhalación larga","alpha 8–10 Hz","432 Hz","orientación corporal"],avoid:["900 Hz","estímulos rápidos","interpretación excesiva"]},
+    disociacion_dominante:{condition:d=>d.disociacion>=30,reading:"Sistema desconectado o en colapso. Priorizar presencia sensorial suave.",sequence:["orientación al espacio","tacto consciente","alpha suave","136 Hz corto"],avoid:["delta profundo","silencio prolongado","exploración del inframundo"]},
+    apertura_suficiente:{condition:d=>d.apertura>=35&&d.inframundo<40,reading:"Hay capacidad de procesar. Abrir con regulación previa y cierre obligatorio.",sequence:["regulación breve","theta suave","palabra consciente","integración corporal","136 Hz"],avoid:["sobreexploración","dejar proceso abierto"]}
+  };
 
   const S = {
     sessionId:null,
@@ -86,15 +94,17 @@
     elapsedBefore:0,
     timer:null,
     ctx:null, master:null, analyser:null,
+    banks:null, activeBank:0,
     oscA:null, oscB:null, gainA:null, gainB:null,
     delay:null, feedback:null, filter:null, panA:null, panB:null,
     lfo:null, lfoGain:null, breathOsc:null, breathGain:null,
-    signal:{carrierSource:"wound_symbolic",carrierHz:174,modulationMode:"manual",modulationHz:.62},
+    signal:cloneSignal(defaultSignal),
     phaseSignalMode:"LOCKED",
-    phaseSignalPlan,
+    phaseSignalPlan:Object.fromEntries(PHASE_ORDER.map(phase=>[phase,{approved:true,signal:cloneSignal(defaultSignal),status:"READY"}])),
+    draftPlan:null,
     viz:"torus",
     canonical:{}, timeData:null, freqData:null,
-    microvoids:[], phaseEvents:[], parameterEvents:[], signalEvents:[], transition:null, manualOverride:null
+    microvoids:[], phaseEvents:[], parameterEvents:[], signalEvents:[], planEvents:[], transition:null, manualOverride:null
   };
   const phaseLabels={descenso:"Descent",shadow:"Shadow",light:"Light",retorno:"Return"};
 
@@ -132,7 +142,7 @@
     $("#gradientReadout").textContent=(x.gradient>=0?"+":"")+Math.round(x.gradient);
     $("#coherenceOut").textContent=x.integration_index+"%";
     $("#coherenceBar").style.width=x.integration_index+"%";
-    $("#carrierReadout").textContent=S.signal.carrierHz;
+    $("#carrierReadout").textContent=S.signal.carrier.hz;
     syncPhaseUi();
     const dur=num("#duration");
     $("#durationLabel").textContent=dur+" min";
@@ -168,20 +178,42 @@
   }
 
   function renderMethodGuidance(){
-    const d=dimensions(),matches=[];
-    if(d.inframundo>=35&&d.apertura<30)matches.push("Inframundo dominant");
-    if(d.activacion>=35)matches.push("Activation dominant");
-    if(d.disociacion>=30)matches.push("Dissociation elevated");
-    if(d.apertura>=35&&d.inframundo<40)matches.push("Opening available");
-    const root=$("#methodMatches");if(root)root.innerHTML=matches.length?matches.map(match=>`<span>✓ ${match}</span>`).join(""):"<span>— No documented match</span>";
+    const d=dimensions(),matches=Object.entries(methodProtocols).filter(([,protocol])=>protocol.condition(d));
+    const root=$("#methodMatches");if(root)root.innerHTML=matches.length?matches.map(([key,protocol])=>`<article><strong>✓ ${key}</strong><small>${protocol.reading}</small><small>Sequence: ${protocol.sequence.join(" · ")}</small><small>Avoid: ${protocol.avoid.join(" · ")}</small><button data-method="${key}">Use suggestion</button></article>`).join(""):"<span>— No documented match</span>";
+    root?.querySelectorAll("button[data-method]").forEach(button=>button.addEventListener("click",()=>useMethodSuggestion(button.dataset.method)));
     const caution=$("#methodCautions");if(caution)caution.textContent=[d.disociacion>=30?"Delta 2 Hz: avoid with high dissociation / deep collapse per Method Base.":"",d.activacion>=70?"900 Hz subtle: avoid with hyperactivation / fragile system per Method Base.":"",d.apertura>=35?"Theta / opening: use prior regulation.":""].filter(Boolean).join(" ")||"No automatic method advisory.";
   }
+  function useMethodSuggestion(key){
+    const protocol=methodProtocols[key];if(!protocol)return;
+    const carrier=protocol.sequence.includes("432 Hz")?methodCarriers.find(item=>item.source_key==="method_432"):protocol.sequence.includes("136 Hz")?methodCarriers.find(item=>item.source_key==="method_136"):null;
+    const modulation=protocol.sequence.some(item=>item.includes("alpha"))?modulationOptions.find(item=>item.key==="alpha_8"):protocol.sequence.some(item=>item.includes("theta"))?modulationOptions.find(item=>item.key==="theta_6"):null;
+    const signal=cloneSignal(S.signal);if(carrier)signal.carrier={source:"method_base",key:carrier.source_key,hz:carrier.value};if(modulation)signal.modulation={source:modulation.source,key:modulation.key,mode:modulation.mode,hz:modulation.hz};
+    const phase=S.phase;S.phaseSignalPlan[phase]={approved:true,signal,status:"APPROVED BY USER"};S.planEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase,from:S.signal,to:signal,mode:S.phaseSignalMode,source:key});
+    if(S.phaseSignalMode==="METHOD GUIDED")transitionSignalTo(signal,{phase,source:"method_guided_user"});renderPhaseSignalPlan();updateReadouts();
+  }
   function renderPhaseSignalPlan(){
+    $("#planBadge").textContent=S.phaseSignalMode==="LOCKED"?"LOCKED · SAME SIGNAL THROUGH ALL PHASES":S.phaseSignalMode;
+    const phaseIndex=PHASE_ORDER.indexOf(S.phase),next=PHASE_ORDER[Math.min(phaseIndex+1,PHASE_ORDER.length-1)];
+    const currentSignal=S.phaseSignalPlan[S.phase].signal,nextSignal=S.phaseSignalPlan[next].signal;
+    $("#planCurrentNext").innerHTML=`CURRENT · ${phaseLabels[S.phase]} · ${currentSignal.carrier.hz} Hz · ${currentSignal.modulation.source} ${currentSignal.modulation.hz} Hz<br>NEXT · ${phaseLabels[next]} · ${nextSignal.carrier.hz} Hz · ${nextSignal.modulation.source} ${nextSignal.modulation.hz} Hz`;
     PHASE_ORDER.forEach(phase=>{
       const target=$("#plan"+phase.charAt(0).toUpperCase()+phase.slice(1));
-      const signal=S.phaseSignalPlan[phase];
-      if(target)target.textContent=`${signal.carrierHz} Hz · ${signal.modulationMode} ${signal.modulationHz} Hz`;
+      const row=S.phaseSignalPlan[phase],signal=row.signal;
+      if(!target)return;
+      if(S.phaseSignalMode==="LOCKED")target.textContent=`${signal.carrier.hz} Hz · ${signal.modulation.mode} ${signal.modulation.hz} Hz · LOCKED`;
+      else target.innerHTML=`<select data-plan-carrier="${phase}">${[...methodCarriers,...symbolicFreqs.map(([value,label])=>({value,label,source_layer:"corpus_wound",source_key:"wound_"+value}))].map(item=>`<option value="${item.source_key}" ${item.source_key===signal.carrier.key?"selected":""}>${item.value} Hz · ${item.source_key}</option>`).join("")}</select><select data-plan-modulation="${phase}">${modulationOptions.map(item=>`<option value="${item.key}" ${item.key===signal.modulation.key?"selected":""}>${item.label}</option>`).join("")}</select><button data-plan-apply="${phase}">${phase===S.phase?"Apply now":"Use next time"}</button><small>${row.status}</small>`;
     });
+    $$("[data-plan-carrier]").forEach(select=>select.addEventListener("change",event=>editPlanCarrier(event.target.dataset.planCarrier,event.target.value)));
+    $$("[data-plan-modulation]").forEach(select=>select.addEventListener("change",event=>editPlanModulation(event.target.dataset.planModulation,event.target.value)));
+    $$("[data-plan-apply]").forEach(button=>button.addEventListener("click",()=>applyPlanRow(button.dataset.planApply)));
+  }
+  function editPlanCarrier(phase,key){const item=[...methodCarriers,...symbolicFreqs.map(([value,label])=>({value,label,source_layer:"corpus_wound",source_key:"wound_"+value}))].find(candidate=>candidate.source_key===key);if(!item)return;const before=cloneSignal(S.phaseSignalPlan[phase].signal);S.phaseSignalPlan[phase].signal.carrier={source:item.source_layer,key:item.source_key,hz:item.value};S.phaseSignalPlan[phase].status="READY";S.planEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase,from:before,to:S.phaseSignalPlan[phase].signal,mode:S.phaseSignalMode,source:"plan_edit"});renderPhaseSignalPlan()}
+  function editPlanModulation(phase,key){const item=modulationOptions.find(candidate=>candidate.key===key);if(!item)return;const before=cloneSignal(S.phaseSignalPlan[phase].signal);S.phaseSignalPlan[phase].signal.modulation={source:item.source,key:item.key,mode:item.mode,hz:item.hz};S.phaseSignalPlan[phase].status="READY";S.planEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase,from:before,to:S.phaseSignalPlan[phase].signal,mode:S.phaseSignalMode,source:"plan_edit"});renderPhaseSignalPlan()}
+  function applyPlanRow(phase){const planned=plannedSignalForPhase(phase);if(!planned)return;S.phaseSignalPlan[phase].approved=true;S.phaseSignalPlan[phase].status="APPROVED BY USER";if(phase===S.phase)transitionSignalTo(planned,{phase,source:"plan_apply_now"});renderPhaseSignalPlan()}
+  function updateLockedPlan(){
+    if(S.phaseSignalMode!=="LOCKED")return;
+    PHASE_ORDER.forEach(phase=>{S.phaseSignalPlan[phase]={approved:true,signal:cloneSignal(S.signal),status:"READY"}});
+    renderPhaseSignalPlan();
   }
 
   function phaseForProgress(progress){
@@ -202,6 +234,7 @@
     const start={dimensions:dimensions(),field:{...S.field}};
     S.phase=nextPhase;
     S.transition={start,target:phaseTargets[nextPhase],startedAt:performance.now(),duration:8000};
+    applyPhaseSignal(nextPhase,"phase_plan");
     if(source==="manual"&&S.running){
       const total=Math.max(num("#duration")*60*1000,1),progress=elapsedMs()/total;
       const releaseAtProgress=[.2,.5,.8,1].find(boundary=>boundary>progress+.0001)||1;
@@ -226,6 +259,34 @@
   function recordSignalEvent(from,to,source="manual"){
     S.signalEvents.push({from,to,phase:S.phase,timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),source});
   }
+  function plannedSignalForPhase(phase){
+    if(S.phaseSignalMode==="LOCKED")return cloneSignal(S.signal);
+    return S.phaseSignalPlan[phase]?.approved?cloneSignal(S.phaseSignalPlan[phase].signal):null;
+  }
+  function createAudioBank(ctx,signal,gainValue=0){
+    const bank={gain:ctx.createGain(),oscA:ctx.createOscillator(),oscB:ctx.createOscillator(),gainA:ctx.createGain(),gainB:ctx.createGain(),panA:ctx.createStereoPanner(),panB:ctx.createStereoPanner()};
+    bank.gain.gain.value=gainValue;bank.oscA.type="sine";bank.oscB.type="triangle";
+    bank.oscA.connect(bank.gainA).connect(bank.panA).connect(bank.gain);bank.oscB.connect(bank.gainB).connect(bank.panB).connect(bank.gain);bank.gain.connect(S.filter);
+    bank.oscA.frequency.value=signal.carrier.hz;bank.oscB.frequency.value=signal.carrier.hz*2;
+    bank.oscA.start();bank.oscB.start();return bank;
+  }
+  function transitionSignalTo(signal,{phase=S.phase,source="phase_plan"}={}){
+    if(!signal)return;
+    const from=cloneSignal(S.signal);S.signal=cloneSignal(signal);
+    if(!S.running||!S.ctx){recordSignalEvent(from,S.signal,source);return}
+    const t=S.ctx.currentTime;
+    if(from.carrier.hz!==signal.carrier.hz){
+      const inactive=1-S.activeBank,next=createAudioBank(S.ctx,signal,0),current=S.banks[S.activeBank];
+      const d=dimensions(),f=S.field,width=clamp(.16+(f.horizon/100)*.72,0,.9);
+      next.gainA.gain.value=.24;next.gainB.gain.value=clamp(.025+(f.presence/100)*.075+(d.apertura/100)*.025,.02,.13);next.panA.pan.value=-width;next.panB.pan.value=width;
+      S.lfoGain.connect(next.gainA.gain);S.banks[inactive]=next;next.gain.gain.setValueAtTime(0,t);current.gain.gain.cancelScheduledValues(t);next.gain.gain.cancelScheduledValues(t);
+      current.gain.gain.setValueAtTime(1,t);current.gain.gain.linearRampToValueAtTime(0,t+4);next.gain.gain.linearRampToValueAtTime(1,t+4);
+      setTimeout(()=>{S.activeBank=inactive;S.oscA=next.oscA;S.oscB=next.oscB;S.gainA=next.gainA;S.gainB=next.gainB;S.panA=next.panA;S.panB=next.panB},4100);
+    }
+    S.lfo.frequency.cancelScheduledValues(t);S.lfo.frequency.setValueAtTime(S.lfo.frequency.value,t);S.lfo.frequency.linearRampToValueAtTime(signal.modulation.hz,t+4);
+    recordSignalEvent(from,S.signal,source);S.signalEvents[S.signalEvents.length-1].phase=phase;
+  }
+  function applyPhaseSignal(phase,source="phase_plan"){const planned=plannedSignalForPhase(phase);if(planned)transitionSignalTo(planned,{phase,source})}
   const parameterDebounce={};
   function recordParameterChangeDebounced(parameter,from,to){
     clearTimeout(parameterDebounce[parameter]);
@@ -235,7 +296,7 @@
   function renderFrequencies(){
     const root=$("#frequencyList");
     root.innerHTML="";
-    const source=S.signal.carrierSource==="method"?methodCarriers:symbolicFreqs.map(([value,label,color])=>({value,label,source_layer:"corpus_wound",source_key:`wound_${value}`,status:"documented_symbolic_protocol",color}));
+    const source=S.signal.carrier.source==="method_base"?methodCarriers:symbolicFreqs.map(([value,label,color])=>({value,label,source_layer:"corpus_wound",source_key:`wound_${value}`,status:"documented_symbolic_protocol",color}));
     source.forEach((item,idx)=>{
       const hz=item.value,label=item.label,color=item.color||"#e1ba73";
       const row=document.createElement("button");
@@ -246,7 +307,7 @@
         <span class="freq-hz">${hz} Hz</span>
         <span class="freq-label">${label}</span>
         <canvas class="freq-wave" width="110" height="20"></canvas>`;
-      row.addEventListener("click",()=>{const previous={...S.signal};S.signal.carrierHz=hz;recordParameterChange("carrier",previous.carrierHz,hz);recordSignalEvent(previous,{...S.signal});$("#carrierReadout").textContent=hz;updateAudio();});
+      row.addEventListener("click",()=>{const previous=cloneSignal(S.signal);S.signal.carrier={source:item.source_layer,key:item.source_key,hz};updateLockedPlan();recordParameterChange("carrier",previous.carrier.hz,hz);recordSignalEvent(previous,S.signal);$("#carrierReadout").textContent=hz;updateAudio();});
       root.appendChild(row);
       const c=row.querySelector("canvas"),cx=c.getContext("2d");
       cx.strokeStyle=color;cx.lineWidth=1.3;cx.beginPath();
@@ -260,6 +321,7 @@
 
   function audioStart(){
     if(S.running) return;
+    if(S.phaseSignalMode!=="LOCKED"&&PHASE_ORDER.some(phase=>!S.phaseSignalPlan[phase]?.approved)){flash("Resolve and approve every phase signal plan row before starting.");return}
     const AC=window.AudioContext||window.webkitAudioContext;
     if(!AC) return;
     S.ctx=new AC();
@@ -270,15 +332,11 @@
     S.timeData=new Uint8Array(S.analyser.fftSize); S.freqData=new Uint8Array(S.analyser.frequencyBinCount);
     S.filter=ctx.createBiquadFilter(); S.filter.type="lowpass";
     S.delay=ctx.createDelay(1); S.feedback=ctx.createGain();
-    S.oscA=ctx.createOscillator();S.oscB=ctx.createOscillator();
-    S.gainA=ctx.createGain();S.gainB=ctx.createGain();
-    S.panA=ctx.createStereoPanner();S.panB=ctx.createStereoPanner();
     S.lfo=ctx.createOscillator();S.lfoGain=ctx.createGain();
     S.breathOsc=ctx.createOscillator();S.breathGain=ctx.createGain();
 
-    S.oscA.type="sine";S.oscB.type="triangle";
-    S.oscA.connect(S.gainA).connect(S.panA).connect(S.filter);
-    S.oscB.connect(S.gainB).connect(S.panB).connect(S.filter);
+    S.banks=[createAudioBank(ctx,S.signal,1),createAudioBank(ctx,S.signal,0)];S.activeBank=0;
+    S.oscA=S.banks[0].oscA;S.oscB=S.banks[0].oscB;S.gainA=S.banks[0].gainA;S.gainB=S.banks[0].gainB;S.panA=S.banks[0].panA;S.panB=S.banks[0].panB;
     S.filter.connect(S.master);
     S.filter.connect(S.delay);
     S.delay.connect(S.master);
@@ -288,7 +346,7 @@
     S.lfo.connect(S.lfoGain).connect(S.gainA.gain);
     S.breathOsc.connect(S.breathGain).connect(S.master.gain);
 
-    [S.oscA,S.oscB,S.lfo,S.breathOsc].forEach(o=>o.start());
+    [S.lfo,S.breathOsc].forEach(o=>o.start());
     S.running=true;S.startedAt=performance.now();
     $("#playBtn").textContent="Ⅱ";
     updateAudio();
@@ -313,7 +371,7 @@
     if(!S.running||!S.ctx) return;
     const d=dimensions(), f=S.field, t=S.ctx.currentTime;
     const depth=num("#depth");
-    const carrierHz=clamp(S.signal.carrierHz,40,2000);
+    const carrierHz=clamp(S.signal.carrier.hz,40,2000);
     S.oscA.frequency.setTargetAtTime(carrierHz,t,.16);
     S.oscB.frequency.setTargetAtTime(carrierHz*2,t,.16);
     S.gainA.gain.setTargetAtTime(.24,t,.18);
@@ -324,7 +382,7 @@
     S.feedback.gain.setTargetAtTime(clamp(f.resonance/100,0,.55),t,.18);
     S.filter.frequency.setTargetAtTime(clamp(650+(100-d.inframundo)*25+d.apertura*10,420,4200),t,.18);
     S.filter.Q.setTargetAtTime(1+(f.crystallization/100)*7,t,.18);
-    S.lfo.frequency.setTargetAtTime(S.signal.modulationHz,t,.18);
+    S.lfo.frequency.setTargetAtTime(S.signal.modulation.hz,t,.18);
     S.lfoGain.gain.setTargetAtTime(.035+d.activacion/100*.10,t,.18);
     const baseMaster=[.025,.035,.045][depth];
     S.master.gain.setTargetAtTime(baseMaster,t,.2);
@@ -341,24 +399,27 @@
     return +(index*S.ctx.sampleRate/(S.analyser.fftSize)).toFixed(2);
   }
   function signalSnapshot(){
-    const carrier=clamp(S.signal.carrierHz,40,2000),sampleRate=S.ctx?.sampleRate??null,fftSize=S.analyser?.fftSize??8192;
-    return {carrier_source:S.signal.carrierSource,carrier_target_hz:S.signal.carrierHz,oscillator_a_hz:carrier,oscillator_b_hz:carrier*2,modulation_mode:S.signal.modulationMode,modulation_hz:S.signal.modulationHz,modulation_source:S.signal.carrierSource==="method"?"method_base":"corpus_wound",environmental_breath_hz:S.field.breath,sample_rate_hz:sampleRate,fft_size:fftSize,fft_resolution_hz:sampleRate?+(sampleRate/fftSize).toFixed(2):null,dominant_fft_hz:dominantFftHz(),audio_context_state:S.ctx?.state??"closed",master_gain:S.master?.gain.value??0};
+    const carrier=clamp(S.signal.carrier.hz,40,2000),sampleRate=S.ctx?.sampleRate??null,fftSize=S.analyser?.fftSize??8192;
+    return {carrier:{source:S.signal.carrier.source,key:S.signal.carrier.key,target_hz:S.signal.carrier.hz},harmonic_b:{source:"aeon_synthesis",rule:"2x_carrier",target_hz:carrier*2},modulation:{source:S.signal.modulation.source,key:S.signal.modulation.key,mode:S.signal.modulation.mode,target_hz:S.signal.modulation.hz},environmental_breath:{source:"aeon_field_mapping",acspec:"ACSPEC-114",target_hz:S.field.breath},sample_rate_hz:sampleRate,fft_size:fftSize,fft_resolution_hz:sampleRate?+(sampleRate/fftSize).toFixed(2):null,dominant_fft_hz:dominantFftHz(),rms_dbfs:signalRmsDbfs(),peak_dbfs:signalPeakDbfs(),near_clipping:signalNearClipping(),audio_context_state:S.ctx?.state??"closed",master_gain:S.master?.gain.value??0};
   }
   function updateSignalMonitor(){
     const signal=signalSnapshot(),format=(value,digits=2)=>value==null?"—":`${Number(value).toFixed(digits)} Hz`;
-    $("#signalSymbolic").textContent=format(signal.carrier_target_hz);
-    $("#signalCarrier").textContent=format(signal.oscillator_a_hz);
-    $("#signalHarmonic").textContent=format(signal.oscillator_b_hz);
-    $("#signalPulse").textContent=format(signal.modulation_hz,2);
-    $("#signalBreath").textContent=format(signal.environmental_breath_hz,3);
+    $("#signalSymbolic").textContent=format(signal.carrier.target_hz);
+    $("#signalCarrier").textContent=format(signal.carrier.target_hz);
+    $("#signalHarmonic").textContent=`AEON synthesis · ${format(signal.harmonic_b.target_hz)}`;
+    $("#signalPulse").textContent=`${signal.modulation.source} · ${format(signal.modulation.target_hz,2)}`;
+    $("#signalBreath").textContent=format(signal.environmental_breath.target_hz,3);
     $("#signalSampleRate").textContent=signal.sample_rate_hz?`${signal.sample_rate_hz} Hz`:"—";
     $("#signalPeak").textContent=format(signal.dominant_fft_hz);
     $("#signalFftResolution").textContent=format(signal.fft_resolution_hz,2);
-    $("#signalRms").textContent=signalRmsDbfs();
-    $("#signalPeakDbfs").textContent=signalPeakDbfs();
-    $("#signalClipping").textContent=signalNearClipping();
-    $("#signalSource").textContent=`${S.signal.carrierSource==="method"?"METHOD BASE":"CORPUS · WOUND SYMBOLIC"} · ${signal.carrier_target_hz} Hz`;
-    $("#signalModulationSource").textContent=`${S.signal.carrierSource==="method"?"METHOD BASE":"MANUAL / FIELD"} · ${signal.modulation_mode}`;
+    $("#signalRms").textContent=signal.rms_dbfs;
+    $("#signalPeakDbfs").textContent=signal.peak_dbfs;
+    $("#signalClipping").textContent=signal.near_clipping;
+    const sourceLabel=source=>source==="method_base"?"METHOD BASE":source==="corpus_wound"?"CORPUS · WOUND SYMBOLIC":source==="legacy_experimental"?"LEGACY EXPERIMENTAL":"MANUAL";
+    $("#signalSource").textContent=`${sourceLabel(signal.carrier.source)} · ${signal.carrier.target_hz} Hz`;
+    $("#signalModulationSource").textContent=`${sourceLabel(signal.modulation.source)} · ${signal.modulation.key}`;
+    $("#signalCurrentPhase").textContent=phaseLabels[S.phase];
+    $("#signalPlanMode").textContent=S.phaseSignalMode;
   }
   function signalRmsDbfs(){if(!S.running||!S.analyser)return "—";S.analyser.getByteTimeDomainData(S.timeData);let sum=0;for(const value of S.timeData){const sample=(value-128)/128;sum+=sample*sample}return `${(20*Math.log10(Math.max(Math.sqrt(sum/S.timeData.length),1e-5))).toFixed(1)} dBFS`}
   function signalPeakDbfs(){if(!S.running||!S.analyser)return "—";let peak=0;for(const value of S.timeData)peak=Math.max(peak,Math.abs((value-128)/128));return `${(20*Math.log10(Math.max(peak,1e-5))).toFixed(1)} dBFS`}
@@ -411,10 +472,10 @@
     root.innerHTML=S.microvoids.map(event=>{const left=clamp(event.timestamp_s/total*100,1,99);return `<span class="microvoid-marker" data-phase="${escapeHtml(event.phase)}" style="left:${left}%" title="${escapeHtml(phaseLabels[event.phase]||event.phase)} · ${event.timestamp_s}s"></span>`}).join("");
   }
   function resetSession(){
-    audioStop();S.elapsedBefore=0;S.phase="descenso";S.transition=null;S.manualOverride=null;S.phaseEvents=[];S.parameterEvents=[];S.signalEvents=[];syncPhaseUi();applyState(phaseTargets.descenso.dimensions,phaseTargets.descenso.field);$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";renderMicrovoidTimeline();flash("Field reset; session preserved.");
+    audioStop();S.elapsedBefore=0;S.phase="descenso";S.transition=null;S.manualOverride=null;S.phaseEvents=[];S.parameterEvents=[];S.signalEvents=[];S.planEvents=[];updateLockedPlan();syncPhaseUi();applyState(phaseTargets.descenso.dimensions,phaseTargets.descenso.field);$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";renderMicrovoidTimeline();flash("Field reset; session preserved.");
   }
   function newSession(){
-    audioStop();S.sessionId=createSessionId();S.sessionStartISO=new Date().toISOString();S.elapsedBefore=0;S.microvoids=[];S.phaseEvents=[];S.parameterEvents=[];S.signalEvents=[];S.transition=null;S.manualOverride=null;S.phase="descenso";syncPhaseUi();$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyState(phaseTargets.descenso.dimensions,phaseTargets.descenso.field);flash("New session started.");
+    audioStop();S.sessionId=createSessionId();S.sessionStartISO=new Date().toISOString();S.elapsedBefore=0;S.microvoids=[];S.phaseEvents=[];S.parameterEvents=[];S.signalEvents=[];S.planEvents=[];S.transition=null;S.manualOverride=null;S.phase="descenso";updateLockedPlan();syncPhaseUi();$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyState(phaseTargets.descenso.dimensions,phaseTargets.descenso.field);flash("New session started.");
   }
 
   function sessionObject(){
@@ -425,7 +486,8 @@
       experiment_id:S.experimentId,
       participant_id:S.participantId,
       engine:"AEON Sound Field",
-      engine_version:"0.3.3",
+      engine_version:"0.3.4",
+      engine_build:"0.3.4",
       date:S.sessionStartISO,
       duration_real_s:+(elapsedMs()/1000).toFixed(2),
       context:{
@@ -439,18 +501,18 @@
       parameters:{
         dimensions:dimensions(),
         derived_profile:x,
-        selected_carrier_hz:S.signal.carrierHz,
-        signal:S.signal,
+        current_signal:signalSnapshot(),
         field:S.field,
         depth:["soft","medium","deep"][num("#depth")],
         planned_duration_min:num("#duration")
         ,signal:signalSnapshot()
         ,phase_plan:{order:PHASE_ORDER,fractions:PHASE_FRACTIONS,transition_ms:8000,status:"experimental_noncanonical"}
-        ,phase_signal_plan:{mode:S.phaseSignalMode,phases:S.phaseSignalPlan,status:"experimental_noncanonical"}
+        ,phase_signal_plan:{mode:S.phaseSignalMode,phases:S.phaseSignalPlan,provenance_boundary:"Source identity remains separate for carrier, modulation, harmonic synthesis and environmental breath.",method_match_policy:"show_all_no_priority",status:"experimental_noncanonical"}
+        ,acspec_time_audio_link:false
         ,matched_method_protocols:methodMatches()
-        ,construct_mapping_version:"0.3.3"
+        ,construct_mapping_version:"0.3.4"
       },
-      events:{phase_transitions:S.phaseEvents,parameter_changes:S.parameterEvents,signal_transitions:S.signalEvents,microvoids:S.microvoids},
+      events:{phase_transitions:S.phaseEvents,signal_transitions:S.signalEvents,parameter_changes:S.parameterEvents,plan_changes:S.planEvents,microvoids:S.microvoids},
       observations:loadNotes(),
       interpretations:{experimental:null,symbolic:null},
       safety:{
@@ -466,10 +528,7 @@
   }
   function methodMatches(){
     const d=dimensions(),matches=[];
-    if(d.inframundo>=35&&d.apertura<30)matches.push({label:"Inframundo dominant",source:"Method Base"});
-    if(d.activacion>=35)matches.push({label:"Activation dominant",source:"Method Base"});
-    if(d.disociacion>=30)matches.push({label:"Dissociation elevated",source:"Method Base"});
-    if(d.apertura>=35&&d.inframundo<40)matches.push({label:"Opening available",source:"Method Base"});
+    Object.entries(methodProtocols).forEach(([key,protocol])=>{if(protocol.condition(d))matches.push({label:key,source:"Method Base",reading:protocol.reading,sequence:protocol.sequence,avoid:protocol.avoid})});
     return matches;
   }
 
@@ -494,10 +553,7 @@
       ,experimentId:S.experimentId
       ,participantId:S.participantId
       ,field:S.field
-      ,carrier:S.signal.carrierHz
-      ,carrierSource:S.signal.carrierSource
-      ,modulationMode:S.signal.modulationMode
-      ,modulationHz:S.signal.modulationHz
+      ,signal:S.signal
       ,construct:$("#constructSelect").value
       ,listeningContext:document.querySelector(".seg.active")?.dataset.output||"headphones"
     }));
@@ -512,10 +568,7 @@
       if(p.duration)$("#duration").value=p.duration;
       if(p.depth!=null)$("#depth").value=p.depth;
       if(p.field)S.field={...S.field,...p.field};
-      if(p.carrier!=null)S.signal.carrierHz=p.carrier;
-      if(p.carrierSource)S.signal.carrierSource=p.carrierSource;
-      if(p.modulationMode)S.signal.modulationMode=p.modulationMode;
-      if(p.modulationHz!=null)S.signal.modulationHz=p.modulationHz;
+      if(p.signal)S.signal=cloneSignal(p.signal);
       if(p.construct)$("#constructSelect").value=p.construct;
       if(p.listeningContext){$$(".seg").forEach(button=>button.classList.toggle("active",button.dataset.output===p.listeningContext))}
       S.experimentId=p.experimentId||S.experimentId;
@@ -576,7 +629,7 @@
           <div class="drawer-card full"><h3>Vista previa JSON</h3><pre style="white-space:pre-wrap;color:#94a5b8;font:9px/1.5 ui-monospace;max-height:420px;overflow:auto">${escapeHtml(JSON.stringify(rec,null,2))}</pre></div>
           <div class="drawer-card full"><button class="action-btn cyan" id="downloadAtlasBtn" style="width:100%">Download ATLAS JSON</button></div>
         </div>`;
-      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.3.json")),0);
+      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.4.json")),0);
     }else if(type==="descenso"||type==="retorno"){
       transitionToPhase(type==="descenso"?"descenso":"retorno","manual");
       eyebrow.textContent=phaseLabels[type].toUpperCase();title.textContent=type==="descenso"?"Descent profile":"Return profile";
@@ -591,7 +644,7 @@
         </div>`;
     }else{
       eyebrow.textContent="HOME";title.textContent="AEON Sound Field";
-      content.innerHTML=`<div class="drawer-card"><h3>v0.3.3</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
+      content.innerHTML=`<div class="drawer-card"><h3>v0.3.4</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
     }
     drawer.classList.add("open");drawer.setAttribute("aria-hidden","false");
   }
@@ -691,9 +744,10 @@
     cx.arc(X,Y,R*.93,Math.PI*.93,Math.PI*2.07);cx.stroke();
 
     // waypoints
+    const activeIndex=PHASE_ORDER.indexOf(S.phase);
     [Math.PI,Math.PI*1.25,Math.PI*1.5,Math.PI*2].forEach((a,i)=>{
       const px=X+Math.cos(a)*R*.93,py=Y+Math.sin(a)*R*.93;
-      cx.fillStyle=gold+(i===1?".95)":".68)");cx.beginPath();cx.arc(px,py,6+i*2,0,Math.PI*2);cx.fill();
+      const active=i===activeIndex;cx.fillStyle=gold+(active?".98)":".48)");cx.beginPath();cx.arc(px,py,active?9:5+i,0,Math.PI*2);cx.fill();
     });
 
     // central vesica/presence
@@ -755,7 +809,7 @@
       for(let i=0;i<bins;i++){
         const h=data?data[i]/255*H*.8:0;mcx.fillStyle="rgba(102,215,241,.55)";mcx.fillRect(i/bins*W,H-h,Math.max(1,W/bins-1),h);
       }
-      const carrier=clamp(S.signal.carrierHz,40,2000);[carrier,carrier*2].forEach((hz,i)=>{if(hz<=visibleHz){const x=hz/visibleHz*W;mcx.strokeStyle=i?"#e1ba73":"#a070f7";mcx.beginPath();mcx.moveTo(x,0);mcx.lineTo(x,H);mcx.stroke()}});
+      const carrier=clamp(S.signal.carrier.hz,40,2000);[carrier,carrier*2].forEach((hz,i)=>{if(hz<=visibleHz){const x=hz/visibleHz*W;mcx.strokeStyle=i?"#e1ba73":"#a070f7";mcx.beginPath();mcx.moveTo(x,0);mcx.lineTo(x,H);mcx.stroke()}});
     }else{
       const labels=["Underworld","Activation","Dissociation","Opening"],values=dimensions(),keys=["inframundo","activacion","disociacion","apertura"];
       labels.forEach((label,i)=>{const y=18+i*(H-42)/3;mcx.fillStyle="#e1ba73";mcx.fillText(`${label} ${Math.round(values[keys[i]])}`,10,y);mcx.fillStyle="#26344a";mcx.fillRect(10,y+7,W-20,5);mcx.fillStyle="#66d7f1";mcx.fillRect(10,y+7,(W-20)*values[keys[i]]/100,5)});
@@ -797,14 +851,14 @@
     $("#timerBtn").addEventListener("click",()=>flash("Session duration is controlled from the left panel."));
     $("#expandVizBtn").addEventListener("click",()=>flash("Expanded visualization reserved for AEON v0.4."));
     $("#closeDrawerBtn").addEventListener("click",()=>{$("#drawer").classList.remove("open");$("#drawer").setAttribute("aria-hidden","true")});
-    $("#carrierSource").addEventListener("change",event=>{const previous={...S.signal};S.signal.carrierSource=event.target.value;renderFrequencies();recordParameterChange("carrier_source",previous.carrierSource,S.signal.carrierSource);recordSignalEvent(previous,{...S.signal});});
-    $("#modulationSelect").addEventListener("change",event=>{if(event.target.value==="manual"){S.signal.modulationMode="manual";S.signal.modulationHz=Number($("#manualModulation").value)}else{const option=modulationBands.find(item=>item.source_key===event.target.value);if(!option)return;S.signal.modulationMode=option.mode;S.signal.modulationHz=option.value}recordParameterChange("modulation",null,{mode:S.signal.modulationMode,hz:S.signal.modulationHz});updateAudio();updateReadouts()});
-    $("#manualModulation").addEventListener("input",event=>{const previous=S.signal.modulationHz;S.signal.modulationMode="manual";S.signal.modulationHz=Number(event.target.value);$("#modulationSelect").value="manual";recordParameterChangeDebounced("modulation",previous,S.signal.modulationHz);updateAudio();updateReadouts()});
-    $("#phaseSignalMode").addEventListener("change",event=>{S.phaseSignalMode=event.target.value;recordParameterChange("phase_signal_mode",null,S.phaseSignalMode)});
+    $("#carrierSource").addEventListener("change",event=>{const previous=cloneSignal(S.signal);S.signal.carrier.source=event.target.value==="method"?"method_base":"corpus_wound";renderFrequencies();updateLockedPlan();recordParameterChange("carrier_source",previous.carrier.source,S.signal.carrier.source);recordSignalEvent(previous,S.signal);});
+    $("#modulationSelect").addEventListener("change",event=>{const option=modulationOptions.find(item=>item.key===event.target.value);if(!option)return;const previous=cloneSignal(S.signal);S.signal.modulation={source:option.source,key:option.key,mode:option.mode,hz:option.hz};$("#manualModulation").value=option.hz;updateLockedPlan();recordParameterChange("modulation",previous.modulation,S.signal.modulation);recordSignalEvent(previous,S.signal);updateAudio();updateReadouts()});
+    $("#manualModulation").addEventListener("input",event=>{const previous=cloneSignal(S.signal);S.signal.modulation={source:"manual",key:"manual",mode:"manual",hz:Number(event.target.value)};$("#modulationSelect").value="legacy_0_62";updateLockedPlan();recordParameterChangeDebounced("modulation",previous.modulation,S.signal.modulation);recordSignalEvent(previous,S.signal);updateAudio();updateReadouts()});
+    $("#phaseSignalMode").addEventListener("change",event=>{S.phaseSignalMode=event.target.value;recordParameterChange("phase_signal_mode",null,S.phaseSignalMode);if(S.phaseSignalMode==="LOCKED")updateLockedPlan();if(S.phaseSignalMode==="METHOD GUIDED")PHASE_ORDER.forEach(phase=>{S.phaseSignalPlan[phase].approved=false;S.phaseSignalPlan[phase].status="UNRESOLVED"});updateReadouts()});
   }
 
   async function init(){
-    ensureSession();renderFrequencies();wire();loadProfile();$("#carrierSource").value=S.signal.carrierSource;renderFrequencies();syncPhaseUi();updateReadouts();drawField();drawMini();animateSide();
+    ensureSession();renderFrequencies();wire();loadProfile();$("#carrierSource").value=S.signal.carrier.source==="method_base"?"method":"wound_symbolic";$("#modulationSelect").value=modulationOptions.some(item=>item.key===S.signal.modulation.key)?S.signal.modulation.key:"legacy_0_62";$("#manualModulation").value=S.signal.modulation.hz;updateLockedPlan();renderFrequencies();syncPhaseUi();updateReadouts();drawField();drawMini();animateSide();
     try{
       const r=await fetch("mappings.json",{cache:"no-store"});if(r.ok){$("#repoDot").classList.add("online");$("#repoStatus").textContent="LOCAL LISTO"}
     }catch(_){}

@@ -40,9 +40,9 @@
   const constructRegistry={
     presencia:{id:"ACSPEC-106",definition:"Nivel de ocupación sensorial del campo.",fieldKey:"presence",min:0,max:100,step:1,unit:"%",audio:"harmonic B gain/density; supporting stereo occupancy.",visual:"torus line density + particle density."},
     resonancia:{id:"ACSPEC-105",definition:"Persistencia de un patrón en la atención.",fieldKey:"resonance",min:0,max:100,step:1,unit:"%",audio:"delay feedback, capped at 0.55.",visual:"persistence / echo rings."},
-    tiempo:{id:"ACSPEC-100",definition:"Relación entre el tiempo físico y el tiempo percibido dentro del ecosistema cognitivo.",fieldKey:"pulse",min:.1,max:12,step:.1,unit:"rate",audio:"None in v0.3.4. Audio protocol modulation is controlled separately in Signal sources.",visual:"Field animation cadence / temporal motion.",status:"experimental_noncanonical"},
+    tiempo:{id:"ACSPEC-100",definition:"Relación entre el tiempo físico y el tiempo percibido dentro del ecosistema cognitivo.",fieldKey:"pulse",min:.1,max:12,step:.1,unit:"rate",audio:"None in v0.3.4.2. Audio protocol modulation is controlled separately in Signal sources.",visual:"Field animation cadence / temporal motion.",status:"experimental_noncanonical"},
     vacio:{id:"ACSPEC-101",definition:"Estructura de baja información utilizada para modular expectativa.",fieldKey:"void",min:0,max:100,step:1,unit:"%",audio:"delay time / temporal spacing.",visual:"field sparsity / spacing."},
-    entropia:{id:"ACSPEC-102",definition:"Imprevisibilidad controlada del entorno.",fieldKey:"entropy",min:0,max:100,step:1,unit:"%",audio:"none in v0.3.4.1; no reproducible audio mapping is currently defined.",visual:"deterministic geometric irregularity; no random audio jitter."},
+    entropia:{id:"ACSPEC-102",definition:"Imprevisibilidad controlada del entorno.",fieldKey:"entropy",min:0,max:100,step:1,unit:"%",audio:"none in v0.3.4.2; no reproducible audio mapping is currently defined.",visual:"deterministic geometric irregularity; no random audio jitter."},
     horizonte:{id:"ACSPEC-103",definition:"Profundidad espacial percibida del ecosistema.",fieldKey:"horizon",min:0,max:100,step:1,unit:"%",audio:"stereo width.",visual:"torus horizontal depth/spread."},
     cristalizacion:{id:"ACSPEC-110",definition:"Estabilización prolongada de una interpretación.",fieldKey:"crystallization",min:0,max:100,step:1,unit:"%",audio:"filter Q.",visual:"geometric rigidity; higher values reduce entropy deformation."},
     respiracion:{id:"ACSPEC-114",definition:"Oscilación lenta de la energía perceptiva global.",fieldKey:"breath",min:.03,max:.15,step:.001,unit:"Hz",audio:"slow global gain envelope with depth capped at 4%.",visual:"slow global expansion/contraction."}
@@ -101,6 +101,7 @@
     modulationTransitionUntil:0,
     signal:cloneSignal(defaultSignal),
     uiCarrierLibrary:"corpus_wound",
+    visual:{raf:null,running:false,lastFrame:0},
     phaseSignalMode:"LOCKED",
     phaseSignalPlan:Object.fromEntries(PHASE_ORDER.map(phase=>[phase,{approved:true,signal:cloneSignal(defaultSignal),status:"READY"}])),
     draftPlan:null,
@@ -157,6 +158,7 @@
     renderMicrovoidTimeline();
     updateAudio();
     updateSignalMonitor();
+    requestStaticVisualRefresh();
   }
 
   function syncPhaseUi(){
@@ -238,6 +240,9 @@
   function transitionToPhase(nextPhase,source="automatic"){
     if(!phaseTargets[nextPhase]||nextPhase===S.phase&& !S.transition)return;
     const start={dimensions:dimensions(),field:{...S.field}};
+    if(!S.running&&source==="manual"){
+      S.phase=nextPhase;S.transition=null;applyState(phaseTargets[nextPhase].dimensions,phaseTargets[nextPhase].field);syncPhaseUi();S.phaseEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase:nextPhase,source});renderVisualFrame();return;
+    }
     S.phase=nextPhase;
     S.transition={start,target:phaseTargets[nextPhase],startedAt:performance.now(),duration:8000};
     applyPhaseSignal(nextPhase,"phase_plan");
@@ -321,7 +326,7 @@
         <span class="freq-hz">${hz} Hz</span>
         <span class="freq-label">${label}</span>
         <canvas class="freq-wave" width="110" height="20"></canvas>`;
-      row.addEventListener("click",()=>{const next=cloneSignal(S.signal);next.carrier={source:item.source_layer,key:item.source_key,hz};recordParameterChange("carrier",S.signal.carrier.hz,hz);transitionSignalTo(next,{source:"carrier_selection"});if(S.phaseSignalMode==="LOCKED")updateLockedPlan();else flash("Audition signal changed; scheduled plan unchanged.");$("#carrierReadout").textContent=hz;updateAudio();});
+      row.addEventListener("click",()=>{const next=cloneSignal(S.signal);next.carrier={source:item.source_layer,key:item.source_key,hz};recordParameterChange("carrier",S.signal.carrier.hz,hz);transitionSignalTo(next,{source:"carrier_selection"});if(S.phaseSignalMode==="LOCKED")updateLockedPlan();else flash("Audition signal changed; scheduled plan unchanged.");$("#carrierReadout").textContent=hz;updateAudio();requestStaticVisualRefresh()});
       root.appendChild(row);
       const c=row.querySelector("canvas"),cx=c.getContext("2d");
       cx.strokeStyle=color;cx.lineWidth=1.3;cx.beginPath();
@@ -364,12 +369,14 @@
     S.running=true;S.startedAt=performance.now();
     $("#playBtn").textContent="Ⅱ";
     updateAudio();
+    startVisualMotion();
     S.timer=setInterval(updateTimer,250);
   }
 
   function audioStop(){
     if(!S.running) return;
     S.elapsedBefore += performance.now()-S.startedAt;
+    stopVisualMotion({renderFrozen:true});
     const ctx=S.ctx;
     try{
       S.master.gain.cancelScheduledValues(ctx.currentTime);
@@ -499,8 +506,8 @@
       experiment_id:S.experimentId,
       participant_id:S.participantId,
       engine:"AEON Sound Field",
-      engine_version:"0.3.4.1",
-      engine_build:"0.3.4.1",
+      engine_version:"0.3.4.2",
+      engine_build:"0.3.4.2",
       date:S.sessionStartISO,
       duration_real_s:+(elapsedMs()/1000).toFixed(2),
       context:{
@@ -522,7 +529,7 @@
         ,phase_signal_plan:{mode:S.phaseSignalMode,phases:S.phaseSignalPlan,provenance_boundary:"Source identity remains separate for carrier, modulation, harmonic synthesis and environmental breath.",method_match_policy:"show_all_no_priority",status:"experimental_noncanonical"}
         ,acspec_time_audio_link:false
         ,matched_method_protocols:methodMatches()
-        ,construct_mapping_version:"0.3.4.1"
+        ,construct_mapping_version:"0.3.4.2"
       },
       events:{phase_transitions:S.phaseEvents,signal_transitions:S.signalEvents,parameter_changes:S.parameterEvents,plan_changes:S.planEvents,microvoids:S.microvoids},
       observations:loadNotes(),
@@ -641,7 +648,7 @@
           <div class="drawer-card full"><h3>Vista previa JSON</h3><pre style="white-space:pre-wrap;color:#94a5b8;font:9px/1.5 ui-monospace;max-height:420px;overflow:auto">${escapeHtml(JSON.stringify(rec,null,2))}</pre></div>
           <div class="drawer-card full"><button class="action-btn cyan" id="downloadAtlasBtn" style="width:100%">Download ATLAS JSON</button></div>
         </div>`;
-      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.4.1.json")),0);
+      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.4.2.json")),0);
     }else if(type==="descenso"||type==="retorno"){
       transitionToPhase(type==="descenso"?"descenso":"retorno","manual");
       eyebrow.textContent=phaseLabels[type].toUpperCase();title.textContent=type==="descenso"?"Descent profile":"Return profile";
@@ -656,7 +663,7 @@
         </div>`;
     }else{
       eyebrow.textContent="HOME";title.textContent="AEON Sound Field";
-      content.innerHTML=`<div class="drawer-card"><h3>v0.3.4.1</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
+      content.innerHTML=`<div class="drawer-card"><h3>v0.3.4.2</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
     }
     drawer.classList.add("open");drawer.setAttribute("aria-hidden","false");
   }
@@ -682,7 +689,7 @@
   const lc=$("#leftBrain"), lcx=lc.getContext("2d");
   const rc=$("#rightBrain"), rcx=rc.getContext("2d");
   const mc=$("#miniViz"), mcx=mc.getContext("2d");
-  let anim=0;
+  const prefersReducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function fit(c){
     const dpr=Math.min(devicePixelRatio||1,2),r=c.getBoundingClientRect();
@@ -691,9 +698,18 @@
     const x=c.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);
   }
 
-  function drawField(){
+  function visualSessionSeconds(){return elapsedMs()/1000}
+  function visualRateFromFieldPulse(pulse){const p=clamp(Number(pulse)||0,.1,12),n=(p-.1)/(12-.1);return .018+n*.10}
+  function visualClock(){const seconds=visualSessionSeconds(),visualHz=visualRateFromFieldPulse(S.field.pulse);return {seconds,visualHz,phase:prefersReducedMotion?0:seconds*visualHz*Math.PI*2}}
+  function renderVisualFrame(){drawFieldFrame();drawMiniFrame();drawSideFrames()}
+  function visualLoop(timestamp){if(!S.running){S.visual.running=false;S.visual.raf=null;return}if(timestamp-S.visual.lastFrame>=1000/30){S.visual.lastFrame=timestamp;renderVisualFrame()}S.visual.raf=requestAnimationFrame(visualLoop)}
+  function startVisualMotion(){if(S.visual.running)return;S.visual.running=true;$("#fieldStatus").textContent="FIELD · LIVE";renderVisualFrame();S.visual.raf=requestAnimationFrame(visualLoop)}
+  function stopVisualMotion({renderFrozen=true}={}){if(S.visual.raf!=null){cancelAnimationFrame(S.visual.raf);S.visual.raf=null}S.visual.running=false;$("#fieldStatus").textContent="FIELD · STATIC";if(renderFrozen)renderVisualFrame()}
+  function requestStaticVisualRefresh(){if(!S.running)renderVisualFrame()}
+
+  function drawFieldFrame(){
     fit(fc);const W=fc.clientWidth,H=fc.clientHeight,cx=fcx,d=dimensions(),x=derived();
-    cx.clearRect(0,0,W,H);const nowSec=performance.now()/1000;anim=nowSec*S.field.pulse*Math.PI*2;
+    cx.clearRect(0,0,W,H);const clock=visualClock();
     const X=W/2,Y=H/2,R=Math.min(W,H)*.34;
     const gold="rgba(225,186,115,",cyan="rgba(102,215,241,",vio="rgba(160,112,247,";
 
@@ -711,7 +727,7 @@
 
     // rotating polygons
     for(let ring=0;ring<4;ring++){
-      const pts=6+ring*2, rr=R*(.34+ring*.13), rot=anim*(ring%2?1:-1)*(1+ring*.15);
+      const pts=6+ring*2, rr=R*(.34+ring*.13), rot=clock.phase*(ring%2?1:-1)*(.28+ring*.06);
       cx.strokeStyle=ring%2?cyan+".18)":vio+".16)";cx.lineWidth=1;cx.beginPath();
       for(let i=0;i<=pts;i++){
         const a=rot+i/pts*Math.PI*2,px=X+Math.cos(a)*rr,py=Y+Math.sin(a)*rr;
@@ -721,21 +737,21 @@
     }
 
     // torus curves
-    const f=S.field, entropyEffective=(f.entropy/100)*(1-(f.crystallization/100)*.75), torusCount=Math.round(10+(f.presence/100)*22), cadence=.25+f.pulse*.8;
-    const breathScale=1+Math.sin(nowSec*Math.PI*2*f.breath)*.05, rotation=nowSec*cadence;
+    const f=S.field, entropyEffective=(f.entropy/100)*(1-(f.crystallization/100)*.75), torusCount=Math.round(10+(f.presence/100)*22);
+    const breathScale=1+Math.sin(clock.seconds*Math.PI*2*f.breath)*.03, rotation=clock.phase*.38;
     for(let j=0;j<torusCount;j++){
       const off=(j-10.5)/10.5, alpha=.035+(1-Math.abs(off))*.035;
       cx.strokeStyle=cyan+alpha+")";cx.beginPath();
       for(let i=0;i<=140;i++){
         const t=i/140*Math.PI*2;
         const px=X+Math.cos(t+rotation)*R*(.77+off*.12)*(1+f.horizon/100*.16)*breathScale;
-        const py=Y+Math.sin(t+rotation)*R*.48*breathScale + Math.sin(t*2+anim*8+j)*R*.045*off*entropyEffective;
+        const py=Y+Math.sin(t+rotation)*R*.48*breathScale + Math.sin(t*2+clock.phase*.75+j*.35)*R*.045*off*entropyEffective;
         i?cx.lineTo(px,py):cx.moveTo(px,py);
       }cx.stroke();
     }
 
     for(let ring=0;ring<Math.round(f.resonance/25);ring++){
-      const rr=R*(.45+ring*.15+Math.sin(anim+ring)*.015);
+      const rr=R*(.45+ring*.15+Math.sin(clock.phase*.30+ring)*.015);
       cx.strokeStyle=gold+(.08+f.resonance/100*.12)+")";cx.beginPath();cx.arc(X,Y,rr,0,Math.PI*2);cx.stroke();
     }
 
@@ -746,7 +762,8 @@
       for(let i=0;i<=100;i++){
         const t=i/100, px=X+side*(R*.2+t*R*.92);
         const amp=(side<0?leftAmp:rightAmp);
-        const py=Y+Math.sin(t*13+anim*(8+d.activacion*.12))*R*.07*amp*Math.sin(t*Math.PI),gap=d.disociacion/100;
+        const activationGain=.65+(d.activacion/100)*.70,phase=clock.phase*activationGain;
+        const py=Y+Math.sin(t*13+phase)*R*.07*amp*Math.sin(t*Math.PI),gap=d.disociacion/100;
         if(gap>.78&&i%5<Math.round(gap*3))cx.moveTo(px,py);else i?cx.lineTo(px,py):cx.moveTo(px,py);
       }cx.stroke();
     }
@@ -765,22 +782,21 @@
     // central vesica/presence
     cx.strokeStyle="rgba(138,180,223,.21)";cx.lineWidth=1;
     for(let i=0;i<10;i++){
-      const rr=R*(.15+i*.033),sx=Math.sin(anim*4+i)*R*.012;
+      const rr=R*(.15+i*.033),sx=Math.sin(clock.phase*.45+i)*R*.012;
       cx.beginPath();cx.ellipse(X+sx,Y,rr*.62,rr,0,0,Math.PI*2);cx.stroke();
     }
 
     // subtle particles
     for(let i=0;i<Math.round(25+(f.presence/100)*85);i++){
-      const spacing=.2+(f.void/100)*.95, a=i*2.399+anim*.6,r=R*(spacing+(i%17)/17*(1-spacing*.35));
+      const spacing=.2+(f.void/100)*.95, a=i*2.399+clock.phase*.12,r=R*(spacing+(i%17)/17*(1-spacing*.35));
       const px=X+Math.cos(a)*r,py=Y+Math.sin(a)*r;
       cx.fillStyle=i%7===0?gold+".25)":cyan+".13)";cx.fillRect(px,py,1,1);
     }
 
-    requestAnimationFrame(drawField);
   }
 
-  function drawBrain(ctx,canvas,color,phaseShift){
-    fit(canvas);const W=canvas.clientWidth,H=canvas.clientHeight;ctx.clearRect(0,0,W,H);const d=dimensions(),f=S.field,synthetic=phaseShift>1,spread=synthetic?1+f.horizon/100*.16:1,rigidity=synthetic?1:1-(f.crystallization/100)*.18,slowScale=1+Math.sin(performance.now()/1000*Math.PI*2*f.breath)*.03;
+  function drawBrain(ctx,canvas,color,phaseShift,clock){
+    fit(canvas);const W=canvas.clientWidth,H=canvas.clientHeight;ctx.clearRect(0,0,W,H);const d=dimensions(),f=S.field,synthetic=phaseShift>1,spread=synthetic?1+f.horizon/100*.16:1,rigidity=synthetic?1:1-(f.crystallization/100)*.18,slowScale=1+Math.sin(clock.seconds*Math.PI*2*f.breath)*.02;
     const X=W/2,Y=H*.5,R=Math.min(W*.28,H*.36);
     ctx.strokeStyle=color;ctx.lineWidth=1;
     for(let k=0;k<8;k++){
@@ -795,20 +811,21 @@
     }
     ctx.beginPath();
     for(let i=0;i<=W;i++){
-      const y=Y+Math.sin(i*.08+anim*(synthetic?12:20)+phaseShift)*5*Math.sin(i/W*Math.PI)*(synthetic?1+d.apertura/100:.7+d.activacion/100);
+      const sideRate=synthetic?.70:.90,activationGain=.75+(d.activacion/100)*.45,sidePhase=clock.phase*sideRate*activationGain;
+      const y=Y+Math.sin(i*.08+sidePhase+phaseShift)*5*Math.sin(i/W*Math.PI)*(synthetic?1+d.apertura/100:.7+d.activacion/100);
       i?ctx.lineTo(i,y):ctx.moveTo(i,y);
     }ctx.stroke();
   }
 
-  function drawMini(){
+  function drawMiniFrame(){
     fit(mc);const W=mc.clientWidth,H=mc.clientHeight;mcx.clearRect(0,0,W,H);
-    const X=W/2,Y=H/2;
+    const X=W/2,Y=H/2,clock=visualClock();
     if(S.viz==="torus"){
-        const f=S.field, nowSec=performance.now()/1000, count=Math.round(8+f.presence/100*18), spread=1+f.horizon/100*.35, entropy=(f.entropy/100)*(1-f.crystallization/100*.75), scale=1+Math.sin(nowSec*Math.PI*2*f.breath)*.05, cadence=.25+f.pulse*.8;
+        const f=S.field, count=Math.round(8+f.presence/100*18), spread=1+f.horizon/100*.35, entropy=(f.entropy/100)*(1-f.crystallization/100*.75), scale=1+Math.sin(clock.seconds*Math.PI*2*f.breath)*.025;
       for(let i=0;i<count;i++){
-          const rr=(20+i*3.5)*scale, deformation=1+Math.sin(nowSec*cadence*3+i)*entropy*.12;
+          const rr=(20+i*3.5)*scale, deformation=1+Math.sin(clock.phase*.55+i*.4)*entropy*.08;
         mcx.strokeStyle=`rgba(${110+i*2},${95+i*3},230,${.05+i*.012})`;
-          mcx.save();mcx.translate(X,Y);mcx.rotate(nowSec*cadence+i*.03);mcx.scale(spread,deformation);mcx.beginPath();
+          mcx.save();mcx.translate(X,Y);mcx.rotate(clock.phase*.32+i*.03);mcx.scale(spread,deformation);mcx.beginPath();
           for(let p=0;p<=120;p++){const a=p/120*Math.PI*2,px=Math.cos(a)*rr*2.15,py=Math.sin(a)*rr*.85;p?mcx.lineTo(px,py):mcx.moveTo(px,py)}
           mcx.stroke();mcx.restore();
       }
@@ -822,18 +839,16 @@
       for(let i=0;i<bins;i++){
         const h=data?data[i]/255*H*.8:0;mcx.fillStyle="rgba(102,215,241,.55)";mcx.fillRect(i/bins*W,H-h,Math.max(1,W/bins-1),h);
       }
+      if(!S.running){mcx.fillStyle="#717d8d";mcx.font="10px ui-monospace";mcx.fillText("NO LIVE SIGNAL",12,20)}
       const carrier=clamp(S.signal.carrier.hz,40,2000);[carrier,carrier*2].forEach((hz,i)=>{if(hz<=visibleHz){const x=hz/visibleHz*W;mcx.strokeStyle=i?"#e1ba73":"#a070f7";mcx.beginPath();mcx.moveTo(x,0);mcx.lineTo(x,H);mcx.stroke()}});
     }else{
       const labels=["Underworld","Activation","Dissociation","Opening"],values=dimensions(),keys=["inframundo","activacion","disociacion","apertura"];
       labels.forEach((label,i)=>{const y=18+i*(H-42)/3;mcx.fillStyle="#e1ba73";mcx.fillText(`${label} ${Math.round(values[keys[i]])}`,10,y);mcx.fillStyle="#26344a";mcx.fillRect(10,y+7,W-20,5);mcx.fillStyle="#66d7f1";mcx.fillRect(10,y+7,(W-20)*values[keys[i]]/100,5)});
     }
-    requestAnimationFrame(drawMini);
   }
 
-  function animateSide(){
-    drawBrain(lcx,lc,"rgba(160,112,247,.50)",0);
-    drawBrain(rcx,rc,"rgba(102,215,241,.55)",2.1);
-    requestAnimationFrame(animateSide);
+  function drawSideFrames(){
+    const clock=visualClock();drawBrain(lcx,lc,"rgba(160,112,247,.50)",0,clock);drawBrain(rcx,rc,"rgba(102,215,241,.55)",2.1,clock);
   }
 
   function wire(){
@@ -841,9 +856,9 @@
     ["#duration","#depth"].forEach(id=>$(id).addEventListener("input",()=>{recordParameterChangeDebounced(id.slice(1),null,num(id));updateReadouts()}));
     $$(".phase-step").forEach(b=>b.addEventListener("click",()=>transitionToPhase(b.dataset.phase,"manual")));
     $("#constructSelect").addEventListener("change",()=>{recordParameterChange("construct",null,$("#constructSelect").value);updateConstructInspector()});
-    $("#constructValue").addEventListener("input",()=>{const c=constructRegistry[$("#constructSelect").value],previous=S.field[c.fieldKey];S.field[c.fieldKey]=Number($("#constructValue").value);recordParameterChangeDebounced("construct_value",previous,S.field[c.fieldKey]);updateConstructInspector();updateAudio()});
+    $("#constructValue").addEventListener("input",()=>{const c=constructRegistry[$("#constructSelect").value],previous=S.field[c.fieldKey];S.field[c.fieldKey]=Number($("#constructValue").value);recordParameterChangeDebounced("construct_value",previous,S.field[c.fieldKey]);updateConstructInspector();updateAudio();requestStaticVisualRefresh()});
     $$(".seg").forEach(b=>b.addEventListener("click",()=>{$$(".seg").forEach(x=>x.classList.remove("active"));b.classList.add("active");recordParameterChange("listening_context",null,b.dataset.output)}));
-    $$(".viz-tab").forEach(b=>b.addEventListener("click",()=>{$$(".viz-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");S.viz=b.dataset.viz}));
+    $$(".viz-tab").forEach(b=>b.addEventListener("click",()=>{$$(".viz-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");S.viz=b.dataset.viz;requestStaticVisualRefresh()}));
     $$(".nav-link").forEach(b=>b.addEventListener("click",()=>{
       $$(".nav-link").forEach(x=>x.classList.remove("active"));b.classList.add("active");
       const v=b.dataset.view;
@@ -871,7 +886,7 @@
   }
 
   async function init(){
-    ensureSession();renderFrequencies();wire();loadProfile();S.uiCarrierLibrary=S.signal.carrier.source;$("#carrierSource").value=S.uiCarrierLibrary==="method_base"?"method":"wound_symbolic";$("#modulationSelect").value=modulationOptions.some(item=>item.key===S.signal.modulation.key)?S.signal.modulation.key:"manual";$("#manualModulation").value=S.signal.modulation.hz;updateLockedPlan();renderFrequencies();syncPhaseUi();updateReadouts();drawField();drawMini();animateSide();
+    ensureSession();renderFrequencies();wire();loadProfile();S.uiCarrierLibrary=S.signal.carrier.source;$("#carrierSource").value=S.uiCarrierLibrary==="method_base"?"method":"wound_symbolic";$("#modulationSelect").value=modulationOptions.some(item=>item.key===S.signal.modulation.key)?S.signal.modulation.key:"manual";$("#manualModulation").value=S.signal.modulation.hz;updateLockedPlan();renderFrequencies();syncPhaseUi();updateReadouts();renderVisualFrame();
     try{
       const r=await fetch("mappings.json",{cache:"no-store"});if(r.ok){$("#repoDot").classList.add("online");$("#repoStatus").textContent="LOCAL LISTO"}
     }catch(_){}

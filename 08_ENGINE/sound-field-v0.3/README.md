@@ -1,4 +1,4 @@
-# AEON Sound Field v0.3.4.1
+# AEON Sound Field v0.3.4.2
 
 Symbolic and alchemical session interface for Ars Caeli.
 

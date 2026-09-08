@@ -1,5 +1,5 @@
 {
-  "version": "0.3.4.1",
+  "version": "0.3.4.2",
   "status": "experimental_noncanonical",
   "epistemic_boundary": {
     "canonical": "Ars Caeli repository Markdown/JSON documents are the documentary source.",
@@ -141,9 +141,9 @@
     "definition": "Source ACSPEC construct; operational mapping is an experimental AEON implementation.",
     "presence": {"id": "ACSPEC-106", "audio": "harmonic B density and supporting stereo occupancy", "visual": "torus and particle density"},
     "resonance": {"id": "ACSPEC-105", "audio": "delay feedback capped at 0.55", "visual": "persistence rings"},
-    "time": {"id": "ACSPEC-100", "field_key": "pulse", "audio_mapping": "none in v0.3.4; audio protocol modulation is independent", "visual_mapping": "field animation cadence", "status": "experimental_noncanonical"},
+    "time": {"id": "ACSPEC-100", "field_key": "pulse", "audio_mapping": "none in v0.3.4.2; audio protocol modulation is independent", "visual_mapping": "bounded normalized field cadence; not literal Hz-to-frame motion", "status": "experimental_noncanonical"},
     "void": {"id": "ACSPEC-101", "audio": "delay spacing", "visual": "field sparsity"},
-    "entropy": {"id": "ACSPEC-102", "audio": "none in v0.3.4.1; no reproducible audio mapping is currently defined.", "visual": "deterministic irregularity"},
+    "entropy": {"id": "ACSPEC-102", "audio": "none in v0.3.4.2; no reproducible audio mapping is currently defined.", "visual": "deterministic irregularity"},
     "horizon": {"id": "ACSPEC-103", "audio": "stereo width", "visual": "torus horizontal spread"},
     "crystallization": {"id": "ACSPEC-110", "audio": "filter Q", "visual": "rigidity attenuates entropy"},
     "breath": {"id": "ACSPEC-114", "audio": "slow envelope <=4%", "visual": "global expansion/contraction"}
@@ -167,6 +167,22 @@
     "spectrum": "AnalyserNode frequency-domain data with carrier and harmonic markers.",
     "axis": "Current Underworld, Activation, Dissociation, and Opening values; no body claims.",
     "torus": "Coupled to current presence, resonance, horizon, entropy, crystallization, breath, and pulse."
+  },
+  "visual_time_mapping": {
+    "source": "ACSPEC-100 Time / S.field.pulse",
+    "mapping": "bounded normalized visual cadence",
+    "literal_hz_rendering": false,
+    "status": "experimental_noncanonical"
+  },
+  "visual_runtime": {
+    "idle": "static geometry; no continuous animation loop",
+    "running": "visual clock advances from session elapsed time",
+    "stopped": "visual clock frozen at elapsed session time",
+    "reset": "visual clock returns to zero",
+    "clock_source": "session elapsed time",
+    "raf_policy": "continuous RAF only while session is running",
+    "max_decorative_fps": 30,
+    "status": "experimental_noncanonical"
   },
   "observation_contract": {
     "microvoid": "User-registered operational event, not physiological measurement.",

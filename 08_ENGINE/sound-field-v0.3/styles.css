@@ -143,6 +143,7 @@ blockquote cite{display:block;margin-top:6px;text-align:center;font:9px var(--fo
 .field-readout{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;gap:12px;pointer-events:none}
 .field-readout span{padding:6px 8px;border:1px solid rgba(255,255,255,.06);background:rgba(2,7,12,.46);border-radius:5px;color:var(--muted);font:8px var(--font-mono);letter-spacing:.05em}
 .field-readout b{color:var(--text)}
+.field-status{position:absolute;right:3%;bottom:4%;padding:5px 8px;border:1px solid rgba(102,215,241,.28);background:rgba(2,7,12,.48);color:var(--muted);font:8px var(--font-mono);letter-spacing:.08em}
 .mantra{text-align:center;margin:-7px 0 18px;color:#b7bdc6;font:8px/1.8 var(--font-mono);letter-spacing:.22em}
 .player{width:min(760px,100%);margin:0 auto;border-radius:12px;padding:12px 20px}
 .player-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}

@@ -57,6 +57,22 @@
     [639,"Bond / relational integration","#5fcef0"],
     [963,"Opening / upper axis","#9b64e6"]
   ];
+  const methodCarriers = [
+    {value:136,label:"136 Hz — grounding / closure",source_layer:"method_base",source_key:"grounding_closure",status:"documented_symbolic_protocol"},
+    {value:432,label:"432 Hz — coherence / containment",source_layer:"method_base",source_key:"coherence_containment",status:"documented_symbolic_protocol"},
+    {value:528,label:"528 Hz — symbolic reorganization / opening anchor",source_layer:"method_base",source_key:"reorganization_opening",status:"documented_symbolic_protocol"},
+    {value:900,label:"900 Hz subtle — high-layer clarity; caution",source_layer:"method_base",source_key:"subtle_high_layer",status:"documented_symbolic_protocol"}
+  ];
+  const modulationBands = [
+    {value:2,mode:"delta",label:"Delta-soft — 2 Hz",source_key:"delta_soft"},
+    {value:4,mode:"theta",label:"Theta — 4 Hz operational midpoint",source_key:"theta_4"},
+    {value:6,mode:"theta",label:"Theta — 6 Hz operational midpoint",source_key:"theta_6"},
+    {value:7,mode:"theta",label:"Theta — 7 Hz",source_key:"theta_7"},
+    {value:8,mode:"alpha",label:"Alpha — 8 Hz",source_key:"alpha_8"},
+    {value:9,mode:"alpha",label:"Alpha — 9 Hz operational midpoint",source_key:"alpha_9"},
+    {value:10,mode:"alpha",label:"Alpha — 10 Hz",source_key:"alpha_10"}
+  ];
+  const phaseSignalPlan=Object.fromEntries(PHASE_ORDER.map(phase=>[phase,{carrierSource:"wound_symbolic",carrierHz:174,modulationMode:"manual",modulationHz:.62}]));
 
   const S = {
     sessionId:null,
@@ -73,10 +89,12 @@
     oscA:null, oscB:null, gainA:null, gainB:null,
     delay:null, feedback:null, filter:null, panA:null, panB:null,
     lfo:null, lfoGain:null, breathOsc:null, breathGain:null,
-    selectedHz:174,
+    signal:{carrierSource:"wound_symbolic",carrierHz:174,modulationMode:"manual",modulationHz:.62},
+    phaseSignalMode:"LOCKED",
+    phaseSignalPlan,
     viz:"torus",
-    canonical:{},
-    microvoids:[], phaseEvents:[], transition:null
+    canonical:{}, timeData:null, freqData:null,
+    microvoids:[], phaseEvents:[], parameterEvents:[], signalEvents:[], transition:null, manualOverride:null
   };
   const phaseLabels={descenso:"Descent",shadow:"Shadow",light:"Light",retorno:"Return"};
 
@@ -114,17 +132,29 @@
     $("#gradientReadout").textContent=(x.gradient>=0?"+":"")+Math.round(x.gradient);
     $("#coherenceOut").textContent=x.integration_index+"%";
     $("#coherenceBar").style.width=x.integration_index+"%";
-    $("#carrierReadout").textContent=S.selectedHz;
-    $("#phaseReadout").textContent=phaseLabels[S.phase].toUpperCase();
+    $("#carrierReadout").textContent=S.signal.carrierHz;
+    syncPhaseUi();
     const dur=num("#duration");
     $("#durationLabel").textContent=dur+" min";
     $("#totalTime").textContent=String(dur).padStart(2,"0")+":00";
     const depths=["Soft","Medium","Deep"];
     $("#depthLabel").textContent=depths[num("#depth")];
     updateConstructInspector();
+    renderMethodGuidance();
+    renderPhaseSignalPlan();
     renderMicrovoidTimeline();
     updateAudio();
     updateSignalMonitor();
+  }
+
+  function syncPhaseUi(){
+    $$(".phase-step").forEach(btn=>{
+      const active=btn.dataset.phase===S.phase;
+      btn.classList.toggle("active",active);
+      btn.setAttribute("aria-selected",String(active));
+    });
+    $("#phaseReadout").textContent=phaseLabels[S.phase].toUpperCase();
+    document.body.dataset.phase=S.phase;
   }
 
   function updateConstructInspector(){
@@ -135,6 +165,23 @@
     $("#constructId").textContent=c.id;$("#constructDefinition").textContent=c.definition;
     $("#constructValueLabel").textContent=`${Number(S.field[c.fieldKey]).toFixed(c.step<.01?3:c.step<1?2:0)} ${c.unit}`;
     $("#constructAudioMap").textContent=c.audio;$("#constructVisualMap").textContent=c.visual;
+  }
+
+  function renderMethodGuidance(){
+    const d=dimensions(),matches=[];
+    if(d.inframundo>=35&&d.apertura<30)matches.push("Inframundo dominant");
+    if(d.activacion>=35)matches.push("Activation dominant");
+    if(d.disociacion>=30)matches.push("Dissociation elevated");
+    if(d.apertura>=35&&d.inframundo<40)matches.push("Opening available");
+    const root=$("#methodMatches");if(root)root.innerHTML=matches.length?matches.map(match=>`<span>✓ ${match}</span>`).join(""):"<span>— No documented match</span>";
+    const caution=$("#methodCautions");if(caution)caution.textContent=[d.disociacion>=30?"Delta 2 Hz: avoid with high dissociation / deep collapse per Method Base.":"",d.activacion>=70?"900 Hz subtle: avoid with hyperactivation / fragile system per Method Base.":"",d.apertura>=35?"Theta / opening: use prior regulation.":""].filter(Boolean).join(" ")||"No automatic method advisory.";
+  }
+  function renderPhaseSignalPlan(){
+    PHASE_ORDER.forEach(phase=>{
+      const target=$("#plan"+phase.charAt(0).toUpperCase()+phase.slice(1));
+      const signal=S.phaseSignalPlan[phase];
+      if(target)target.textContent=`${signal.carrierHz} Hz · ${signal.modulationMode} ${signal.modulationHz} Hz`;
+    });
   }
 
   function phaseForProgress(progress){
@@ -155,7 +202,12 @@
     const start={dimensions:dimensions(),field:{...S.field}};
     S.phase=nextPhase;
     S.transition={start,target:phaseTargets[nextPhase],startedAt:performance.now(),duration:8000};
-    $(".phase-step").forEach(b=>b.classList.toggle("active",b.dataset.phase===nextPhase));
+    if(source==="manual"&&S.running){
+      const total=Math.max(num("#duration")*60*1000,1),progress=elapsedMs()/total;
+      const releaseAtProgress=[.2,.5,.8,1].find(boundary=>boundary>progress+.0001)||1;
+      S.manualOverride={phase:nextPhase,startedAtProgress:progress,releaseAtProgress};
+    }
+    syncPhaseUi();
     S.phaseEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase:nextPhase,source});
     applyState(start.dimensions,start.field);
   }
@@ -167,10 +219,25 @@
     if(t>=1)S.transition=null;
   }
 
+  function recordParameterChange(parameter,from,to){
+    if(String(from)===String(to))return;
+    S.parameterEvents.push({id:crypto.randomUUID(),timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),parameter,from,to});
+  }
+  function recordSignalEvent(from,to,source="manual"){
+    S.signalEvents.push({from,to,phase:S.phase,timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),source});
+  }
+  const parameterDebounce={};
+  function recordParameterChangeDebounced(parameter,from,to){
+    clearTimeout(parameterDebounce[parameter]);
+    parameterDebounce[parameter]=setTimeout(()=>recordParameterChange(parameter,from,to),300);
+  }
+
   function renderFrequencies(){
     const root=$("#frequencyList");
     root.innerHTML="";
-    symbolicFreqs.forEach(([hz,label,color],idx)=>{
+    const source=S.signal.carrierSource==="method"?methodCarriers:symbolicFreqs.map(([value,label,color])=>({value,label,source_layer:"corpus_wound",source_key:`wound_${value}`,status:"documented_symbolic_protocol",color}));
+    source.forEach((item,idx)=>{
+      const hz=item.value,label=item.label,color=item.color||"#e1ba73";
       const row=document.createElement("button");
       row.className="freq-row";
       row.style.cssText="width:100%;border:0;background:transparent;text-align:left;color:inherit;cursor:pointer";
@@ -179,7 +246,7 @@
         <span class="freq-hz">${hz} Hz</span>
         <span class="freq-label">${label}</span>
         <canvas class="freq-wave" width="110" height="20"></canvas>`;
-      row.addEventListener("click",()=>{S.selectedHz=hz;$("#carrierReadout").textContent=hz;updateAudio();});
+      row.addEventListener("click",()=>{const previous={...S.signal};S.signal.carrierHz=hz;recordParameterChange("carrier",previous.carrierHz,hz);recordSignalEvent(previous,{...S.signal});$("#carrierReadout").textContent=hz;updateAudio();});
       root.appendChild(row);
       const c=row.querySelector("canvas"),cx=c.getContext("2d");
       cx.strokeStyle=color;cx.lineWidth=1.3;cx.beginPath();
@@ -199,7 +266,8 @@
     const ctx=S.ctx;
 
     S.master=ctx.createGain(); S.master.gain.value=0;
-    S.analyser=ctx.createAnalyser(); S.analyser.fftSize=1024; S.analyser.smoothingTimeConstant=.82;
+    S.analyser=ctx.createAnalyser(); S.analyser.fftSize=8192; S.analyser.smoothingTimeConstant=.82;
+    S.timeData=new Uint8Array(S.analyser.fftSize); S.freqData=new Uint8Array(S.analyser.frequencyBinCount);
     S.filter=ctx.createBiquadFilter(); S.filter.type="lowpass";
     S.delay=ctx.createDelay(1); S.feedback=ctx.createGain();
     S.oscA=ctx.createOscillator();S.oscB=ctx.createOscillator();
@@ -211,10 +279,12 @@
     S.oscA.type="sine";S.oscB.type="triangle";
     S.oscA.connect(S.gainA).connect(S.panA).connect(S.filter);
     S.oscB.connect(S.gainB).connect(S.panB).connect(S.filter);
-    S.filter.connect(S.analyser);
-    S.filter.connect(S.delay).connect(S.feedback).connect(S.delay);
-    S.delay.connect(S.analyser);
-    S.analyser.connect(S.master).connect(ctx.destination);
+    S.filter.connect(S.master);
+    S.filter.connect(S.delay);
+    S.delay.connect(S.master);
+    S.delay.connect(S.feedback).connect(S.delay);
+    S.master.connect(S.analyser);
+    S.analyser.connect(ctx.destination);
     S.lfo.connect(S.lfoGain).connect(S.gainA.gain);
     S.breathOsc.connect(S.breathGain).connect(S.master.gain);
 
@@ -243,7 +313,7 @@
     if(!S.running||!S.ctx) return;
     const d=dimensions(), f=S.field, t=S.ctx.currentTime;
     const depth=num("#depth");
-    const carrierHz=clamp(S.selectedHz,40,2000);
+    const carrierHz=clamp(S.signal.carrierHz,40,2000);
     S.oscA.frequency.setTargetAtTime(carrierHz,t,.16);
     S.oscB.frequency.setTargetAtTime(carrierHz*2,t,.16);
     S.gainA.gain.setTargetAtTime(.24,t,.18);
@@ -254,7 +324,7 @@
     S.feedback.gain.setTargetAtTime(clamp(f.resonance/100,0,.55),t,.18);
     S.filter.frequency.setTargetAtTime(clamp(650+(100-d.inframundo)*25+d.apertura*10,420,4200),t,.18);
     S.filter.Q.setTargetAtTime(1+(f.crystallization/100)*7,t,.18);
-    S.lfo.frequency.setTargetAtTime(f.pulse,t,.18);
+    S.lfo.frequency.setTargetAtTime(S.signal.modulationHz,t,.18);
     S.lfoGain.gain.setTargetAtTime(.035+d.activacion/100*.10,t,.18);
     const baseMaster=[.025,.035,.045][depth];
     S.master.gain.setTargetAtTime(baseMaster,t,.2);
@@ -265,25 +335,34 @@
 
   function dominantFftHz(){
     if(!S.running||!S.analyser||!S.ctx)return null;
-    const data=new Uint8Array(S.analyser.frequencyBinCount);S.analyser.getByteFrequencyData(data);
+    const data=S.freqData;S.analyser.getByteFrequencyData(data);
     let peak=0,index=0;
     data.forEach((value,i)=>{if(value>peak){peak=value;index=i}});
     return +(index*S.ctx.sampleRate/(S.analyser.fftSize)).toFixed(2);
   }
   function signalSnapshot(){
-    const carrier=clamp(S.selectedHz,40,2000);
-    return {symbolic_target_hz:S.selectedHz,oscillator_a_hz:carrier,oscillator_b_hz:carrier*2,modulation_hz:S.field.pulse,environmental_breath_hz:S.field.breath,sample_rate_hz:S.ctx?.sampleRate??null,dominant_fft_hz:dominantFftHz()};
+    const carrier=clamp(S.signal.carrierHz,40,2000),sampleRate=S.ctx?.sampleRate??null,fftSize=S.analyser?.fftSize??8192;
+    return {carrier_source:S.signal.carrierSource,carrier_target_hz:S.signal.carrierHz,oscillator_a_hz:carrier,oscillator_b_hz:carrier*2,modulation_mode:S.signal.modulationMode,modulation_hz:S.signal.modulationHz,modulation_source:S.signal.carrierSource==="method"?"method_base":"corpus_wound",environmental_breath_hz:S.field.breath,sample_rate_hz:sampleRate,fft_size:fftSize,fft_resolution_hz:sampleRate?+(sampleRate/fftSize).toFixed(2):null,dominant_fft_hz:dominantFftHz(),audio_context_state:S.ctx?.state??"closed",master_gain:S.master?.gain.value??0};
   }
   function updateSignalMonitor(){
     const signal=signalSnapshot(),format=(value,digits=2)=>value==null?"—":`${Number(value).toFixed(digits)} Hz`;
-    $("#signalSymbolic").textContent=format(signal.symbolic_target_hz);
+    $("#signalSymbolic").textContent=format(signal.carrier_target_hz);
     $("#signalCarrier").textContent=format(signal.oscillator_a_hz);
     $("#signalHarmonic").textContent=format(signal.oscillator_b_hz);
     $("#signalPulse").textContent=format(signal.modulation_hz,2);
     $("#signalBreath").textContent=format(signal.environmental_breath_hz,3);
     $("#signalSampleRate").textContent=signal.sample_rate_hz?`${signal.sample_rate_hz} Hz`:"—";
     $("#signalPeak").textContent=format(signal.dominant_fft_hz);
+    $("#signalFftResolution").textContent=format(signal.fft_resolution_hz,2);
+    $("#signalRms").textContent=signalRmsDbfs();
+    $("#signalPeakDbfs").textContent=signalPeakDbfs();
+    $("#signalClipping").textContent=signalNearClipping();
+    $("#signalSource").textContent=`${S.signal.carrierSource==="method"?"METHOD BASE":"CORPUS · WOUND SYMBOLIC"} · ${signal.carrier_target_hz} Hz`;
+    $("#signalModulationSource").textContent=`${S.signal.carrierSource==="method"?"METHOD BASE":"MANUAL / FIELD"} · ${signal.modulation_mode}`;
   }
+  function signalRmsDbfs(){if(!S.running||!S.analyser)return "—";S.analyser.getByteTimeDomainData(S.timeData);let sum=0;for(const value of S.timeData){const sample=(value-128)/128;sum+=sample*sample}return `${(20*Math.log10(Math.max(Math.sqrt(sum/S.timeData.length),1e-5))).toFixed(1)} dBFS`}
+  function signalPeakDbfs(){if(!S.running||!S.analyser)return "—";let peak=0;for(const value of S.timeData)peak=Math.max(peak,Math.abs((value-128)/128));return `${(20*Math.log10(Math.max(peak,1e-5))).toFixed(1)} dBFS`}
+  function signalNearClipping(){if(!S.running||!S.analyser)return "—";let peak=0;for(const value of S.timeData)peak=Math.max(peak,Math.abs((value-128)/128));return peak>.92?"YES":"NO"}
 
   function elapsedMs(){ return S.elapsedBefore + (S.running ? performance.now()-S.startedAt : 0); }
   function updateTimer(){
@@ -291,11 +370,14 @@
     const ms=Math.min(elapsedMs(),total);
     updateTransition();
     const progress=total>0?ms/total:0,resolved=phaseForProgress(progress);
-    if(resolved!==S.phase&&!S.transition)transitionToPhase(resolved,"automatic");
+    if(S.manualOverride&&progress>=S.manualOverride.releaseAtProgress)S.manualOverride=null;
+    const effectivePhase=S.manualOverride?S.manualOverride.phase:resolved;
+    if(effectivePhase!==S.phase&&!S.transition)transitionToPhase(effectivePhase,S.manualOverride?"manual":"automatic");
     const sec=Math.floor(ms/1000);
     $("#elapsed").textContent=String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0");
     $("#progressBar").style.width=(ms/total*100)+"%";
     renderMicrovoidTimeline();
+    if(S.running)updateSignalMonitor();
     if(ms>=total && S.running) audioStop();
   }
   function createSessionId(){
@@ -316,7 +398,7 @@
   function registerMicrovoid(){
     ensureSession();
     const x=derived();
-    const event={id:crypto.randomUUID(),timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase:S.phase,signal_snapshot:signalSnapshot(),construct_snapshot:{selected:$("#constructSelect").value,field:{...S.field}},field:{...S.field},dimensions:dimensions(),integration_index:x.integration_index,gradient:x.gradient,source:"manual"};
+    const event={id:crypto.randomUUID(),timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase:S.phase,signal_snapshot:signalSnapshot(),dimensions:dimensions(),field:{...S.field},construct:$("#constructSelect").value,construct_snapshot:{selected:$("#constructSelect").value,field:{...S.field}},integration_index:x.integration_index,gradient:x.gradient,text:"",source:"manual"};
     S.microvoids.push(event);renderMicrovoidTimeline();flash("Microvoid registered.");
     const timeline=$("#microvoidTimeline");timeline.classList.remove("microvoid-pulse");void timeline.offsetWidth;timeline.classList.add("microvoid-pulse");
   }
@@ -329,10 +411,10 @@
     root.innerHTML=S.microvoids.map(event=>{const left=clamp(event.timestamp_s/total*100,1,99);return `<span class="microvoid-marker" data-phase="${escapeHtml(event.phase)}" style="left:${left}%" title="${escapeHtml(phaseLabels[event.phase]||event.phase)} · ${event.timestamp_s}s"></span>`}).join("");
   }
   function resetSession(){
-    audioStop();S.elapsedBefore=0;S.phase="descenso";S.transition=null;S.phaseEvents=[];applyState(phaseTargets.descenso.dimensions,phaseTargets.descenso.field);$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";renderMicrovoidTimeline();flash("Field reset; session preserved.");
+    audioStop();S.elapsedBefore=0;S.phase="descenso";S.transition=null;S.manualOverride=null;S.phaseEvents=[];S.parameterEvents=[];S.signalEvents=[];syncPhaseUi();applyState(phaseTargets.descenso.dimensions,phaseTargets.descenso.field);$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";renderMicrovoidTimeline();flash("Field reset; session preserved.");
   }
   function newSession(){
-    audioStop();S.sessionId=createSessionId();S.sessionStartISO=new Date().toISOString();S.elapsedBefore=0;S.microvoids=[];S.phaseEvents=[];S.transition=null;S.phase="descenso";$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyState(phaseTargets.descenso.dimensions,phaseTargets.descenso.field);flash("New session started.");
+    audioStop();S.sessionId=createSessionId();S.sessionStartISO=new Date().toISOString();S.elapsedBefore=0;S.microvoids=[];S.phaseEvents=[];S.parameterEvents=[];S.signalEvents=[];S.transition=null;S.manualOverride=null;S.phase="descenso";syncPhaseUi();$("#elapsed").textContent="00:00";$("#progressBar").style.width="0%";applyState(phaseTargets.descenso.dimensions,phaseTargets.descenso.field);flash("New session started.");
   }
 
   function sessionObject(){
@@ -343,28 +425,32 @@
       experiment_id:S.experimentId,
       participant_id:S.participantId,
       engine:"AEON Sound Field",
-      engine_version:"0.3.2",
+      engine_version:"0.3.3",
       date:S.sessionStartISO,
       duration_real_s:+(elapsedMs()/1000).toFixed(2),
       context:{
         phase:S.phase,
         intention:$("#intention").value.trim()||null,
         construct:$("#constructSelect").value,
+        listening_context:document.querySelector(".seg.active")?.dataset.output||"headphones",
         output:document.querySelector(".seg.active")?.dataset.output||"headphones",
         epistemic_boundary:"symbolic_and_experimental_mappings_not_medical_claims"
       },
       parameters:{
         dimensions:dimensions(),
         derived_profile:x,
-        selected_symbolic_frequency_hz:S.selectedHz,
+        selected_carrier_hz:S.signal.carrierHz,
+        signal:S.signal,
         field:S.field,
         depth:["soft","medium","deep"][num("#depth")],
         planned_duration_min:num("#duration")
         ,signal:signalSnapshot()
         ,phase_plan:{order:PHASE_ORDER,fractions:PHASE_FRACTIONS,transition_ms:8000,status:"experimental_noncanonical"}
-        ,construct_mapping_version:"0.3.2"
+        ,phase_signal_plan:{mode:S.phaseSignalMode,phases:S.phaseSignalPlan,status:"experimental_noncanonical"}
+        ,matched_method_protocols:methodMatches()
+        ,construct_mapping_version:"0.3.3"
       },
-      events:{phase_transitions:S.phaseEvents,microvoids:S.microvoids},
+      events:{phase_transitions:S.phaseEvents,parameter_changes:S.parameterEvents,signal_transitions:S.signalEvents,microvoids:S.microvoids},
       observations:loadNotes(),
       interpretations:{experimental:null,symbolic:null},
       safety:{
@@ -377,6 +463,14 @@
       signal_measurement_boundary:"AnalyserNode describes the generated browser signal; it is not an acoustic calibration or physiological measurement.",
       completeness:"partial"
     };
+  }
+  function methodMatches(){
+    const d=dimensions(),matches=[];
+    if(d.inframundo>=35&&d.apertura<30)matches.push({label:"Inframundo dominant",source:"Method Base"});
+    if(d.activacion>=35)matches.push({label:"Activation dominant",source:"Method Base"});
+    if(d.disociacion>=30)matches.push({label:"Dissociation elevated",source:"Method Base"});
+    if(d.apertura>=35&&d.inframundo<40)matches.push({label:"Opening available",source:"Method Base"});
+    return matches;
   }
 
   function downloadJSON(obj,name){
@@ -399,6 +493,13 @@
       depth:num("#depth")
       ,experimentId:S.experimentId
       ,participantId:S.participantId
+      ,field:S.field
+      ,carrier:S.signal.carrierHz
+      ,carrierSource:S.signal.carrierSource
+      ,modulationMode:S.signal.modulationMode
+      ,modulationHz:S.signal.modulationHz
+      ,construct:$("#constructSelect").value
+      ,listeningContext:document.querySelector(".seg.active")?.dataset.output||"headphones"
     }));
     flash("Profile saved.");
   }
@@ -410,6 +511,13 @@
       if(p.dimensions) Object.entries(p.dimensions).forEach(([k,v])=>$("#"+k).value=v);
       if(p.duration)$("#duration").value=p.duration;
       if(p.depth!=null)$("#depth").value=p.depth;
+      if(p.field)S.field={...S.field,...p.field};
+      if(p.carrier!=null)S.signal.carrierHz=p.carrier;
+      if(p.carrierSource)S.signal.carrierSource=p.carrierSource;
+      if(p.modulationMode)S.signal.modulationMode=p.modulationMode;
+      if(p.modulationHz!=null)S.signal.modulationHz=p.modulationHz;
+      if(p.construct)$("#constructSelect").value=p.construct;
+      if(p.listeningContext){$$(".seg").forEach(button=>button.classList.toggle("active",button.dataset.output===p.listeningContext))}
       S.experimentId=p.experimentId||S.experimentId;
       S.participantId=p.participantId||S.participantId;
       updateReadouts();
@@ -443,7 +551,7 @@
         </div>`;
       setTimeout(()=>$("#addNoteBtn")?.addEventListener("click",()=>{
         const text=$("#noteText").value.trim();if(!text)return;
-        ensureSession();const arr=loadNotes();arr.push({id:crypto.randomUUID(),at:new Date().toISOString(),phase:S.phase,text});localStorage.setItem(notesStorageKey(),JSON.stringify(arr));openDrawer("sesion");
+        ensureSession();const arr=loadNotes();arr.push({id:crypto.randomUUID(),timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase:S.phase,signal_snapshot:signalSnapshot(),dimensions:dimensions(),field:{...S.field},construct:$("#constructSelect").value,text});localStorage.setItem(notesStorageKey(),JSON.stringify(arr));openDrawer("sesion");
       }),0);
       setTimeout(()=>$("#saveIdsBtn")?.addEventListener("click",()=>{S.experimentId=$("#experimentIdInput").value.trim()||"ACX-0001";S.participantId=$("#participantIdInput").value.trim()||"P-0001";saveProfile();openDrawer("sesion");}),0);
       setTimeout(()=>$("#newSessionBtn")?.addEventListener("click",()=>{newSession();openDrawer("sesion")}),0);
@@ -468,7 +576,7 @@
           <div class="drawer-card full"><h3>Vista previa JSON</h3><pre style="white-space:pre-wrap;color:#94a5b8;font:9px/1.5 ui-monospace;max-height:420px;overflow:auto">${escapeHtml(JSON.stringify(rec,null,2))}</pre></div>
           <div class="drawer-card full"><button class="action-btn cyan" id="downloadAtlasBtn" style="width:100%">Download ATLAS JSON</button></div>
         </div>`;
-      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.2.json")),0);
+      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.3.json")),0);
     }else if(type==="descenso"||type==="retorno"){
       transitionToPhase(type==="descenso"?"descenso":"retorno","manual");
       eyebrow.textContent=phaseLabels[type].toUpperCase();title.textContent=type==="descenso"?"Descent profile":"Return profile";
@@ -483,7 +591,7 @@
         </div>`;
     }else{
       eyebrow.textContent="HOME";title.textContent="AEON Sound Field";
-      content.innerHTML=`<div class="drawer-card"><h3>v0.3.2</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
+      content.innerHTML=`<div class="drawer-card"><h3>v0.3.3</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
     }
     drawer.classList.add("open");drawer.setAttribute("aria-hidden","false");
   }
@@ -548,17 +656,22 @@
     }
 
     // torus curves
-    const f=S.field, entropyEffective=(f.entropy/100)*(1-(f.crystallization/100)*.75), torusCount=Math.round(10+(f.presence/100)*22);
-    const breathScale=1+Math.sin(performance.now()/1000*Math.PI*2*f.breath)*.05;
+    const f=S.field, entropyEffective=(f.entropy/100)*(1-(f.crystallization/100)*.75), torusCount=Math.round(10+(f.presence/100)*22), cadence=.25+f.pulse*.8;
+    const breathScale=1+Math.sin(performance.now()/1000*Math.PI*2*f.breath)*.05, rotation=anim*cadence;
     for(let j=0;j<torusCount;j++){
       const off=(j-10.5)/10.5, alpha=.035+(1-Math.abs(off))*.035;
       cx.strokeStyle=cyan+alpha+")";cx.beginPath();
       for(let i=0;i<=140;i++){
         const t=i/140*Math.PI*2;
-        const px=X+Math.cos(t)*R*(.77+off*.12)*(1+f.horizon/100*.16)*breathScale;
-        const py=Y+Math.sin(t)*R*.48*breathScale + Math.sin(t*2+anim*8+j)*R*.045*off*entropyEffective;
+        const px=X+Math.cos(t+rotation)*R*(.77+off*.12)*(1+f.horizon/100*.16)*breathScale;
+        const py=Y+Math.sin(t+rotation)*R*.48*breathScale + Math.sin(t*2+anim*8+j)*R*.045*off*entropyEffective;
         i?cx.lineTo(px,py):cx.moveTo(px,py);
       }cx.stroke();
+    }
+
+    for(let ring=0;ring<Math.round(f.resonance/25);ring++){
+      const rr=R*(.45+ring*.15+Math.sin(anim+ring)*.015);
+      cx.strokeStyle=gold+(.08+f.resonance/100*.12)+")";cx.beginPath();cx.arc(X,Y,rr,0,Math.PI*2);cx.stroke();
     }
 
     // left/right energy
@@ -568,8 +681,8 @@
       for(let i=0;i<=100;i++){
         const t=i/100, px=X+side*(R*.2+t*R*.92);
         const amp=(side<0?leftAmp:rightAmp);
-        const py=Y+Math.sin(t*13+anim*18)*R*.07*amp*Math.sin(t*Math.PI);
-        i?cx.lineTo(px,py):cx.moveTo(px,py);
+        const py=Y+Math.sin(t*13+anim*(8+d.activacion*.12))*R*.07*amp*Math.sin(t*Math.PI),gap=d.disociacion/100;
+        if(gap>.78&&i%5<Math.round(gap*3))cx.moveTo(px,py);else i?cx.lineTo(px,py):cx.moveTo(px,py);
       }cx.stroke();
     }
 
@@ -578,9 +691,9 @@
     cx.arc(X,Y,R*.93,Math.PI*.93,Math.PI*2.07);cx.stroke();
 
     // waypoints
-    [Math.PI,Math.PI*1.5,Math.PI*2].forEach((a,i)=>{
+    [Math.PI,Math.PI*1.25,Math.PI*1.5,Math.PI*2].forEach((a,i)=>{
       const px=X+Math.cos(a)*R*.93,py=Y+Math.sin(a)*R*.93;
-      cx.fillStyle=gold+(i===1?".85)":".58)");cx.beginPath();cx.arc(px,py,5+i*2,0,Math.PI*2);cx.fill();
+      cx.fillStyle=gold+(i===1?".95)":".68)");cx.beginPath();cx.arc(px,py,6+i*2,0,Math.PI*2);cx.fill();
     });
 
     // central vesica/presence
@@ -592,7 +705,7 @@
 
     // subtle particles
     for(let i=0;i<Math.round(25+(f.presence/100)*85);i++){
-      const a=i*2.399+anim*.6,r=R*(.2+(i%17)/17*.95);
+      const spacing=.2+(f.void/100)*.95, a=i*2.399+anim*.6,r=R*(spacing+(i%17)/17*(1-spacing*.35));
       const px=X+Math.cos(a)*r,py=Y+Math.sin(a)*r;
       cx.fillStyle=i%7===0?gold+".25)":cyan+".13)";cx.fillRect(px,py,1,1);
     }
@@ -601,7 +714,7 @@
   }
 
   function drawBrain(ctx,canvas,color,phaseShift){
-    fit(canvas);const W=canvas.clientWidth,H=canvas.clientHeight;ctx.clearRect(0,0,W,H);
+    fit(canvas);const W=canvas.clientWidth,H=canvas.clientHeight;ctx.clearRect(0,0,W,H);const d=dimensions(),f=S.field,synthetic=phaseShift>1,spread=synthetic?1+f.horizon/100*.16:1,rigidity=synthetic?1:1-(f.crystallization/100)*.18,slowScale=1+Math.sin(performance.now()/1000*Math.PI*2*f.breath)*.03;
     const X=W/2,Y=H*.5,R=Math.min(W*.28,H*.36);
     ctx.strokeStyle=color;ctx.lineWidth=1;
     for(let k=0;k<8;k++){
@@ -609,14 +722,14 @@
       for(let i=0;i<=80;i++){
         const t=i/80*Math.PI*2;
         const rr=R*(.55+k*.055);
-        const px=X+Math.cos(t)*rr*(1+.08*Math.sin(t*3+k));
-        const py=Y+Math.sin(t)*rr*.72*(1+.05*Math.cos(t*4+k));
+        const px=X+Math.cos(t)*rr*spread*slowScale*(1+.08*Math.sin(t*3+k)*rigidity);
+        const py=Y+Math.sin(t)*rr*.72*slowScale*(1+.05*Math.cos(t*4+k)*rigidity);
         i?ctx.lineTo(px,py):ctx.moveTo(px,py);
       }ctx.stroke();
     }
     ctx.beginPath();
     for(let i=0;i<=W;i++){
-      const y=Y+Math.sin(i*.08+anim*20+phaseShift)*5*Math.sin(i/W*Math.PI);
+      const y=Y+Math.sin(i*.08+anim*(synthetic?12:20)+phaseShift)*5*Math.sin(i/W*Math.PI)*(synthetic?1+d.apertura/100:.7+d.activacion/100);
       i?ctx.lineTo(i,y):ctx.moveTo(i,y);
     }ctx.stroke();
   }
@@ -625,22 +738,24 @@
     fit(mc);const W=mc.clientWidth,H=mc.clientHeight;mcx.clearRect(0,0,W,H);
     const X=W/2,Y=H/2;
     if(S.viz==="torus"){
-      const f=S.field, count=Math.round(8+f.presence/100*18), spread=1+f.horizon/100*.35, entropy=(f.entropy/100)*(1-f.crystallization/100*.75), scale=1+Math.sin(performance.now()/1000*Math.PI*2*f.breath)*.05;
+      const f=S.field, count=Math.round(8+f.presence/100*18), spread=1+f.horizon/100*.35, entropy=(f.entropy/100)*(1-f.crystallization/100*.75), scale=1+Math.sin(performance.now()/1000*Math.PI*2*f.breath)*.05, cadence=.25+f.pulse*.8;
       for(let i=0;i<count;i++){
-        const rr=(20+i*3.5)*scale;
+        const rr=(20+i*3.5)*scale, deformation=1+Math.sin(anim*cadence*3+i)*entropy*.12;
         mcx.strokeStyle=`rgba(${110+i*2},${95+i*3},230,${.05+i*.012})`;
         mcx.beginPath();mcx.ellipse(X,Y,rr*2.15,rr*.85,0,0,Math.PI*2);mcx.stroke();
+        mcx.save();mcx.translate(X,Y);mcx.rotate(anim*cadence);mcx.scale(spread,deformation);mcx.stroke();mcx.restore();
       }
+      for(let ring=0;ring<Math.round(f.resonance/25);ring++){mcx.strokeStyle=`rgba(225,186,115,${.08+f.resonance/600})`;mcx.beginPath();mcx.arc(X,Y,(30+ring*18)*scale,0,Math.PI*2);mcx.stroke()}
       mcx.strokeStyle="rgba(170,100,250,.8)";mcx.beginPath();mcx.moveTo(X,10);mcx.lineTo(X,H-10);mcx.stroke();
     }else if(S.viz==="waves"){
       mcx.strokeStyle="#66d7f1";mcx.globalAlpha=.8;mcx.beginPath();
-      if(S.running&&S.analyser){const data=new Uint8Array(S.analyser.fftSize);S.analyser.getByteTimeDomainData(data);for(let i=0;i<W;i++){const y=data[Math.floor(i/W*data.length)]/255*H;i?mcx.lineTo(i,y):mcx.moveTo(i,y)}}else{mcx.moveTo(0,Y);mcx.lineTo(W,Y);mcx.fillStyle="#717d8d";mcx.font="10px ui-monospace";mcx.fillText("NO LIVE SIGNAL",12,20)}mcx.stroke();mcx.globalAlpha=1;
+      if(S.running&&S.analyser){const data=S.timeData;S.analyser.getByteTimeDomainData(data);for(let i=0;i<W;i++){const y=data[Math.floor(i/W*data.length)]/255*H;i?mcx.lineTo(i,y):mcx.moveTo(i,y)}}else{mcx.moveTo(0,Y);mcx.lineTo(W,Y);mcx.fillStyle="#717d8d";mcx.font="10px ui-monospace";mcx.fillText("NO LIVE SIGNAL",12,20)}mcx.stroke();mcx.globalAlpha=1;
     }else if(S.viz==="spectrum"){
-      const data=S.analyser&&S.running?new Uint8Array(S.analyser.frequencyBinCount):null, visibleHz=2500, bins=data?Math.min(data.length,Math.floor(visibleHz/(S.ctx.sampleRate/2)*data.length)):48;
+      const data=S.analyser&&S.running?S.freqData:null, visibleHz=2500, bins=data?Math.min(data.length,Math.floor(visibleHz/(S.ctx.sampleRate/2)*data.length)):48;
       for(let i=0;i<bins;i++){
         const h=data?data[i]/255*H*.8:0;mcx.fillStyle="rgba(102,215,241,.55)";mcx.fillRect(i/bins*W,H-h,Math.max(1,W/bins-1),h);
       }
-      const carrier=clamp(S.selectedHz,40,2000);[carrier,carrier*2].forEach((hz,i)=>{if(hz<=visibleHz){const x=hz/visibleHz*W;mcx.strokeStyle=i?"#e1ba73":"#a070f7";mcx.beginPath();mcx.moveTo(x,0);mcx.lineTo(x,H);mcx.stroke()}});
+      const carrier=clamp(S.signal.carrierHz,40,2000);[carrier,carrier*2].forEach((hz,i)=>{if(hz<=visibleHz){const x=hz/visibleHz*W;mcx.strokeStyle=i?"#e1ba73":"#a070f7";mcx.beginPath();mcx.moveTo(x,0);mcx.lineTo(x,H);mcx.stroke()}});
     }else{
       const labels=["Underworld","Activation","Dissociation","Opening"],values=dimensions(),keys=["inframundo","activacion","disociacion","apertura"];
       labels.forEach((label,i)=>{const y=18+i*(H-42)/3;mcx.fillStyle="#e1ba73";mcx.fillText(`${label} ${Math.round(values[keys[i]])}`,10,y);mcx.fillStyle="#26344a";mcx.fillRect(10,y+7,W-20,5);mcx.fillStyle="#66d7f1";mcx.fillRect(10,y+7,(W-20)*values[keys[i]]/100,5)});
@@ -655,11 +770,12 @@
   }
 
   function wire(){
-    ["#inframundo","#activacion","#disociacion","#apertura","#duration","#depth"].forEach(id=>$(id).addEventListener("input",updateReadouts));
+    ["#inframundo","#activacion","#disociacion","#apertura"].forEach(id=>$(id).addEventListener("input",()=>{recordParameterChangeDebounced("dimensions",null,dimensions());updateReadouts()}));
+    ["#duration","#depth"].forEach(id=>$(id).addEventListener("input",()=>{recordParameterChangeDebounced(id.slice(1),null,num(id));updateReadouts()}));
     $$(".phase-step").forEach(b=>b.addEventListener("click",()=>transitionToPhase(b.dataset.phase,"manual")));
-    $("#constructSelect").addEventListener("change",updateConstructInspector);
-    $("#constructValue").addEventListener("input",()=>{const c=constructRegistry[$("#constructSelect").value];S.field[c.fieldKey]=Number($("#constructValue").value);updateConstructInspector();updateAudio()});
-    $$(".seg").forEach(b=>b.addEventListener("click",()=>{$$(".seg").forEach(x=>x.classList.remove("active"));b.classList.add("active")}));
+    $("#constructSelect").addEventListener("change",()=>{recordParameterChange("construct",null,$("#constructSelect").value);updateConstructInspector()});
+    $("#constructValue").addEventListener("input",()=>{const c=constructRegistry[$("#constructSelect").value],previous=S.field[c.fieldKey];S.field[c.fieldKey]=Number($("#constructValue").value);recordParameterChangeDebounced("construct_value",previous,S.field[c.fieldKey]);updateConstructInspector();updateAudio()});
+    $$(".seg").forEach(b=>b.addEventListener("click",()=>{$$(".seg").forEach(x=>x.classList.remove("active"));b.classList.add("active");recordParameterChange("listening_context",null,b.dataset.output)}));
     $$(".viz-tab").forEach(b=>b.addEventListener("click",()=>{$$(".viz-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");S.viz=b.dataset.viz}));
     $$(".nav-link").forEach(b=>b.addEventListener("click",()=>{
       $$(".nav-link").forEach(x=>x.classList.remove("active"));b.classList.add("active");
@@ -681,10 +797,14 @@
     $("#timerBtn").addEventListener("click",()=>flash("Session duration is controlled from the left panel."));
     $("#expandVizBtn").addEventListener("click",()=>flash("Expanded visualization reserved for AEON v0.4."));
     $("#closeDrawerBtn").addEventListener("click",()=>{$("#drawer").classList.remove("open");$("#drawer").setAttribute("aria-hidden","true")});
+    $("#carrierSource").addEventListener("change",event=>{const previous={...S.signal};S.signal.carrierSource=event.target.value;renderFrequencies();recordParameterChange("carrier_source",previous.carrierSource,S.signal.carrierSource);recordSignalEvent(previous,{...S.signal});});
+    $("#modulationSelect").addEventListener("change",event=>{if(event.target.value==="manual"){S.signal.modulationMode="manual";S.signal.modulationHz=Number($("#manualModulation").value)}else{const option=modulationBands.find(item=>item.source_key===event.target.value);if(!option)return;S.signal.modulationMode=option.mode;S.signal.modulationHz=option.value}recordParameterChange("modulation",null,{mode:S.signal.modulationMode,hz:S.signal.modulationHz});updateAudio();updateReadouts()});
+    $("#manualModulation").addEventListener("input",event=>{const previous=S.signal.modulationHz;S.signal.modulationMode="manual";S.signal.modulationHz=Number(event.target.value);$("#modulationSelect").value="manual";recordParameterChangeDebounced("modulation",previous,S.signal.modulationHz);updateAudio();updateReadouts()});
+    $("#phaseSignalMode").addEventListener("change",event=>{S.phaseSignalMode=event.target.value;recordParameterChange("phase_signal_mode",null,S.phaseSignalMode)});
   }
 
   async function init(){
-    ensureSession();renderFrequencies();wire();loadProfile();updateReadouts();drawField();drawMini();animateSide();
+    ensureSession();renderFrequencies();wire();loadProfile();$("#carrierSource").value=S.signal.carrierSource;renderFrequencies();syncPhaseUi();updateReadouts();drawField();drawMini();animateSide();
     try{
       const r=await fetch("mappings.json",{cache:"no-store"});if(r.ok){$("#repoDot").classList.add("online");$("#repoStatus").textContent="LOCAL LISTO"}
     }catch(_){}

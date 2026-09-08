@@ -1,5 +1,5 @@
 {
-  "version": "0.3.2",
+  "version": "0.3.3",
   "status": "experimental_noncanonical",
   "epistemic_boundary": {
     "canonical": "Ars Caeli repository Markdown/JSON documents are the documentary source.",
@@ -116,7 +116,15 @@
     "harmonic_b_hz": "Triangle Oscillator B equals 2 x carrier.",
     "modulation_hz": "S.field.pulse controls the amplitude LFO independently.",
     "environmental_breath_hz": "S.field.breath controls a slow envelope with <=4% depth.",
-    "measurement_boundary": "AnalyserNode describes generated browser signal, not acoustic calibration or physiology."
+    "measurement_boundary": "AnalyserNode describes generated browser signal, not acoustic calibration or physiology.",
+    "fft_resolution": "sample_rate / fft_size",
+    "quality_metrics": ["RMS dBFS", "peak dBFS", "near clipping"],
+    "method_protocol": ["136 Hz", "432 Hz", "528 Hz", "900 Hz subtle", "Delta-soft 2 Hz", "Theta 4-7 Hz", "Alpha 8-10 Hz"],
+    "corpus_wound_symbolic": [174, 285, 396, 417, 528, 639, 963]
+  },
+  "derived_metrics": {
+    "gradient": {"formula": "(return_score - descent_score)", "status": "experimental_noncanonical"},
+    "integration_index": {"formula": "clamp(45 + opening*0.38 - dissociation*0.16 - abs(activation-35)*0.05, 28, 96)", "status": "experimental_noncanonical", "validation": "not validated as biometric or clinical metric"}
   },
   "construct_operational_mappings": {
     "definition": "Source ACSPEC construct; operational mapping is an experimental AEON implementation.",
@@ -128,6 +136,20 @@
     "horizon": {"id": "ACSPEC-103", "audio": "stereo width", "visual": "torus horizontal spread"},
     "crystallization": {"id": "ACSPEC-110", "audio": "filter Q", "visual": "rigidity attenuates entropy"},
     "breath": {"id": "ACSPEC-114", "audio": "slow envelope <=4%", "visual": "global expansion/contraction"}
+  },
+  "field_dimension_coupling": {
+    "underworld": "left field amplitude",
+    "opening": "right field amplitude",
+    "activation": "wave cadence",
+    "dissociation": "deterministic line continuity/gap ratio",
+    "status": "experimental_noncanonical"
+  },
+  "polarity_coupling": {
+    "analytical_rigidity": "crystallization",
+    "analytical_cadence": "activation",
+    "synthetic_spread": "horizon/opening",
+    "synthetic_slow_expansion": "breath",
+    "status": "operational symbolic polarity; not hemispheric measurement"
   },
   "visualization_contract": {
     "waves": "AnalyserNode time-domain data while running; explicit idle baseline otherwise.",

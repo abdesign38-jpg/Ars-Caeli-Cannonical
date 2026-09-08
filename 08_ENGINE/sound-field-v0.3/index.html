@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="AEON Sound Field v0.3.2 — Ars Caeli symbolic and experimental session interface.">
-  <title>Ars Caeli · AEON Sound Field v0.3.2</title>
-  <link rel="stylesheet" href="styles.css?v=0.3.2">
+  <meta name="description" content="AEON Sound Field v0.3.3 — Ars Caeli symbolic and experimental session interface.">
+  <title>Ars Caeli · AEON Sound Field v0.3.3</title>
+  <link rel="stylesheet" href="styles.css?v=0.3.3">
 </head>
 <body>
   <div class="cosmos" aria-hidden="true"></div>
@@ -34,7 +34,7 @@
     <div class="header-tools">
       <span class="status-dot" id="repoDot"></span>
       <span class="header-status" id="repoStatus">LOCAL</span>
-      <span class="version">v0.3.2</span>
+      <span class="version">v0.3.3</span>
     </div>
   </header>
 
@@ -117,7 +117,7 @@
       </section>
 
       <section class="panel-section">
-        <div class="section-title"><span>Output</span></div>
+        <div class="section-title"><span>Listening context</span></div>
         <div class="segmented">
           <button class="seg active" data-output="headphones">Headphones</button>
           <button class="seg" data-output="speakers">Speakers</button>
@@ -170,17 +170,14 @@
         </div>
 
         <div class="vertical-axis" aria-hidden="true">
-          <i class="orb o1"></i>
-          <i class="orb o2"></i>
-          <i class="orb o3"></i>
-          <i class="orb o4"></i>
-          <i class="orb o5"></i>
-          <i class="orb o6"></i>
-          <i class="orb o7"></i>
+          <i class="orb o1" title="Underworld"></i>
+          <i class="orb o2" title="Activation"></i>
+          <i class="orb o3" title="Dissociation"></i>
+          <i class="orb o4" title="Opening"></i>
         </div>
 
         <div class="field-readout">
-          <span><b id="phaseReadout">DESCENT</b> phase</span>
+          <span>CURRENT PHASE · <b id="phaseReadout">DESCENT</b></span>
           <span><b id="gradientReadout">+24</b> gradient</span>
           <span><b id="carrierReadout">174</b> Hz</span>
         </div>
@@ -222,41 +219,56 @@
         <div class="hemisphere-grid">
           <div class="hemisphere">
             <canvas id="leftBrain" width="220" height="120"></canvas>
-            <strong>Analytical polarity</strong>
+            <strong>Analytical field — Structure · Analysis</strong>
             <small>Structure · Analysis</small>
           </div>
           <div class="divider"></div>
           <div class="hemisphere">
             <canvas id="rightBrain" width="220" height="120"></canvas>
-            <strong>Synthetic polarity</strong>
+            <strong>Synthetic field — Intuition · Synthesis</strong>
             <small>Intuition · Synthesis</small>
           </div>
         </div>
 
         <div class="coherence">
-          <span>Integration index</span>
+          <span>Experimental integration index</span>
           <div class="coherence-track"><div id="coherenceBar"></div></div>
           <output id="coherenceOut">78%</output>
         </div>
-        <p class="symbolic-label">Symbolic representation · not biometric</p>
+        <p class="symbolic-label">Operational symbolic polarity · not hemispheric measurement</p>
       </section>
 
       <section class="card glass">
-        <div class="card-title">Symbolic frequencies</div>
+        <div class="card-title">Signal sources</div>
+        <label class="field-label" for="carrierSource">Carrier source</label>
+        <select id="carrierSource"><option value="method">Method protocol</option><option value="wound_symbolic">Wound symbolic correspondences</option></select>
+        <label class="field-label" for="modulationSelect">Modulation band</label>
+        <select id="modulationSelect">
+          <option value="manual">Manual — 0.1–12 Hz</option><option value="delta_soft">Delta-soft — 2 Hz</option><option value="theta_4">Theta — 4 Hz</option><option value="theta_6">Theta — 6 Hz operational midpoint</option><option value="theta_7">Theta — 7 Hz</option><option value="alpha_8">Alpha — 8 Hz</option><option value="alpha_9">Alpha — 9 Hz operational midpoint</option><option value="alpha_10">Alpha — 10 Hz</option>
+        </select>
+        <input id="manualModulation" type="range" min="0.1" max="12" step="0.1" value="0.6" aria-label="Manual modulation frequency">
         <div class="frequency-list" id="frequencyList"></div>
-        <p class="micro-note">Internal Ars Caeli correspondences. Presented as symbolic language, not therapeutic facts.</p>
+        <p class="micro-note">Corpus symbolic correspondences · selected manually unless a target wound profile is loaded.</p>
+        <div class="phase-signal-plan"><small>Phase signal plan · no hidden Shadow/Light assignment</small><select id="phaseSignalMode"><option>LOCKED</option><option>CUSTOM PHASE PLAN</option><option>METHOD GUIDED</option></select><table><tbody><tr><td>Descent</td><td id="planDescenso">174 Hz · manual 0.62 Hz</td></tr><tr><td>Shadow</td><td id="planShadow">174 Hz · manual 0.62 Hz</td></tr><tr><td>Light</td><td id="planLight">174 Hz · manual 0.62 Hz</td></tr><tr><td>Return</td><td id="planRetorno">174 Hz · manual 0.62 Hz</td></tr></tbody></table></div>
+        <div class="method-guidance"><small>MATCHED METHOD PROTOCOLS</small><div id="methodMatches">— No documented match</div><p id="methodCautions">No automatic method advisory.</p></div>
       </section>
 
       <section class="card glass">
         <div class="card-title">Signal monitor</div>
         <div class="signal-grid">
           <div class="signal-item"><small>Symbolic target</small><strong id="signalSymbolic">174.00 Hz</strong></div>
-          <div class="signal-item"><small>Actual carrier A</small><strong id="signalCarrier">174.00 Hz</strong></div>
+          <div class="signal-item"><small>Oscillator A target</small><strong id="signalCarrier">174.00 Hz</strong></div>
           <div class="signal-item"><small>Harmonic B</small><strong id="signalHarmonic">348.00 Hz</strong></div>
           <div class="signal-item"><small>Modulation / pulse</small><strong id="signalPulse">0.62 Hz</strong></div>
           <div class="signal-item"><small>Environmental breath</small><strong id="signalBreath">0.105 Hz</strong></div>
           <div class="signal-item"><small>Sample rate</small><strong id="signalSampleRate">—</strong></div>
           <div class="signal-item"><small>Dominant FFT peak</small><strong id="signalPeak">—</strong></div>
+          <div class="signal-item"><small>FFT resolution</small><strong id="signalFftResolution">—</strong></div>
+          <div class="signal-item"><small>RMS dBFS</small><strong id="signalRms">—</strong></div>
+          <div class="signal-item"><small>Peak dBFS</small><strong id="signalPeakDbfs">—</strong></div>
+          <div class="signal-item"><small>Near clipping</small><strong id="signalClipping">—</strong></div>
+          <div class="signal-item"><small>Carrier source</small><strong id="signalSource">—</strong></div>
+          <div class="signal-item"><small>Modulation source</small><strong id="signalModulationSource">—</strong></div>
         </div>
         <p class="micro-note">Browser signal monitor · not an acoustic calibration of headphones/speakers.</p>
       </section>
@@ -295,10 +307,10 @@
   </section>
 
   <footer class="app-footer">
-    <span>ARS CAELI · AEON ENGINE · SOUND FIELD v0.3.2</span>
+    <span>ARS CAELI · AEON ENGINE · SOUND FIELD v0.3.3</span>
     <span>VERITAS IN SONO</span>
   </footer>
 
-  <script src="app.js?v=0.3.2"></script>
+  <script src="app.js?v=0.3.3"></script>
 </body>
 </html>

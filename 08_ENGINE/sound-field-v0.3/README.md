@@ -1,4 +1,4 @@
-# AEON Sound Field v0.3.1
+# AEON Sound Field v0.3.3
 
 Symbolic and alchemical session interface for Ars Caeli.
 
@@ -10,9 +10,9 @@ Version 0.3 replaces the previous technical panel with a complete session experi
 - session profile and intention;
 - four dimensions of the alchemical method: Underworld, Activation, Dissociation, and Opening;
 - animated central mandala/torus;
-- visual axis `Descent → Session → Return`;
+- visual axis `Descent → Shadow → Light → Return`;
 - bilateral field and return gradient;
-- selectable symbolic frequencies;
+- separated Method Protocol and Corpus/Wound symbolic signal sources;
 - Web Audio engine;
 - timer;
 - local observations;
@@ -86,7 +86,7 @@ The current public URL preserves the repository path.
 - dimensions,
 - gradient,
 - integration index,
-- selected symbolic frequency,
+- signal source/provenance, FFT resolution, dBFS quality metrics, and event history,
 - field parameters,
 - observations,
 - safety.

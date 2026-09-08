@@ -1,7 +1,7 @@
 {
   "id": "AEON-SOUND-FIELD",
   "name": "AEON Sound Field",
-  "version": "0.3.1",
+  "version": "0.3.3",
   "status": "experimental",
   "entry": "index.html",
   "design": "neuroenergetic-alchemical-session-ui",
@@ -15,11 +15,13 @@
     "descent-return-axis",
     "animated-mandala-torus",
     "alchemical-session-profile",
-    "symbolic-frequency-library",
+    "signal-source-libraries",
     "audio-engine",
     "timer",
     "local-session-save",
     "atlas-export",
-    "repository-sync"
+    "repository-sync",
+    "digital-signal-quality-monitor",
+    "phase-override-and-event-history"
   ]
 }

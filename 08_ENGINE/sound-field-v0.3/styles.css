@@ -139,7 +139,7 @@ blockquote cite{display:block;margin-top:6px;text-align:center;font:9px var(--fo
 .descent-label{left:2%;top:20%}.return-label{right:2%;top:20%}.shadow-label{left:3%;bottom:20%}.light-label{right:3%;bottom:20%}
 .vertical-axis{position:absolute;left:50%;top:20%;bottom:19%;width:1px;background:linear-gradient(transparent,rgba(225,186,115,.6),rgba(102,215,241,.7),rgba(160,112,247,.65),transparent)}
 .orb{position:absolute;left:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,.45);box-shadow:0 0 18px currentColor}
-.o1{top:5%;color:#e3c37e;background:#caa256}.o2{top:20%;color:#a173fb;background:#8a5ce6}.o3{top:35%;color:#5ca4ff;background:#3d7ed8}.o4{top:50%;color:#6ee6ee;background:#48bcc5}.o5{top:65%;color:#d1ea82;background:#9cbd4b}.o6{top:80%;color:#ffad66;background:#e37a3f}.o7{top:95%;color:#ff7c6f;background:#d9504a}
+.o1{top:12%;color:#e3c37e;background:#caa256}.o2{top:37%;color:#a173fb;background:#8a5ce6}.o3{top:63%;color:#5ca4ff;background:#3d7ed8}.o4{top:88%;color:#6ee6ee;background:#48bcc5}
 .field-readout{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;gap:12px;pointer-events:none}
 .field-readout span{padding:6px 8px;border:1px solid rgba(255,255,255,.06);background:rgba(2,7,12,.46);border-radius:5px;color:var(--muted);font:8px var(--font-mono);letter-spacing:.05em}
 .field-readout b{color:var(--text)}

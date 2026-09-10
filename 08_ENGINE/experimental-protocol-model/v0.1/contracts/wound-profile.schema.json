@@ -1,0 +1,308 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ars-caeli.local/contracts/wound-profile.schema.json",
+  "title": "WOUND_PROFILE",
+  "description": "Versioned symbolic/archetypal wound hypothesis. It is not a diagnosis.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "wound_id",
+    "taxonomy_version",
+    "name",
+    "source_status",
+    "provenance",
+    "node_emotional",
+    "manifestations",
+    "symbolic_geometry",
+    "symbolic_frequencies",
+    "mathematical_models",
+    "crystal_correlates",
+    "dimensional_map",
+    "observable_candidates",
+    "epistemic_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "wound_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "taxonomy_version": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "source_status": {
+      "type": "string",
+      "enum": [
+        "consolidated_source",
+        "draft_source",
+        "legacy_source"
+      ]
+    },
+    "provenance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://ars-caeli.local/contracts/common.schema.json#/$defs/provenance_record"
+      }
+    },
+    "node_emotional": {
+      "type": "string"
+    },
+    "manifestations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "symbolic_geometry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primary",
+        "dimensional"
+      ],
+      "properties": {
+        "primary": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dimensional": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "interpretation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "symbolic_frequencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_hz",
+        "complementary_hz",
+        "status"
+      ],
+      "properties": {
+        "base_hz": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "complementary_hz": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "status": {
+          "const": "source_symbolic"
+        },
+        "claim_boundary": {
+          "type": "string"
+        }
+      }
+    },
+    "mathematical_models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expression",
+          "variables",
+          "status"
+        ],
+        "properties": {
+          "expression": {
+            "type": "string"
+          },
+          "variables": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "const": "source_symbolic"
+          }
+        }
+      }
+    },
+    "organic_correlates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "status"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "source_description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "const": "source_symbolic"
+          },
+          "medical_validation": {
+            "const": false
+          }
+        }
+      }
+    },
+    "cognitive_correlates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "emotional_correlates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "crystal_correlates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "mineral",
+          "system",
+          "interpretation",
+          "status"
+        ],
+        "properties": {
+          "mineral": {
+            "type": "string"
+          },
+          "system": {
+            "type": "string"
+          },
+          "interpretation": {
+            "type": "string"
+          },
+          "status": {
+            "const": "source_symbolic"
+          }
+        }
+      }
+    },
+    "dimensional_map": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "seed_phrase": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "shadows": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "egregores": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deities_or_demons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "related_crystallization_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "observable_candidates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "derivation",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "derivation": {
+            "type": "string"
+          },
+          "status": {
+            "const": "experimental_operationalization"
+          }
+        }
+      }
+    },
+    "epistemic_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "diagnostic",
+        "causal",
+        "physiological"
+      ],
+      "properties": {
+        "diagnostic": {
+          "const": false
+        },
+        "causal": {
+          "const": false
+        },
+        "physiological": {
+          "const": false
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

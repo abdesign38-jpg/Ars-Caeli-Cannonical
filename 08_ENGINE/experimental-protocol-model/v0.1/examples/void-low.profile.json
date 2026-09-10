@@ -1,0 +1,54 @@
+{
+  "schema_version": "0.1",
+  "void_profile_id": "void.temporal.low.v0_1",
+  "label": "Vacío temporal bajo · 20% silencio",
+  "source_construct": {
+    "acspec_id": "ACSPEC-101",
+    "definition": "Estructura de baja información utilizada para modular expectativa.",
+    "source_status": "draft",
+    "provenance": [
+      {
+        "source_id": "ACSPEC-101",
+        "title": "Vacío",
+        "version": "0.1.0",
+        "locator": "Definición / Operacionalización / Preguntas abiertas",
+        "uri": "https://raw.githubusercontent.com/abdesign38-jpg/Ars-Caeli-Cannonical/main/04_PHYSICS/ACSPEC-101-Vac%C3%ADo.md",
+        "layer": "source_draft",
+        "notes": "La fuente no fija una métrica; esta operacionalización temporal pertenece al piloto."
+      }
+    ]
+  },
+  "operationalization": {
+    "primary_dimension": "temporal_occupancy",
+    "definition": "Proportion and arrangement of active-signal time versus deliberately silent time in a deterministic schedule.",
+    "status": "experimental_operationalization",
+    "not_equivalent_to": [
+      "delay",
+      "reverb",
+      "entropy"
+    ]
+  },
+  "schedule": {
+    "block_duration_s": 60,
+    "cycle_duration_s": 10,
+    "active_duration_s": 8,
+    "silent_duration_s": 2,
+    "pattern": "fixed_periodic",
+    "seed": null,
+    "explicit_events": []
+  },
+  "derived_schedule_metrics": {
+    "silence_ratio": 0.2,
+    "event_rate_per_min": 6.0,
+    "mean_gap_ms": 2000,
+    "gap_cv": 0,
+    "temporal_predictability": 1,
+    "spectral_occupancy_ratio": null
+  },
+  "entropy_control": {
+    "held_constant": true,
+    "rule": "Fixed 10-second periodic cycle; no random jitter. Entropy is not manipulated in pilot v0.1.",
+    "entropy_profile_id": null
+  },
+  "status": "experimental_operationalization"
+}

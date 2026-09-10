@@ -1,0 +1,34 @@
+{
+  "package": "AEON Experimental Protocol Model",
+  "version": "0.1",
+  "contracts": [
+    "common.schema.json",
+    "crystallization-profile.schema.json",
+    "observation-probe.schema.json",
+    "response-series.schema.json",
+    "stimulus-condition.schema.json",
+    "void-profile.schema.json",
+    "wound-profile.schema.json"
+  ],
+  "examples": [
+    "C1_LOW_ASC.stimulus-condition.json",
+    "C2_MED_ASC.stimulus-condition.json",
+    "C3_HIGH.stimulus-condition.json",
+    "C4_MED_DESC.stimulus-condition.json",
+    "C5_LOW_DESC.stimulus-condition.json",
+    "invisibilidad-relacional.observation-probe.json",
+    "invisibilidad-relacional.wound-profile.json",
+    "pilot-01-void-x-crystallization.protocol.json",
+    "response-series.template.json",
+    "retencion-afectiva.crystallization-profile.json",
+    "void-high.profile.json",
+    "void-low.profile.json",
+    "void-medium.profile.json"
+  ],
+  "docs": [
+    "GITHUB_CODER_INTEGRATION.md",
+    "DESIGN_DECISIONS.md"
+  ],
+  "pilot": "pilot-01-void-x-crystallization.protocol.json",
+  "epistemic_rule": "source_symbolic != experimental_operationalization != engine_measured != participant_reported != derived_metric"
+}

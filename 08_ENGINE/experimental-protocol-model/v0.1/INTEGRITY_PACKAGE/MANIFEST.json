@@ -1,0 +1,38 @@
+{
+  "package": "AEON Phase B.1 Contract Integrity",
+  "purpose": "Block raw/contradictory protocol JSON from reaching future AEON execution.",
+  "target": "08_ENGINE/experimental-protocol-model/v0.1/",
+  "files": {
+    "instructions": [
+      "README_FOR_GITHUB_CODER.md",
+      "IMPLEMENTATION_SPEC.md",
+      "QA_CHECKLIST.md",
+      "GITHUB_CODER_PROMPT.txt"
+    ],
+    "new_schemas": [
+      "proposed/contracts/experiment-protocol.schema.json",
+      "proposed/contracts/executable-stimulus.schema.json",
+      "proposed/contracts/executable-protocol.schema.json"
+    ],
+    "reference_code": [
+      "proposed/semantic_validator.py",
+      "proposed/compiler.py",
+      "proposed/adapters.reference.py",
+      "proposed/VALIDATOR_CHANGES.md"
+    ],
+    "migration": [
+      "proposed/MIGRATE_PILOT01.md",
+      "proposed/examples/pilot-01-void-x-crystallization.protocol.json"
+    ],
+    "runtime_boundary": [
+      "proposed/BROWSER_RUNTIME_BOUNDARY.md"
+    ],
+    "tests_ci": [
+      "proposed/tests/test_contract_integrity.py",
+      "proposed/requirements-dev.txt",
+      "proposed/.github/workflows/aeon-contract-integrity.yml"
+    ]
+  },
+  "hard_gate": "Do not begin Phase C Void Gate until B.1 QA passes.",
+  "runtime_authority": "compiled condition runtime_schedule, never raw derived_schedule_metrics"
+}

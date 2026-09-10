@@ -1,0 +1,119 @@
+{
+  "protocol_version": "0.1",
+  "protocol_id": "pilot.void_x_response_crystallization.invisibilidad.v0_1",
+  "title": "AEON Pilot 01 · Vacío temporal × persistencia de respuesta · Invisibilidad Relacional",
+  "status": "experimental_design_not_validated",
+  "purpose": "Calibrate whether deterministic changes in temporal information density produce repeatable changes in a predeclared subjective outcome before testing wound-specific carrier correspondences.",
+  "source_basis": [
+    {
+      "source_id": "ACSPEC-101",
+      "claim": "Vacío is defined as low-information structure used to modulate expectation; measurement remains an open question.",
+      "layer": "source_draft"
+    },
+    {
+      "source_id": "ACSPEC-110",
+      "claim": "Cristalización is defined as prolonged stabilization of an interpretation; measurement remains an open question.",
+      "layer": "source_draft"
+    },
+    {
+      "source_id": "HERIDA-1-CONSOLIDADA",
+      "claim": "Invisibilidad Relacional includes difficulty occupying space and disconnection from one's own presence.",
+      "layer": "source_symbolic"
+    },
+    {
+      "source_id": "METODO-ALQUIMICO-BASE-0.1",
+      "claim": "Retención Afectiva is a named symbolic crystallization; 432 Hz and alpha 8–10 Hz are documented method signal options in relevant dimensions.",
+      "layer": "source_symbolic"
+    }
+  ],
+  "primary_question": "Within the same participant, does changing only temporal silence ratio alter felt_presence ratings in a repeatable direction while carrier/modulation, cycle length and predictability are held constant?",
+  "primary_outcome": {
+    "id": "felt_presence",
+    "scale": "0–10",
+    "minimum_practical_difference": 2,
+    "threshold_status": "pilot_convention_not_validated"
+  },
+  "null_interpretation": "If felt_presence changes are smaller than the pilot threshold, inconsistent in direction across replicated sessions, or equally explained by order/recovery effects, the pilot does not support treating temporal Void as a meaningful driver for this outcome.",
+  "crystallization_test": {
+    "meaning": "Response crystallization is operationalized as persistence/path-dependence, not as the source symbolic crystallization.",
+    "metrics": [
+      "hysteresis_delta_medium",
+      "hysteresis_delta_low",
+      "recovery_time_s",
+      "persistence_auc"
+    ],
+    "requires_replication": true
+  },
+  "design": {
+    "type": "within_person_deterministic_calibration",
+    "sequence": [
+      "C1_LOW_ASC",
+      "C2_MED_ASC",
+      "C3_HIGH",
+      "C4_MED_DESC",
+      "C5_LOW_DESC"
+    ],
+    "block_duration_s": 60,
+    "probe_between_blocks": true,
+    "baseline_probe": true,
+    "immediate_post_probe": true,
+    "recovery_probes_s": [
+      60,
+      180
+    ],
+    "recommended_replications_before_interpretation": 3,
+    "replication_note": "Use the same hardware/context when possible; later add counterbalanced sequences to separate path-dependence from simple order effects."
+  },
+  "controlled_signal": {
+    "carrier": {
+      "source": "method_base",
+      "key": "method_432",
+      "hz": 432
+    },
+    "modulation": {
+      "source": "method_base",
+      "key": "alpha_8",
+      "mode": "alpha",
+      "hz": 8
+    },
+    "environmental_breath_hz": 0.073,
+    "harmonic_b_rule": "2x_carrier"
+  },
+  "probe_set_ref": "probe.invisibilidad_relacional.blind.v0_1",
+  "analysis_plan": {
+    "primary": [
+      "Plot felt_presence against silence_ratio for ascending C1/C2/C3.",
+      "Compute void_response_slope.",
+      "Compare repeated 50% condition C2 vs C4.",
+      "Compare repeated 20% condition C1 vs C5."
+    ],
+    "secondary": [
+      "Repeat plots for space_occupancy, expansion_contraction and expression_impulse without treating them as co-primary outcomes.",
+      "Inspect free-text/body-map data only after numeric primary analysis is frozen."
+    ],
+    "across_sessions": [
+      "Compare sign of void_response_slope across at least 3 replications.",
+      "Do not call a pattern stable if direction reverses repeatedly.",
+      "If hysteresis appears, later counterbalance starting direction to test order effects."
+    ]
+  },
+  "stop_rules": [
+    "Participant may stop or skip any probe at any time.",
+    "Stop audio if discomfort occurs.",
+    "Do not interpret acute distress or physical symptoms through the symbolic model; use appropriate health support when needed."
+  ],
+  "non_goals": [
+    "No claim that 432 Hz treats Invisibilidad Relacional.",
+    "No claim that alpha 8 Hz measures or entrains an alpha brain state.",
+    "No claim that a high persistence metric proves Retención Afectiva.",
+    "No organ/chakra prediction is shown before participant observation.",
+    "No wound-specific carrier comparison in Pilot 01."
+  ],
+  "condition_refs": [
+    "C1_LOW_ASC",
+    "C2_MED_ASC",
+    "C3_HIGH",
+    "C4_MED_DESC",
+    "C5_LOW_DESC"
+  ]
+}

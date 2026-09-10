@@ -1,0 +1,37 @@
+Integrate AEON Phase B.1 Contract Integrity against the current `main` branch.
+
+Read in this order:
+1. `README_FOR_GITHUB_CODER.md`
+2. `IMPLEMENTATION_SPEC.md`
+3. `QA_CHECKLIST.md`
+4. everything under `proposed/`
+
+Target:
+`08_ENGINE/experimental-protocol-model/v0.1/`
+
+Critical constraints:
+- Do NOT modify Sound Field audio/UI in this commit.
+- Raw JSON under `examples/` must never become executable runtime input.
+- Validation order is mandatory: JSON Schema -> semantic invariants -> reference resolution -> deterministic compilation.
+- Do not auto-correct contradictory source data; fail closed with structured errors.
+- Only `fixed_periodic` Void schedules are executable in v0.1.
+- Migrate Pilot 01 from embedded `conditions` to canonical `condition_refs`.
+- Recompute runtime schedule metrics from primitive schedule values; never trust stored derived metrics as runtime authority.
+- Require explicit `series_id`; remove runtime `SERIES-TEMPLATE` fallback.
+- Add automated negative tests and CI drift detection.
+- Generated `compiled/` artifacts must be deterministic and byte-stable.
+- GitHub Pages/browser Phase C will later load only `compiled/*.executable.json`; do not implement the Void audio gate yet.
+
+Use the Python files under `proposed/` as reference implementations. Merge them carefully with the current repository code rather than overwriting unrelated newer changes.
+
+Before finishing:
+- run structural validation;
+- run semantic tests;
+- compile all runtime artifacts;
+- run compiler drift check;
+- report PASS/FAIL for every section in `QA_CHECKLIST.md`;
+- list every created/modified file;
+- explicitly confirm that `08_ENGINE/sound-field-v0.3/` was not changed.
+
+Suggested commit:
+`feat(aeon): add semantic contract compiler and execution integrity gate`

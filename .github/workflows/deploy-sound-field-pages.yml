@@ -6,6 +6,7 @@ on:
     paths:
       - "index.html"
       - "08_ENGINE/sound-field-v0.3/**"
+      - "08_ENGINE/experimental-protocol-model/**"
       - ".github/workflows/deploy-sound-field-pages.yml"
   workflow_dispatch:
 

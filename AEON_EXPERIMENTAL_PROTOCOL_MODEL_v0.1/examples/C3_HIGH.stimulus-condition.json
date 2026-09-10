@@ -1,0 +1,128 @@
+{
+  "schema_version": "0.1",
+  "condition_id": "C3_HIGH",
+  "label": "High void · peak",
+  "experimental_question": "Does temporal Void, operationalized as silence ratio with period/predictability/carrier/modulation held constant, alter the predeclared subjective outcome?",
+  "hypothesis_refs": {
+    "wound_profile_id": "invisibilidad_relacional",
+    "crystallization_profile_ids": [
+      "retencion_afectiva"
+    ]
+  },
+  "manipulated_variables": [
+    {
+      "name": "void.temporal_occupancy.silence_ratio",
+      "value": 0.8,
+      "unit": "ratio",
+      "status": "experimental_operationalization"
+    }
+  ],
+  "held_constant": {
+    "cycle_duration_s": 10,
+    "event_rate_per_min": 6,
+    "temporal_predictability": 1,
+    "gap_cv": 0,
+    "entropy": "not manipulated; deterministic periodic schedule",
+    "carrier_source": "method_base",
+    "carrier_hz": 432,
+    "modulation_mode": "alpha",
+    "modulation_hz": 8,
+    "harmonic_b_rule": "2x_carrier",
+    "master_gain_policy": "same configured gain across conditions; record actual RMS/Peak dBFS per block",
+    "spectral_content_policy": "same oscillator/filter architecture while active"
+  },
+  "signal": {
+    "carrier": {
+      "source": "method_base",
+      "key": "method_432",
+      "hz": 432
+    },
+    "modulation": {
+      "source": "method_base",
+      "key": "alpha_8",
+      "mode": "alpha",
+      "hz": 8
+    },
+    "environmental_breath_hz": 0.073,
+    "harmonic_b_rule": "2x_carrier"
+  },
+  "void_profile": {
+    "schema_version": "0.1",
+    "void_profile_id": "void.temporal.high.v0_1",
+    "label": "Vacío temporal alto · 80% silencio",
+    "source_construct": {
+      "acspec_id": "ACSPEC-101",
+      "definition": "Estructura de baja información utilizada para modular expectativa.",
+      "source_status": "draft",
+      "provenance": [
+        {
+          "source_id": "ACSPEC-101",
+          "title": "Vacío",
+          "version": "0.1.0",
+          "locator": "Definición / Operacionalización / Preguntas abiertas",
+          "uri": "https://raw.githubusercontent.com/abdesign38-jpg/Ars-Caeli-Cannonical/main/04_PHYSICS/ACSPEC-101-Vac%C3%ADo.md",
+          "layer": "source_draft",
+          "notes": "La fuente no fija una métrica; esta operacionalización temporal pertenece al piloto."
+        }
+      ]
+    },
+    "operationalization": {
+      "primary_dimension": "temporal_occupancy",
+      "definition": "Proportion and arrangement of active-signal time versus deliberately silent time in a deterministic schedule.",
+      "status": "experimental_operationalization",
+      "not_equivalent_to": [
+        "delay",
+        "reverb",
+        "entropy"
+      ]
+    },
+    "schedule": {
+      "block_duration_s": 60,
+      "cycle_duration_s": 10,
+      "active_duration_s": 2,
+      "silent_duration_s": 8,
+      "pattern": "fixed_periodic",
+      "seed": null,
+      "explicit_events": []
+    },
+    "derived_schedule_metrics": {
+      "silence_ratio": 0.8,
+      "event_rate_per_min": 6.0,
+      "mean_gap_ms": 8000,
+      "gap_cv": 0,
+      "temporal_predictability": 1,
+      "spectral_occupancy_ratio": null
+    },
+    "entropy_control": {
+      "held_constant": true,
+      "rule": "Fixed 10-second periodic cycle; no random jitter. Entropy is not manipulated in pilot v0.1.",
+      "entropy_profile_id": null
+    },
+    "status": "experimental_operationalization"
+  },
+  "timing": {
+    "exposure_s": 60,
+    "probe_after_s": 0,
+    "recovery_s": 0
+  },
+  "order_control": {
+    "position": 3,
+    "sequence_id": "void_hysteresis_L-M-H-M-L_v0_1",
+    "randomization_seed": null,
+    "path_role": "peak"
+  },
+  "blinding": {
+    "participant_hidden_fields": [
+      "wound_profile_id",
+      "crystallization_profile_ids",
+      "symbolic_frequency_correspondences",
+      "expected_direction_of_response"
+    ],
+    "reveal_rule": "Do not reveal model expectation before the participant saves the required observation probes."
+  },
+  "measurement_boundary": {
+    "engine": "AEON records generated browser signal and deterministic stimulus schedule; it does not measure acoustic SPL at the ear.",
+    "participant": "Ratings and free reports are subjective observations, not diagnoses.",
+    "causality": "A change observed after a condition is not labeled as caused by the carrier, wound, or symbolic construct without further controlled replication."
+  }
+}

@@ -1,0 +1,283 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ars-caeli.local/contracts/common.schema.json",
+  "title": "Ars Caeli Experimental Common Definitions",
+  "type": "object",
+  "$defs": {
+    "epistemic_layer": {
+      "type": "string",
+      "enum": [
+        "source_documented",
+        "source_symbolic",
+        "source_draft",
+        "experimental_operationalization",
+        "engine_measured",
+        "participant_reported",
+        "derived_metric",
+        "hypothesis"
+      ]
+    },
+    "provenance_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "title",
+        "layer"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "locator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "uri": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "layer": {
+          "$ref": "https://ars-caeli.local/contracts/common.schema.json#/$defs/epistemic_layer"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "dimension_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inframundo",
+        "activacion",
+        "disociacion",
+        "apertura"
+      ],
+      "properties": {
+        "inframundo": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "activacion": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "disociacion": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "apertura": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "dimension_weights": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inframundo": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "activacion": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "disociacion": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "apertura": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
+        }
+      }
+    },
+    "signal_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "carrier",
+        "modulation"
+      ],
+      "properties": {
+        "carrier": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source",
+            "key",
+            "hz"
+          ],
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": [
+                "method_base",
+                "corpus_wound",
+                "manual",
+                "control"
+              ]
+            },
+            "key": {
+              "type": "string"
+            },
+            "hz": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "modulation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source",
+            "key",
+            "mode",
+            "hz"
+          ],
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": [
+                "method_base",
+                "manual",
+                "legacy_experimental",
+                "control"
+              ]
+            },
+            "key": {
+              "type": "string"
+            },
+            "mode": {
+              "type": "string"
+            },
+            "hz": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "environmental_breath_hz": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "harmonic_b_rule": {
+          "type": "string",
+          "default": "2x_carrier"
+        }
+      }
+    },
+    "engine_signal_metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sample_rate_hz": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "fft_size": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 32
+        },
+        "fft_resolution_hz": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "dominant_fft_hz": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "rms_dbfs": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "peak_dbfs": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "near_clipping": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "master_gain": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "measurement_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine",
+        "participant",
+        "causality"
+      ],
+      "properties": {
+        "engine": {
+          "type": "string"
+        },
+        "participant": {
+          "type": "string"
+        },
+        "causality": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

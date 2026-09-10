@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ars-caeli.local/contracts/executable-stimulus.schema.json",
+  "title": "EXECUTABLE_STIMULUS_CONDITION",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "execution_status",
+    "compiler_version",
+    "condition_id",
+    "source_sha256",
+    "signal",
+    "runtime_schedule",
+    "experimental_context",
+    "hypothesis_refs",
+    "blinding",
+    "measurement_boundary",
+    "integrity"
+  ],
+  "properties": {
+    "execution_status": {
+      "const": "validated"
+    },
+    "compiler_version": {
+      "const": "0.1"
+    },
+    "condition_id": {
+      "type": "string"
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "signal": {
+      "$ref": "https://ars-caeli.local/contracts/common.schema.json#/$defs/signal_identity"
+    },
+    "runtime_schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pattern",
+        "block_duration_s",
+        "cycle_duration_s",
+        "active_duration_s",
+        "silent_duration_s",
+        "silence_ratio",
+        "event_rate_per_min",
+        "mean_gap_ms",
+        "gap_cv",
+        "temporal_predictability",
+        "whole_cycles"
+      ],
+      "properties": {
+        "pattern": {
+          "const": "fixed_periodic"
+        },
+        "block_duration_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "cycle_duration_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "active_duration_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "silent_duration_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "silence_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "event_rate_per_min": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "mean_gap_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "gap_cv": {
+          "const": 0
+        },
+        "temporal_predictability": {
+          "const": 1
+        },
+        "whole_cycles": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "experimental_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manipulated_variables",
+        "held_constant",
+        "timing",
+        "order_control"
+      ],
+      "properties": {
+        "manipulated_variables": {
+          "type": "array"
+        },
+        "held_constant": {
+          "type": "object"
+        },
+        "timing": {
+          "type": "object"
+        },
+        "order_control": {
+          "type": "object"
+        }
+      }
+    },
+    "hypothesis_refs": {
+      "type": "object"
+    },
+    "blinding": {
+      "type": "object"
+    },
+    "measurement_boundary": {
+      "$ref": "https://ars-caeli.local/contracts/common.schema.json#/$defs/measurement_boundary"
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_validation",
+        "semantic_validation",
+        "reference_validation"
+      ],
+      "properties": {
+        "schema_validation": {
+          "const": true
+        },
+        "semantic_validation": {
+          "const": true
+        },
+        "reference_validation": {
+          "const": true
+        }
+      }
+    }
+  }
+}

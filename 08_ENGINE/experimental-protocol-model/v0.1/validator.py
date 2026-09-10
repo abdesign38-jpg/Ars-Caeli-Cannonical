@@ -16,6 +16,7 @@ CONTRACTS_ROOT = PACKAGE_ROOT / "contracts"
 EXAMPLES_ROOT = PACKAGE_ROOT / "examples"
 
 SCHEMA_BY_EXAMPLE_SUFFIX = {
+    ".protocol.json": "experiment-protocol.schema.json",
     ".crystallization-profile.json": "crystallization-profile.schema.json",
     ".observation-probe.json": "observation-probe.schema.json",
     ".stimulus-condition.json": "stimulus-condition.schema.json",
@@ -94,8 +95,6 @@ def ensure_valid_stimulus_condition(instance: dict[str, Any]) -> dict[str, Any]:
 
 
 def _schema_for_example(filename: str) -> str:
-    if filename == "pilot-01-void-x-crystallization.protocol.json":
-        raise ValueError("The protocol design is not an instance of one contract schema")
     for suffix, schema_name in SCHEMA_BY_EXAMPLE_SUFFIX.items():
         if filename.endswith(suffix):
             return schema_name
@@ -105,8 +104,6 @@ def _schema_for_example(filename: str) -> str:
 def validate_examples() -> list[dict[str, Any]]:
     results = []
     for example_path in sorted(EXAMPLES_ROOT.glob("*.json")):
-        if example_path.name.endswith("protocol.json"):
-            continue
         results.append(validate_file(example_path))
     return results
 

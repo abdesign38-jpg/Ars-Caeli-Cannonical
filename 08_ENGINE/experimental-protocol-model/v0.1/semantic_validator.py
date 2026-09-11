@@ -252,6 +252,25 @@ def validate_protocol_semantics(
         _issue(issues, "PROTOCOL_SEQUENCE_MISMATCH", "condition_refs",
                "condition_refs must exactly equal design.sequence.", sequence, refs)
 
+    design = protocol["design"]
+    execution_policy = protocol["execution_policy"]
+    if design.get("probe_between_blocks") is not True or execution_policy.get("between_conditions", {}).get("next_condition_trigger") != "required_probe_saved_or_skipped":
+        _issue(issues, "PROTOCOL_PROBE_POLICY_MISMATCH", "design.probe_between_blocks",
+               "Pilot 01 requires probe between blocks to be enabled and the runtime policy must request a saved or skipped probe before the next condition.",
+               True, design.get("probe_between_blocks"))
+    if design.get("baseline_probe") is not True or execution_policy.get("baseline", {}).get("probe_trigger") != "before_first_condition":
+        _issue(issues, "PROTOCOL_PROBE_POLICY_MISMATCH", "design.baseline_probe",
+               "Pilot 01 requires baseline probe policy to match protocol execution baseline semantics.",
+               True, design.get("baseline_probe"))
+    if design.get("immediate_post_probe") is not True or execution_policy.get("post_exposure", {}).get("immediate_post_trigger") != "final_condition_end":
+        _issue(issues, "PROTOCOL_PROBE_POLICY_MISMATCH", "design.immediate_post_probe",
+               "Pilot 01 requires immediate post-probe semantics to match protocol execution policy.",
+               True, design.get("immediate_post_probe"))
+    if design.get("recovery_probes_s") != execution_policy.get("recovery", {}).get("probe_offsets_s"):
+        _issue(issues, "PROTOCOL_RECOVERY_POLICY_MISMATCH", "design.recovery_probes_s",
+               "Design recovery probes must match execution_policy.recovery.probe_offsets_s.",
+               execution_policy.get("recovery", {}).get("probe_offsets_s"), design.get("recovery_probes_s"))
+
     conditions = []
     for i, cid in enumerate(refs):
         try:
@@ -304,10 +323,6 @@ def validate_protocol_semantics(
                    f"conditions.{c['condition_id']}.gate_envelope",
                    "Pilot 01 requires one shared gate envelope.", expected_envelope,
                    c.get("gate_envelope"))
-        if c["signal"] != protocol["controlled_signal"]:
-            _issue(issues, "PROTOCOL_SIGNAL_MISMATCH", f"conditions.{c['condition_id']}.signal",
-                   "Pilot 01 requires every controlled signal field to match.",
-                   protocol["controlled_signal"], c["signal"])
 
     try:
         probe = load_probe(protocol["probe_set_ref"])

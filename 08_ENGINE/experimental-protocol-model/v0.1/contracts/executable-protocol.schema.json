@@ -39,7 +39,85 @@
     },
     "runtime_policy": {
       "type": "object",
-      "additionalProperties": true
+      "additionalProperties": false,
+      "required": [
+        "condition_clock",
+        "cycle_reset",
+        "pause",
+        "between_conditions",
+        "baseline",
+        "post_exposure",
+        "recovery",
+        "manual_controls",
+        "integrity_breach_policy"
+      ],
+      "properties": {
+        "condition_clock": { "const": "active_exposure_only" },
+        "cycle_reset": { "const": "at_each_condition_start" },
+        "pause": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allowed", "clock_behavior", "audio_behavior", "resume_behavior", "record_pause_duration"],
+          "properties": {
+            "allowed": { "const": true },
+            "clock_behavior": { "const": "freeze_condition_clock" },
+            "audio_behavior": { "const": "silence" },
+            "resume_behavior": { "const": "continue_same_condition_time" },
+            "record_pause_duration": { "const": true }
+          }
+        },
+        "between_conditions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["audio_state", "next_condition_trigger", "gap_duration_policy"],
+          "properties": {
+            "audio_state": { "const": "silence" },
+            "next_condition_trigger": { "const": "required_probe_saved_or_skipped" },
+            "gap_duration_policy": { "const": "participant_contingent_record_actual" }
+          }
+        },
+        "baseline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["probe_trigger", "audio_state"],
+          "properties": {
+            "probe_trigger": { "const": "before_first_condition" },
+            "audio_state": { "const": "silence" }
+          }
+        },
+        "post_exposure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["audio_state", "immediate_post_trigger"],
+          "properties": {
+            "audio_state": { "const": "silence" },
+            "immediate_post_trigger": { "const": "final_condition_end" }
+          }
+        },
+        "recovery": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["audio_state", "clock_anchor", "probe_offsets_s"],
+          "properties": {
+            "audio_state": { "const": "silence" },
+            "clock_anchor": { "const": "final_condition_end" },
+            "probe_offsets_s": { "const": [60, 180] }
+          }
+        },
+        "manual_controls": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["carrier", "modulation", "void_schedule", "gate_envelope", "aeon_master_gain"],
+          "properties": {
+            "carrier": { "const": "locked" },
+            "modulation": { "const": "locked" },
+            "void_schedule": { "const": "locked" },
+            "gate_envelope": { "const": "locked" },
+            "aeon_master_gain": { "const": "locked_at_protocol_start" }
+          }
+        },
+        "integrity_breach_policy": { "const": "abort_condition_and_mark_series_invalid" }
+      }
     },
     "probe_set_ref": {
       "type": "string"

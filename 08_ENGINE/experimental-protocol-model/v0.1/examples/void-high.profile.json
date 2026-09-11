@@ -35,7 +35,10 @@
     "silent_duration_s": 8,
     "pattern": "fixed_periodic",
     "seed": null,
-    "explicit_events": []
+    "explicit_events": [],
+    "cycle_order": "active_then_silence",
+    "cycle_anchor": "condition_start",
+    "phase_offset_s": 0
   },
   "derived_schedule_metrics": {
     "silence_ratio": 0.8,

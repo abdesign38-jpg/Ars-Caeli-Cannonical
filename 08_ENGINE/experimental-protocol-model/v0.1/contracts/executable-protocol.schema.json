@@ -11,6 +11,7 @@
     "source_sha256",
     "primary_outcome",
     "controlled_signal",
+    "runtime_policy",
     "probe_set_ref",
     "condition_sequence",
     "condition_fingerprints",
@@ -35,6 +36,10 @@
     },
     "controlled_signal": {
       "$ref": "https://ars-caeli.local/contracts/common.schema.json#/$defs/signal_identity"
+    },
+    "runtime_policy": {
+      "type": "object",
+      "additionalProperties": true
     },
     "probe_set_ref": {
       "type": "string"

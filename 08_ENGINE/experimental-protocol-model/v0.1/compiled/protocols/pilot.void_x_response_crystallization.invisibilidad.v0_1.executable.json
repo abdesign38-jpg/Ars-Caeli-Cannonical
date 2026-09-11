@@ -1,11 +1,11 @@
 {
   "compiler_version": "0.1",
   "condition_fingerprints": {
-    "C1_LOW_ASC": "e46efaef1364294baf287bf585fcf76cfc03120b1a474d19675683377026fca7",
-    "C2_MED_ASC": "3e02b935ffa40e03f7fa73b2145e000ca2b7aabaa36442665ae8db58906a3c37",
-    "C3_HIGH": "51f8630556e539072c25aa2bd5a549e3c26fb4a56a063c35cafd61b3abcce667",
-    "C4_MED_DESC": "c130757ea1a443491ac104acb78cb3b932771648a5a910ed0e7f895e27771336",
-    "C5_LOW_DESC": "d27dbb77c477bc829f7b0dbe70474bc0f1cbd52e9313f247a8f8c26663c658cf"
+    "C1_LOW_ASC": "605ca3c320f22a08f25c16d5243129a66c98b1f5f21a3c4df901dede66642b24",
+    "C2_MED_ASC": "ead194629a66b2c7fcf221ef42cfd242fe0884c54dffc42e7844670f50b64fd2",
+    "C3_HIGH": "79873bcc0f7b9db20090156fc5de301c53d9973c4ab6a060cd0de823a94ac279",
+    "C4_MED_DESC": "6f5138c268af2dc78451e560ec548c406d80b2a0531146030ff4c1e81178aacc",
+    "C5_LOW_DESC": "707fc5645dd7cded320071386fe2d487cd6f0315339f81c79f729222ad3eae1a"
   },
   "condition_sequence": [
     "C1_LOW_ASC",
@@ -44,5 +44,45 @@
   },
   "probe_set_ref": "probe.invisibilidad_relacional.blind.v0_1",
   "protocol_id": "pilot.void_x_response_crystallization.invisibilidad.v0_1",
-  "source_sha256": "66d62e8eb70f142031ad97df54a2b1beb33458499b8599e54428494553d18522"
+  "runtime_policy": {
+    "baseline": {
+      "audio_state": "silence",
+      "probe_trigger": "before_first_condition"
+    },
+    "between_conditions": {
+      "audio_state": "silence",
+      "gap_duration_policy": "participant_contingent_record_actual",
+      "next_condition_trigger": "required_probe_saved_or_skipped"
+    },
+    "condition_clock": "active_exposure_only",
+    "cycle_reset": "at_each_condition_start",
+    "integrity_breach_policy": "abort_condition_and_mark_series_invalid",
+    "manual_controls": {
+      "aeon_master_gain": "locked_at_protocol_start",
+      "carrier": "locked",
+      "gate_envelope": "locked",
+      "modulation": "locked",
+      "void_schedule": "locked"
+    },
+    "pause": {
+      "allowed": true,
+      "audio_behavior": "silence",
+      "clock_behavior": "freeze_condition_clock",
+      "record_pause_duration": true,
+      "resume_behavior": "continue_same_condition_time"
+    },
+    "post_exposure": {
+      "audio_state": "silence",
+      "immediate_post_trigger": "final_condition_end"
+    },
+    "recovery": {
+      "audio_state": "silence",
+      "clock_anchor": "final_condition_end",
+      "probe_offsets_s": [
+        60,
+        180
+      ]
+    }
+  },
+  "source_sha256": "c6ca5ec31a8e19183631c16b2357a7646f06fa71f26216d107f4b6ac2710f87e"
 }

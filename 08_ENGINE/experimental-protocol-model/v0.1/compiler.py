@@ -14,6 +14,8 @@ from typing import Any
 
 from validator import ProtocolValidationError, validate_instance
 from semantic_validator import (
+    ReferenceDuplicateError,
+    ReferenceNotFoundError,
     ensure_semantically_valid,
     recompute_fixed_periodic,
     validate_condition_semantics,
@@ -46,9 +48,9 @@ def _lookup(pattern: str, id_field: str, identifier: str) -> dict[str, Any]:
         if value.get(id_field) == identifier:
             matches.append(value)
     if not matches:
-        raise LookupError(f"Unknown {id_field}: {identifier}")
+        raise ReferenceNotFoundError(f"Unknown {id_field}: {identifier}")
     if len(matches) > 1:
-        raise LookupError(f"Duplicate {id_field}: {identifier}")
+        raise ReferenceDuplicateError(f"Duplicate {id_field}: {identifier}")
     return copy.deepcopy(matches[0])
 
 def load_raw_condition(identifier: str) -> dict[str, Any]:
@@ -96,13 +98,14 @@ def compile_condition(source: dict[str, Any]) -> dict[str, Any]:
     ensure_schema(source, "stimulus-condition.schema.json", source.get("condition_id", "condition"))
     issues = validate_condition_semantics(
         source,
-        resolve_wound=load_raw_wound,
-        resolve_crystallization=load_raw_crystallization,
+        resolve_wound=load_schema_valid_wound,
+        resolve_crystallization=load_schema_valid_crystallization,
         executable=True,
     )
     ensure_semantically_valid(issues, source["condition_id"])
 
     runtime_schedule = recompute_fixed_periodic(source["void_profile"])
+    runtime_schedule["gate_envelope"] = copy.deepcopy(source["gate_envelope"])
     compiled = {
         "execution_status": "validated",
         "compiler_version": COMPILER_VERSION,
@@ -153,6 +156,7 @@ def compile_protocol(source: dict[str, Any]) -> tuple[dict[str, Any], dict[str, 
         "source_sha256": sha256_of(source),
         "primary_outcome": copy.deepcopy(source["primary_outcome"]),
         "controlled_signal": copy.deepcopy(source["controlled_signal"]),
+        "runtime_policy": copy.deepcopy(source["execution_policy"]),
         "probe_set_ref": source["probe_set_ref"],
         "condition_sequence": list(source["condition_refs"]),
         "condition_fingerprints": fingerprints,

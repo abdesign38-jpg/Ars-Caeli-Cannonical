@@ -65,11 +65,21 @@
   "runtime_schedule": {
     "active_duration_s": 8.0,
     "block_duration_s": 60.0,
+    "cycle_anchor": "condition_start",
     "cycle_duration_s": 10.0,
+    "cycle_order": "active_then_silence",
     "event_rate_per_min": 6.0,
     "gap_cv": 0.0,
+    "gate_envelope": {
+      "active_gain": 1.0,
+      "ramp_ms": 20,
+      "ramp_shape": "linear",
+      "silent_gain": 0.0
+    },
     "mean_gap_ms": 2000.0,
     "pattern": "fixed_periodic",
+    "phase_offset_s": 0,
+    "scheduled_silence_ratio": 0.2,
     "silence_ratio": 0.2,
     "silent_duration_s": 2.0,
     "temporal_predictability": 1.0,
@@ -90,5 +100,5 @@
       "source": "method_base"
     }
   },
-  "source_sha256": "09208507bd21f16b7eafec579e83f0a58c24b76351bc3924d4c35c0a97d87af0"
+  "source_sha256": "fcc2b36ad8525ab38c3bb3ffa7d9be768f01c41d6f158adfb37726e3acb5cddf"
 }

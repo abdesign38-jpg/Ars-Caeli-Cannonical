@@ -79,6 +79,43 @@
     "environmental_breath_hz": 0.073,
     "harmonic_b_rule": "2x_carrier"
   },
+  "execution_policy": {
+    "condition_clock": "active_exposure_only",
+    "cycle_reset": "at_each_condition_start",
+    "pause": {
+      "allowed": true,
+      "clock_behavior": "freeze_condition_clock",
+      "audio_behavior": "silence",
+      "resume_behavior": "continue_same_condition_time",
+      "record_pause_duration": true
+    },
+    "between_conditions": {
+      "audio_state": "silence",
+      "next_condition_trigger": "required_probe_saved_or_skipped",
+      "gap_duration_policy": "participant_contingent_record_actual"
+    },
+    "baseline": {
+      "probe_trigger": "before_first_condition",
+      "audio_state": "silence"
+    },
+    "post_exposure": {
+      "audio_state": "silence",
+      "immediate_post_trigger": "final_condition_end"
+    },
+    "recovery": {
+      "audio_state": "silence",
+      "clock_anchor": "final_condition_end",
+      "probe_offsets_s": [60, 180]
+    },
+    "manual_controls": {
+      "carrier": "locked",
+      "modulation": "locked",
+      "void_schedule": "locked",
+      "gate_envelope": "locked",
+      "aeon_master_gain": "locked_at_protocol_start"
+    },
+    "integrity_breach_policy": "abort_condition_and_mark_series_invalid"
+  },
   "probe_set_ref": "probe.invisibilidad_relacional.blind.v0_1",
   "analysis_plan": {
     "primary": [

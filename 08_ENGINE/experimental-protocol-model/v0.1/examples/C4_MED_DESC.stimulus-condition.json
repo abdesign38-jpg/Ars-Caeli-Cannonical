@@ -82,6 +82,9 @@
       "active_duration_s": 5,
       "silent_duration_s": 5,
       "pattern": "fixed_periodic",
+      "cycle_order": "active_then_silence",
+      "cycle_anchor": "condition_start",
+      "phase_offset_s": 0,
       "seed": null,
       "explicit_events": []
     },
@@ -100,6 +103,12 @@
     },
     "status": "experimental_operationalization"
   },
+    "gate_envelope": {
+      "active_gain": 1.0,
+      "silent_gain": 0.0,
+      "ramp_ms": 20,
+      "ramp_shape": "linear"
+    },
   "timing": {
     "exposure_s": 60,
     "probe_after_s": 0,

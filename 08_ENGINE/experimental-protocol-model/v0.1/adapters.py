@@ -8,6 +8,8 @@ from pathlib import Path
 from typing import Any
 
 from semantic_validator import (
+    ReferenceDuplicateError,
+    ReferenceNotFoundError,
     ensure_semantically_valid,
     validate_condition_semantics,
     validate_protocol_semantics,
@@ -32,9 +34,9 @@ def _read_examples(pattern: str, id_field: str, identifier: str) -> dict[str, An
         if value.get(id_field) == identifier:
             matches.append(value)
     if not matches:
-        raise AdapterLookupError(f"Unknown {id_field}: {identifier}")
+        raise ReferenceNotFoundError(f"Unknown {id_field}: {identifier}")
     if len(matches) > 1:
-        raise AdapterLookupError(f"Duplicate {id_field}: {identifier}")
+        raise ReferenceDuplicateError(f"Duplicate {id_field}: {identifier}")
     return copy.deepcopy(matches[0])
 
 
@@ -147,7 +149,6 @@ def createResponseSeries(sessionContext: dict[str, Any]) -> dict[str, Any]:
         "started_at": sessionContext["started_at"],
         "observations": [],
         "engine_records": [],
-        "derived_metrics": [],
         "derived_metrics": [],
         "interpretation_boundary": (
             "Derived response metrics characterize this observed series; "

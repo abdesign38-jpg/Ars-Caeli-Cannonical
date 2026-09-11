@@ -43,12 +43,16 @@
         "cycle_duration_s",
         "active_duration_s",
         "silent_duration_s",
-        "silence_ratio",
+        "cycle_order",
+        "cycle_anchor",
+        "phase_offset_s",
+        "scheduled_silence_ratio",
         "event_rate_per_min",
         "mean_gap_ms",
         "gap_cv",
         "temporal_predictability",
-        "whole_cycles"
+        "whole_cycles",
+        "gate_envelope"
       ],
       "properties": {
         "pattern": {
@@ -69,6 +73,14 @@
         "silent_duration_s": {
           "type": "number",
           "minimum": 0
+        },
+        "cycle_order": { "const": "active_then_silence" },
+        "cycle_anchor": { "const": "condition_start" },
+        "phase_offset_s": { "const": 0 },
+        "scheduled_silence_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
         },
         "silence_ratio": {
           "type": "number",
@@ -92,6 +104,17 @@
         "whole_cycles": {
           "type": "integer",
           "minimum": 1
+        },
+        "gate_envelope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["active_gain", "silent_gain", "ramp_ms", "ramp_shape"],
+          "properties": {
+            "active_gain": { "const": 1.0 },
+            "silent_gain": { "const": 0.0 },
+            "ramp_ms": { "const": 20 },
+            "ramp_shape": { "const": "linear" }
+          }
         }
       }
     },

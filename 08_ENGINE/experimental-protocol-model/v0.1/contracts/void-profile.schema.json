@@ -88,7 +88,10 @@
         "active_duration_s",
         "silent_duration_s",
         "pattern",
-        "seed"
+        "seed",
+        "cycle_order",
+        "cycle_anchor",
+        "phase_offset_s"
       ],
       "properties": {
         "block_duration_s": {
@@ -120,6 +123,15 @@
             "integer",
             "null"
           ]
+        },
+        "cycle_order": {
+          "const": "active_then_silence"
+        },
+        "cycle_anchor": {
+          "const": "condition_start"
+        },
+        "phase_offset_s": {
+          "const": 0
         },
         "explicit_events": {
           "type": "array",

@@ -27,6 +27,14 @@ class SemanticValidationError(ValueError):
         self.issues = issues
         super().__init__(f"{label} failed semantic validation with {len(issues)} error(s)")
 
+
+class ReferenceNotFoundError(LookupError):
+    """A requested canonical reference does not exist."""
+
+
+class ReferenceDuplicateError(LookupError):
+    """A requested canonical reference resolves to more than one file."""
+
 def _eq(a: Any, b: Any) -> bool:
     if isinstance(a, (int, float)) and isinstance(b, (int, float)):
         return isclose(float(a), float(b), rel_tol=TOL, abs_tol=TOL)
@@ -43,11 +51,15 @@ def recompute_fixed_periodic(void_profile: dict[str, Any]) -> dict[str, Any]:
     block = float(s["block_duration_s"])
     return {
         "pattern": "fixed_periodic",
+        "cycle_order": s["cycle_order"],
+        "cycle_anchor": s["cycle_anchor"],
+        "phase_offset_s": s["phase_offset_s"],
         "block_duration_s": block,
         "cycle_duration_s": cycle,
         "active_duration_s": active,
         "silent_duration_s": silent,
         "silence_ratio": silent / cycle,
+        "scheduled_silence_ratio": silent / cycle,
         "event_rate_per_min": 60.0 / cycle,
         "mean_gap_ms": silent * 1000.0,
         "gap_cv": 0.0,
@@ -62,8 +74,8 @@ def validate_void_profile_semantics(
     require_whole_cycles: bool = False,
 ) -> list[SemanticIssue]:
     issues: list[SemanticIssue] = []
-    s = void_profile["schedule"]
-    pattern = s["pattern"]
+    s = void_profile.get("schedule", {})
+    pattern = s.get("pattern")
 
     if executable and pattern != "fixed_periodic":
         _issue(
@@ -75,6 +87,31 @@ def validate_void_profile_semantics(
 
     if pattern != "fixed_periodic":
         return issues
+
+    required_keys = {
+        "cycle_duration_s": "schedule.cycle_duration_s",
+        "active_duration_s": "schedule.active_duration_s",
+        "silent_duration_s": "schedule.silent_duration_s",
+        "block_duration_s": "schedule.block_duration_s",
+    }
+    for key, path in required_keys.items():
+        if key not in s:
+            _issue(issues, "VOID_SCHEDULE_FIELD_MISSING", path,
+                   f"Executable fixed_periodic schedule requires {key}.", None, None)
+            return issues
+
+    for key, expected in (
+        ("cycle_order", "active_then_silence"),
+        ("cycle_anchor", "condition_start"),
+        ("phase_offset_s", 0),
+    ):
+        if key not in s:
+            _issue(issues, "VOID_SCHEDULE_FIELD_MISSING", f"schedule.{key}",
+                   f"Executable fixed_periodic schedule requires {key}.", expected, None)
+            continue
+        if not _eq(s[key], expected):
+            _issue(issues, "VOID_CYCLE_SEMANTICS_INVALID", f"schedule.{key}",
+                   f"{key} must use the v0.1 executable value.", expected, s[key])
 
     cycle = float(s["cycle_duration_s"])
     active = float(s["active_duration_s"])
@@ -174,7 +211,10 @@ def validate_condition_semantics(
     if resolve_wound and refs.get("wound_profile_id"):
         try:
             resolve_wound(refs["wound_profile_id"])
-        except LookupError as exc:
+        except ReferenceDuplicateError as exc:
+            _issue(issues, "REFERENCE_DUPLICATE", "hypothesis_refs.wound_profile_id",
+                   str(exc), refs["wound_profile_id"], None)
+        except (ReferenceNotFoundError, LookupError) as exc:
             _issue(issues, "REFERENCE_NOT_FOUND", "hypothesis_refs.wound_profile_id",
                    str(exc), refs["wound_profile_id"], None)
 
@@ -182,7 +222,11 @@ def validate_condition_semantics(
         for i, cid in enumerate(refs.get("crystallization_profile_ids", [])):
             try:
                 resolve_crystallization(cid)
-            except LookupError as exc:
+            except ReferenceDuplicateError as exc:
+                _issue(issues, "REFERENCE_DUPLICATE",
+                       f"hypothesis_refs.crystallization_profile_ids.{i}",
+                       str(exc), cid, None)
+            except (ReferenceNotFoundError, LookupError) as exc:
                 _issue(issues, "REFERENCE_NOT_FOUND",
                        f"hypothesis_refs.crystallization_profile_ids.{i}",
                        str(exc), cid, None)
@@ -200,6 +244,10 @@ def validate_protocol_semantics(
     refs = protocol["condition_refs"]
     sequence = protocol["design"]["sequence"]
 
+    if len(refs) != len(set(refs)):
+        _issue(issues, "REFERENCE_DUPLICATE", "condition_refs",
+               "condition_refs must resolve uniquely.", "unique IDs", refs)
+
     if refs != sequence:
         _issue(issues, "PROTOCOL_SEQUENCE_MISMATCH", "condition_refs",
                "condition_refs must exactly equal design.sequence.", sequence, refs)
@@ -209,7 +257,9 @@ def validate_protocol_semantics(
         try:
             c = load_condition(cid)
             conditions.append(c)
-        except LookupError as exc:
+        except ReferenceDuplicateError as exc:
+            _issue(issues, "REFERENCE_DUPLICATE", f"condition_refs.{i}", str(exc), cid, None)
+        except (ReferenceNotFoundError, LookupError) as exc:
             _issue(issues, "REFERENCE_NOT_FOUND", f"condition_refs.{i}", str(exc), cid, None)
 
     sequence_ids = set()
@@ -245,9 +295,27 @@ def validate_protocol_semantics(
                "All conditions in one protocol sequence must share one sequence_id.",
                "single sequence_id", sorted(sequence_ids))
 
+    expected_envelope = {
+        "active_gain": 1.0, "silent_gain": 0.0, "ramp_ms": 20, "ramp_shape": "linear"
+    }
+    for c in conditions:
+        if c.get("gate_envelope") != expected_envelope:
+            _issue(issues, "CONDITION_GATE_ENVELOPE_MISMATCH",
+                   f"conditions.{c['condition_id']}.gate_envelope",
+                   "Pilot 01 requires one shared gate envelope.", expected_envelope,
+                   c.get("gate_envelope"))
+        if c["signal"] != protocol["controlled_signal"]:
+            _issue(issues, "PROTOCOL_SIGNAL_MISMATCH", f"conditions.{c['condition_id']}.signal",
+                   "Pilot 01 requires every controlled signal field to match.",
+                   protocol["controlled_signal"], c["signal"])
+
     try:
         probe = load_probe(protocol["probe_set_ref"])
-    except LookupError as exc:
+    except ReferenceDuplicateError as exc:
+        _issue(issues, "REFERENCE_DUPLICATE", "probe_set_ref", str(exc),
+               protocol["probe_set_ref"], None)
+        probe = None
+    except (ReferenceNotFoundError, LookupError) as exc:
         _issue(issues, "REFERENCE_NOT_FOUND", "probe_set_ref", str(exc),
                protocol["probe_set_ref"], None)
         probe = None

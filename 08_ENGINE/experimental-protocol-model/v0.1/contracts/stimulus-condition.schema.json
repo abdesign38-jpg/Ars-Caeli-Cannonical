@@ -13,6 +13,7 @@
     "held_constant",
     "signal",
     "void_profile",
+    "gate_envelope",
     "timing",
     "order_control",
     "blinding",
@@ -88,6 +89,22 @@
     },
     "void_profile": {
       "$ref": "https://ars-caeli.local/contracts/void-profile.schema.json"
+    },
+    "gate_envelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "active_gain",
+        "silent_gain",
+        "ramp_ms",
+        "ramp_shape"
+      ],
+      "properties": {
+        "active_gain": { "const": 1.0 },
+        "silent_gain": { "const": 0.0 },
+        "ramp_ms": { "const": 20 },
+        "ramp_shape": { "const": "linear" }
+      }
     },
     "timing": {
       "type": "object",

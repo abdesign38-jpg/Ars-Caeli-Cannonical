@@ -1,0 +1,7 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://ars-caeli.local/contracts/v0.2/response-series.schema.json",
+  "type":"object","additionalProperties":false,
+  "required":["schema_version","series_id","session_id","participant_id","protocol_id","started_at","observations","engine_records","derived_metrics","behavioral_records","interpretation_boundary"],
+  "properties":{"schema_version":{"const":"0.2-draft"},"series_id":{"type":"string"},"session_id":{"type":"string"},"participant_id":{"type":"string"},"protocol_id":{"type":"string"},"started_at":{"type":"string","format":"date-time"},"observations":{"type":"array"},"engine_records":{"type":"array"},"derived_metrics":{"type":"array"},"behavioral_records":{"type":"array","items":{"$ref":"https://ars-caeli.local/contracts/v0.2/behavioral-record.schema.json"}},"interpretation_boundary":{"type":"string"}}
+}

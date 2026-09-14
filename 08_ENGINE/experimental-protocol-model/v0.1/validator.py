@@ -23,6 +23,11 @@ SCHEMA_BY_EXAMPLE_SUFFIX = {
     ".wound-profile.json": "wound-profile.schema.json",
     ".profile.json": "void-profile.schema.json",
     "response-series.template.json": "response-series.schema.json",
+    ".perceptual-stimulus.json": "draft-v0.2/perceptual-stimulus.schema.json",
+    ".behavioral-probe.json": "draft-v0.2/behavioral-probe.schema.json",
+    ".behavioral-trial.json": "draft-v0.2/behavioral-trial.schema.json",
+    ".behavioral-record.json": "draft-v0.2/behavioral-record.schema.json",
+    "response-series-v0.2.template.json": "draft-v0.2/response-series.schema.json",
 }
 
 
@@ -34,6 +39,10 @@ class ProtocolValidationError(ValueError):
         super().__init__(result["message"])
 
 
+class SchemaRegistryError(ValueError):
+    """Raised when the recursive schema registry is inconsistent."""
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     with path.open(encoding="utf-8") as stream:
         return json.load(stream)
@@ -41,16 +50,25 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 def _schema_registry() -> Registry:
     resources = []
-    for schema_path in CONTRACTS_ROOT.glob("*.schema.json"):
+    seen_ids = set()
+    for schema_path in sorted(CONTRACTS_ROOT.rglob("*.schema.json")):
         schema = _read_json(schema_path)
+        Draft202012Validator.check_schema(schema)
         schema_id = schema.get("$id")
         if schema_id:
+            if schema_id in seen_ids:
+                raise SchemaRegistryError(f"Duplicate schema $id: {schema_id}")
+            seen_ids.add(schema_id)
             resources.append((schema_id, Resource.from_contents(schema)))
     return Registry().with_resources(resources)
 
 
 def _validator(schema_name: str) -> Draft202012Validator:
     schema_path = CONTRACTS_ROOT / schema_name
+    if not schema_path.is_file():
+        matches = list(CONTRACTS_ROOT.rglob(Path(schema_name).name))
+        if len(matches) == 1:
+            schema_path = matches[0]
     if not schema_path.is_file():
         raise FileNotFoundError(f"Unknown protocol schema: {schema_name}")
     schema = _read_json(schema_path)
@@ -103,7 +121,7 @@ def _schema_for_example(filename: str) -> str:
 
 def validate_examples() -> list[dict[str, Any]]:
     results = []
-    for example_path in sorted(EXAMPLES_ROOT.glob("*.json")):
+    for example_path in sorted(EXAMPLES_ROOT.rglob("*.json")):
         results.append(validate_file(example_path))
     return results
 

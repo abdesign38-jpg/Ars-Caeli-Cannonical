@@ -1,0 +1,9 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://ars-caeli.local/contracts/v0.2/behavioral-probe.schema.json",
+  "type":"object","additionalProperties":false,
+  "required":["schema_version","probe_id","task_type","construct","instructions","stimulus_family","required_parameters","choices","has_correct_answer","trial_policy"],
+  "properties":{
+    "schema_version":{"const":"0.2-draft"},"probe_id":{"type":"string","minLength":1},"task_type":{"enum":["two_alternative_forced_choice","odd_one_out","same_different"]},"construct":{"type":"string","minLength":1},"analysis_role":{"type":"string"},"instructions":{"type":"string","minLength":1},"stimulus_family":{"type":"string","minLength":1},"required_parameters":{"type":"array","items":{"type":"string"},"uniqueItems":true},"choices":{"type":"array","minItems":2,"items":{"type":"object","additionalProperties":false,"required":["choice_id","position"],"properties":{"choice_id":{"type":"string"},"position":{"type":"integer","minimum":0}}}},"has_correct_answer":{"type":"boolean"},"correct_choice_id":{"type":["string","null"]},"trial_policy":{"oneOf":[{"type":"object","additionalProperties":false,"required":["mode","trials"],"properties":{"mode":{"const":"fixed"},"trials":{"type":"integer","minimum":1}}},{"type":"object","additionalProperties":false,"required":["mode","method_id","method_version","min_trials","max_trials","stopping_rule","seed"],"properties":{"mode":{"const":"adaptive"},"method_id":{"type":"string"},"method_version":{"type":"string"},"min_trials":{"type":"integer","minimum":1},"max_trials":{"type":"integer","minimum":1},"stopping_rule":{"type":"string"},"seed":{"type":"integer"}}}]}
+  }
+}

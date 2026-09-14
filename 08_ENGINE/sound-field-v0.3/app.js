@@ -93,7 +93,7 @@
     startedAt:0,
     elapsedBefore:0,
     timer:null,
-    ctx:null, master:null, analyser:null,
+    ctx:null, master:null, analyser:null, outputGate:null, telemetryAnalyser:null, telemetrySink:null,
     banks:null, activeBank:0,
     oscA:null, oscB:null, gainA:null, gainB:null,
     delay:null, feedback:null, filter:null, panA:null, panB:null,
@@ -107,7 +107,13 @@
     draftPlan:null,
     viz:"torus",
     canonical:{}, timeData:null, freqData:null,
-    microvoids:[], phaseEvents:[], parameterEvents:[], signalEvents:[], planEvents:[], transition:null, manualOverride:null
+    microvoids:[], phaseEvents:[], parameterEvents:[], signalEvents:[], planEvents:[], transition:null, manualOverride:null,
+    protocol:{
+      mode:"FREE", state:"FREE", protocol:null, conditions:new Map(), conditionIndex:0, condition:null,
+      integrity:{verified:false,error:null}, audioSnapshot:null, previousSignal:null, conditionAnchorCtxTime:null,
+      telemetryData:null, telemetryTimer:null, telemetrySamples:[], telemetrySummary:null, telemetryError:null,
+      run:{id:null,valid:true,invalidReason:null,conditions:[],events:[],calibration_only:false}
+    }
   };
   const phaseLabels={descenso:"Descent",shadow:"Shadow",light:"Light",retorno:"Return"};
 
@@ -118,6 +124,84 @@
       disociacion:num("#disociacion"),
       apertura:num("#apertura")
     };
+  }
+
+  function protocolModeActive(){return S.protocol.mode!=="FREE"}
+  function protocolRunning(){return S.protocol.state==="CONDITION_RUNNING"}
+  function effectiveAudioControlState(){
+    if(protocolModeActive()&&S.protocol.audioSnapshot)return S.protocol.audioSnapshot;
+    return {dimensions:dimensions(),field:S.field,depth:num("#depth")};
+  }
+  function protocolConditionTime(){
+    if(!S.ctx||S.protocol.conditionAnchorCtxTime==null)return 0;
+    return Math.max(0,S.ctx.currentTime-S.protocol.conditionAnchorCtxTime);
+  }
+  function protocolTimeLabel(seconds){
+    const value=Math.max(0,Number(seconds)||0),minutes=Math.floor(value/60),remaining=(value-minutes*60).toFixed(3);
+    return `${String(minutes).padStart(2,"0")}:${String(remaining).padStart(6,"0")}`;
+  }
+  function protocolUi(){
+    const p=S.protocol,condition=p.condition,schedule=condition?.runtime_schedule;
+    const set=(id,value)=>{const element=$(id);if(element)element.textContent=value};
+    const panel=$("#protocolPanel");if(panel)panel.dataset.telemetrySamples=String(p.telemetrySamples.length);
+    set("#protocolMode",p.mode==="FREE"?"Free Field":"Pilot 01");
+    set("#protocolIntegrity",p.integrity.verified?"VERIFIED":p.integrity.error?"INVALID":"NOT LOADED");
+    set("#protocolId",p.protocol?.protocol_id||"—");
+    set("#protocolCondition",condition?`${condition.condition_id} · ${p.conditionIndex+1}/5`:"—");
+    set("#protocolSchedule",schedule?`${Number(schedule.active_duration_s).toFixed(1)} active / ${Number(schedule.silent_duration_s).toFixed(1)} silent`:"—");
+    set("#protocolScheduledSilence",schedule?`${(Number(schedule.scheduled_silence_ratio)*100).toFixed(0)}%`:"—");
+    set("#protocolGate",p.state==="PAUSED"?"PAUSED":protocolRunning()?(window.AEONProtocolRuntime?.scheduledStateAt(schedule,protocolConditionTime())||"ACTIVE"):p.state==="PROBE_PENDING"?"SILENT":"—");
+    set("#protocolTime",schedule?`${protocolTimeLabel(protocolConditionTime())} / ${protocolTimeLabel(schedule.block_duration_s)}`:"00:00.000 / 01:00.000");
+    set("#protocolRms",p.telemetrySamples.length?`${p.telemetrySamples[p.telemetrySamples.length-1].rms_dbfs.toFixed(1)} dBFS`:p.telemetryError?"INVALID":"—");
+    set("#protocolMeasuredSilence",p.telemetrySummary?`${(p.telemetrySummary.measured_digital_silence_ratio*100).toFixed(1)}%`:"—");
+    set("#protocolState",p.state);
+    const error=$("#protocolError");if(error){error.textContent=p.integrity.error||"";error.hidden=!p.integrity.error}
+    const notice=$("#protocolNotice");if(notice)notice.hidden=p.state!=="PROBE_PENDING";
+    const arm=$("#armProtocolBtn");if(arm)arm.disabled=p.mode!=="FREE"||S.running;
+    const abort=$("#abortProtocolBtn");if(abort)abort.disabled=p.mode==="FREE"||p.state==="ABORTED";
+    ["#inframundo","#activacion","#disociacion","#apertura","#constructSelect","#constructValue","#duration","#depth","#carrierSource","#modulationSelect","#manualModulation","#phaseSignalMode","#resetBtn","#prevBtn","#nextBtn","#timerBtn","#registerMicrovoidBtn"].forEach(selector=>{const element=$(selector);if(element)element.disabled=protocolModeActive()});
+    document.body.classList.toggle("protocol-active",protocolModeActive());
+  }
+  function protocolIntegrityFailure(reason){
+    const p=S.protocol;p.integrity.verified=false;p.integrity.error=String(reason?.message||reason);p.state="INVALID";p.run.valid=false;p.run.invalidReason=p.integrity.error;
+    p.run.events.push({type:"integrity_breach",at:new Date().toISOString(),reason:p.integrity.error});
+    if(S.outputGate&&S.ctx){S.outputGate.gain.cancelScheduledValues(S.ctx.currentTime);S.outputGate.gain.setValueAtTime(0,S.ctx.currentTime)}
+    if(S.running&&S.ctx&&S.ctx.state==="running")S.ctx.suspend().catch(()=>{});
+    protocolUi();
+  }
+  function protocolWatchdog(){
+    const p=S.protocol;if(!protocolRunning()||!p.condition||!p.audioSnapshot)return;
+    const expected=p.condition.signal,actual=S.signal,controls={dimensions:dimensions(),field:S.field,depth:num("#depth"),listening_context:document.querySelector(".seg.active")?.dataset.output||"headphones"};
+    const signalMismatch=JSON.stringify(actual)!==JSON.stringify(expected);
+    const snapshotMismatch=JSON.stringify(controls.dimensions)!==JSON.stringify(p.audioSnapshot.dimensions)||JSON.stringify({...controls.field,breath:.073})!==JSON.stringify(p.audioSnapshot.field)||controls.depth!==p.audioSnapshot.depth||controls.listening_context!==p.audioSnapshot.listening_context;
+    if(signalMismatch||snapshotMismatch)protocolIntegrityFailure({message:`locked protocol parameter changed (${signalMismatch?"signal":"audio snapshot"})`});
+  }
+  function protocolAudioSnapshot(){
+    const current=effectiveAudioControlState();
+    return Object.freeze({
+      dimensions:structuredClone(current.dimensions),
+      field:{...structuredClone(current.field),breath:.073},
+      depth:current.depth,
+      listening_context:document.querySelector(".seg.active")?.dataset.output||"headphones",
+      aeon_master_base_gain:[.025,.035,.045][current.depth]
+    });
+  }
+  async function armProtocol(){
+    if(S.running||S.protocol.mode!=="FREE")return;
+    const p=S.protocol;p.integrity={verified:false,error:null};p.state="READY";p.run={id:createSessionId(),valid:true,invalidReason:null,conditions:[],events:[],calibration_only:new URLSearchParams(location.search).get("aeon_qa")==="1"};protocolUi();
+    try{
+      const base="../experimental-protocol-model/v0.1/compiled";
+      const artifacts=await window.AEONProtocolRuntime.loadAndVerifyArtifacts(base);
+      p.protocol=artifacts.protocol;p.conditions=artifacts.conditions;p.conditionIndex=0;const qaId=new URLSearchParams(location.search).get("aeon_qa")==="1"?$("#protocolQaCondition")?.value:null;p.condition=artifacts.conditions.get(qaId||p.protocol.condition_sequence[0]);
+      p.audioSnapshot=protocolAudioSnapshot();p.previousSignal=cloneSignal(S.signal);p.integrity.verified=true;p.mode="ARMED";p.state="READY";
+      S.signal=structuredClone(p.condition.signal);protocolUi();updateReadouts();flash("Pilot 01 verified and armed.");
+    }catch(error){p.mode="FREE";protocolIntegrityFailure(error);flash(p.integrity.error)}
+  }
+  function abortProtocol(){
+    if(S.protocol.mode==="FREE")return;
+    if(S.ctx&&S.running)audioStop();
+    const p=S.protocol;p.mode="FREE";p.state="ABORTED";p.condition=null;p.conditionAnchorCtxTime=null;p.conditions=new Map();p.audioSnapshot=null;p.telemetrySamples=[];p.telemetrySummary=null;
+    S.signal=cloneSignal(p.previousSignal||defaultSignal);p.previousSignal=null;protocolUi();updateReadouts();flash("Protocol aborted; Free Field restored.");
   }
 
   function derived(){
@@ -238,6 +322,7 @@
   }
 
   function transitionToPhase(nextPhase,source="automatic"){
+    if(protocolModeActive())return;
     if(!phaseTargets[nextPhase]||nextPhase===S.phase&& !S.transition)return;
     const start={dimensions:dimensions(),field:{...S.field}};
     if(!S.running&&source==="manual"){
@@ -274,13 +359,14 @@
     if(S.phaseSignalMode==="LOCKED")return cloneSignal(S.signal);
     return S.phaseSignalPlan[phase]?.approved?cloneSignal(S.phaseSignalPlan[phase].signal):null;
   }
-  function createAudioBank(ctx,signal,gainValue=0){
+  function createAudioBank(ctx,signal,gainValue=0,startAt=null){
     const bank={gain:ctx.createGain(),oscA:ctx.createOscillator(),oscB:ctx.createOscillator(),gainA:ctx.createGain(),gainB:ctx.createGain(),panA:ctx.createStereoPanner(),panB:ctx.createStereoPanner()};
     bank.signal=cloneSignal(signal);
     bank.gain.gain.value=gainValue;bank.oscA.type="sine";bank.oscB.type="triangle";
     bank.oscA.connect(bank.gainA).connect(bank.panA).connect(bank.gain);bank.oscB.connect(bank.gainB).connect(bank.panB).connect(bank.gain);bank.gain.connect(S.filter);
     bank.oscA.frequency.value=signal.carrier.hz;bank.oscB.frequency.value=signal.carrier.hz*2;
-    bank.oscA.start();bank.oscB.start();return bank;
+    if(startAt==null){bank.oscA.start();bank.oscB.start()}else{bank.oscA.start(startAt);bank.oscB.start(startAt)}
+    return bank;
   }
   function activeAudioBank(){return S.banks?.[S.activeBank]??null}
   function disposeBank(bank,when=0){
@@ -340,41 +426,57 @@
 
   function audioStart(){
     if(S.running) return;
+    if(protocolModeActive()){
+      if(!S.protocol.integrity.verified||!S.protocol.condition)return;
+      if(S.protocol.state==="PROBE_PENDING"||S.protocol.state==="INVALID"||S.protocol.state==="ABORTED")return;
+    }
     if(S.phaseSignalMode!=="LOCKED"&&PHASE_ORDER.some(phase=>!S.phaseSignalPlan[phase]?.approved)){flash("Resolve and approve every phase signal plan row before starting.");return}
     const AC=window.AudioContext||window.webkitAudioContext;
     if(!AC) return;
     S.ctx=new AC();
     const ctx=S.ctx;
 
+    const protocolStartAt=protocolModeActive()?ctx.currentTime+.050:null;
     S.master=ctx.createGain(); S.master.gain.value=0;
+    S.outputGate=ctx.createGain();S.outputGate.gain.value=protocolModeActive()?0:1;
     S.analyser=ctx.createAnalyser(); S.analyser.fftSize=8192; S.analyser.smoothingTimeConstant=.82;
+    S.telemetryAnalyser=ctx.createAnalyser();S.telemetryAnalyser.fftSize=1024;S.telemetryAnalyser.smoothingTimeConstant=0;
+    S.telemetrySink=ctx.createGain();S.telemetrySink.gain.value=0;
     S.timeData=new Uint8Array(S.analyser.fftSize); S.freqData=new Uint8Array(S.analyser.frequencyBinCount);
     S.filter=ctx.createBiquadFilter(); S.filter.type="lowpass";
     S.delay=ctx.createDelay(1); S.feedback=ctx.createGain();
     S.lfo=ctx.createOscillator();S.lfoGain=ctx.createGain();
     S.breathOsc=ctx.createOscillator();S.breathGain=ctx.createGain();
 
-    S.banks=[createAudioBank(ctx,S.signal,1),createAudioBank(ctx,S.signal,0)];S.activeBank=0;
+    S.banks=[createAudioBank(ctx,S.signal,1,protocolStartAt),createAudioBank(ctx,S.signal,0,protocolStartAt)];S.activeBank=0;
     S.oscA=S.banks[0].oscA;S.oscB=S.banks[0].oscB;S.gainA=S.banks[0].gainA;S.gainB=S.banks[0].gainB;S.panA=S.banks[0].panA;S.panB=S.banks[0].panB;
     S.filter.connect(S.master);
     S.filter.connect(S.delay);
     S.delay.connect(S.master);
     S.delay.connect(S.feedback).connect(S.delay);
-    S.master.connect(S.analyser);
+    S.master.connect(S.outputGate);
+    S.outputGate.connect(S.analyser);
     S.analyser.connect(ctx.destination);
+    S.outputGate.connect(S.telemetryAnalyser).connect(S.telemetrySink).connect(ctx.destination);
     S.lfo.connect(S.lfoGain);S.banks.forEach(bank=>S.lfoGain.connect(bank.gainA.gain));
     S.breathOsc.connect(S.breathGain).connect(S.master.gain);
 
-    [S.lfo,S.breathOsc].forEach(o=>o.start());
+    if(protocolStartAt==null){S.lfo.start();S.breathOsc.start()}else{S.lfo.start(protocolStartAt);S.breathOsc.start(protocolStartAt)}
     S.running=true;S.startedAt=performance.now();
+    if(protocolModeActive()){
+      S.protocol.state="CONDITION_RUNNING";S.protocol.conditionAnchorCtxTime=protocolStartAt;S.protocol.telemetrySamples=[];S.protocol.telemetrySummary=null;
+      window.AEONProtocolRuntime.scheduleFixedPeriodicGate(S.outputGate.gain,S.protocol.condition.runtime_schedule,protocolStartAt);
+      S.protocol.telemetryData=new Float32Array(S.telemetryAnalyser.fftSize);S.protocol.telemetryTimer=window.setInterval(()=>sampleProtocolTelemetry(),25);
+    }
     $("#playBtn").textContent="Ⅱ";
     updateAudio();
-    startVisualMotion();
+    if(!protocolModeActive())startVisualMotion();
+    else {$("#fieldStatus").textContent="FIELD · PROTOCOL STATIC";renderVisualFrame()}
     S.timer=setInterval(updateTimer,250);
   }
 
   function audioStop(){
-    if(!S.running) return;
+    if(!S.running&&!S.ctx) return;
     S.elapsedBefore += performance.now()-S.startedAt;
     stopVisualMotion({renderFrozen:true});
     const ctx=S.ctx;
@@ -386,13 +488,13 @@
       try{S.lfo?.stop();S.lfo?.disconnect();S.lfoGain?.disconnect();S.breathOsc?.stop();S.breathOsc?.disconnect();S.breathGain?.disconnect()}catch(_){ }
       setTimeout(()=>ctx.close().catch(()=>{}),650);
     }catch(_){}
-    S.running=false;S.ctx=null;S.banks=null;S.activeBank=0;S.oscA=S.oscB=S.gainA=S.gainB=S.panA=S.panB=null;$("#playBtn").textContent="▶";
-    clearInterval(S.timer);S.timer=null;
+    S.running=false;S.ctx=null;S.outputGate=null;S.telemetryAnalyser=null;S.telemetrySink=null;S.banks=null;S.activeBank=0;S.oscA=S.oscB=S.gainA=S.gainB=S.panA=S.panB=null;$("#playBtn").textContent="▶";
+    clearInterval(S.timer);S.timer=null;clearInterval(S.protocol.telemetryTimer);S.protocol.telemetryTimer=null;protocolUi();
   }
 
   function updateAudio(){
     if(!S.running||!S.ctx) return;
-    const d=dimensions(), f=S.field, t=S.ctx.currentTime;
+    const controls=effectiveAudioControlState(),d=controls.dimensions,f=controls.field,t=S.ctx.currentTime;
     const depth=num("#depth");
     S.banks?.forEach(bank=>updateBankFieldParams(bank,d,f,t));
     const width=clamp(.16+(f.horizon/100)*.72,0,.9);
@@ -402,13 +504,50 @@
     S.filter.Q.setTargetAtTime(1+(f.crystallization/100)*7,t,.18);
     if(t>=S.modulationTransitionUntil)S.lfo.frequency.setTargetAtTime(S.signal.modulation.hz,t,.18);
     S.lfoGain.gain.setTargetAtTime(.035+d.activacion/100*.10,t,.18);
-    const baseMaster=[.025,.035,.045][depth];
+    const baseMaster=controls.aeon_master_base_gain??[.025,.035,.045][controls.depth??depth];
     S.master.gain.setTargetAtTime(baseMaster,t,.2);
     S.breathOsc.frequency.setTargetAtTime(f.breath,t,.25);
     S.breathGain.gain.setTargetAtTime(baseMaster*.04,t,.25);
     updateSignalMonitor();
   }
   function updateBankFieldParams(bank,d,f,t){if(!bank)return;const width=clamp(.16+(f.horizon/100)*.72,0,.9);bank.gainA.gain.setTargetAtTime(.24,t,.18);bank.gainB.gain.setTargetAtTime(clamp(.025+(f.presence/100)*.075+(d.apertura/100)*.025,.02,.13),t,.18);bank.panA.pan.setTargetAtTime(-width,t,.18);bank.panB.pan.setTargetAtTime(width,t,.18)}
+
+  function sampleProtocolTelemetry(){
+    const p=S.protocol;if(!protocolRunning()||!S.telemetryAnalyser||!p.telemetryData||!S.ctx)return;
+    try{
+      S.telemetryAnalyser.getFloatTimeDomainData(p.telemetryData);
+      const conditionTime=protocolConditionTime(),schedule=p.condition.runtime_schedule;
+      const rmsDbfs=window.AEONProtocolRuntime.rmsDbfs(p.telemetryData);
+      p.telemetrySamples.push({condition_time_s:+conditionTime.toFixed(3),context_time_s:+S.ctx.currentTime.toFixed(3),scheduled_state:window.AEONProtocolRuntime.scheduledStateAt(schedule,conditionTime),in_ramp_window:window.AEONProtocolRuntime.inGateRampWindow(schedule,conditionTime),rms_dbfs:+rmsDbfs.toFixed(3),measured_silent:rmsDbfs<=-80});
+      protocolUi();
+    }catch(error){
+      clearInterval(p.telemetryTimer);p.telemetryTimer=null;p.telemetryError=String(error?.message||error);protocolIntegrityFailure({message:`telemetry unavailable: ${p.telemetryError}`});
+    }
+  }
+
+  function summarizeProtocolTelemetry(){
+    const p=S.protocol,samples=p.telemetrySamples,schedule=p.condition.runtime_schedule;
+    const active=samples.filter(sample=>sample.scheduled_state==="ACTIVE"),silent=samples.filter(sample=>sample.scheduled_state==="SILENT");
+    const steady=samples.filter(sample=>!sample.in_ramp_window&&sample.condition_time_s>=.075&&sample.condition_time_s<=schedule.block_duration_s-.075);
+    const ratio=values=>values.length?values.filter(sample=>sample.measured_silent).length/values.length:null;
+    const agreement=values=>values.length?values.filter(sample=>sample.measured_silent===(sample.scheduled_state==="SILENT")).length/values.length:null;
+    const median=values=>{if(!values.length)return null;const sorted=values.map(sample=>sample.rms_dbfs).sort((a,b)=>a-b);return sorted[Math.floor(sorted.length/2)]};
+    return {scheduled_silence_ratio:schedule.scheduled_silence_ratio,measured_digital_silence_ratio:ratio(samples),steady_state_measured_silence_ratio:ratio(steady),classification_agreement:agreement(samples),steady_state_classification_agreement:agreement(steady),sample_count:samples.length,active_sample_count:active.length,silent_sample_count:silent.length,median_active_rms_dbfs:median(active),median_silent_rms_dbfs:median(silent),near_clipping_count:samples.filter(sample=>sample.rms_dbfs>-1).length,telemetry_valid:!!S.telemetryAnalyser};
+  }
+
+  function disposeConditionGraph(){
+    S.banks?.forEach(bank=>disposeBank(bank));
+    try{S.lfo?.stop();S.lfo?.disconnect();S.lfoGain?.disconnect();S.breathOsc?.stop();S.breathOsc?.disconnect();S.breathGain?.disconnect()}catch(_){ }
+    S.banks=null;S.activeBank=0;S.oscA=S.oscB=S.gainA=S.gainB=S.panA=S.panB=null;
+  }
+
+  function finishProtocolCondition(){
+    if(!protocolRunning())return;
+    const p=S.protocol;if(S.outputGate&&S.ctx){S.outputGate.gain.cancelScheduledValues(S.ctx.currentTime);S.outputGate.gain.setValueAtTime(0,S.ctx.currentTime)}
+    clearInterval(p.telemetryTimer);p.telemetryTimer=null;p.telemetrySummary=summarizeProtocolTelemetry();
+    p.run.conditions.push({condition_id:p.condition.condition_id,source_sha256:p.condition.source_sha256,executable_fingerprint:p.protocol.condition_fingerprints[p.condition.condition_id],scheduled_silence_ratio:p.condition.runtime_schedule.scheduled_silence_ratio,started_at:new Date().toISOString(),ended_at:new Date().toISOString(),pauses:[],telemetry_policy:{source:"browser_digital_output_downstream_of_protocol_gate",fft_size:1024,sampling_interval_ms:25,silence_threshold_dbfs:-80,not_acoustic_spl:true},telemetry_summary:p.telemetrySummary,telemetry_samples:p.telemetrySamples});
+    disposeConditionGraph();p.state="PROBE_PENDING";S.running=false;clearInterval(S.timer);S.timer=null;$("#playBtn").textContent="▶";stopVisualMotion({renderFrozen:true});protocolUi();flash("Condition complete. Observation layer required.");
+  }
 
   function dominantFftHz(){
     if(!S.running||!S.analyser||!S.ctx)return null;
@@ -418,8 +557,8 @@
     return +(index*S.ctx.sampleRate/(S.analyser.fftSize)).toFixed(2);
   }
   function signalSnapshot(){
-    const carrier=clamp(S.signal.carrier.hz,40,2000),sampleRate=S.ctx?.sampleRate??null,fftSize=S.analyser?.fftSize??8192;
-    return {carrier:{source:S.signal.carrier.source,key:S.signal.carrier.key,target_hz:S.signal.carrier.hz},harmonic_b:{source:"aeon_synthesis",rule:"2x_carrier",target_hz:carrier*2},modulation:{source:S.signal.modulation.source,key:S.signal.modulation.key,mode:S.signal.modulation.mode,target_hz:S.signal.modulation.hz},environmental_breath:{source:"aeon_field_mapping",acspec:"ACSPEC-114",target_hz:S.field.breath},sample_rate_hz:sampleRate,fft_size:fftSize,fft_resolution_hz:sampleRate?+(sampleRate/fftSize).toFixed(2):null,dominant_fft_hz:dominantFftHz(),rms_dbfs:signalRmsDbfs(),peak_dbfs:signalPeakDbfs(),near_clipping:signalNearClipping(),audio_context_state:S.ctx?.state??"closed",master_gain:S.master?.gain.value??0};
+    const controls=effectiveAudioControlState(),carrier=clamp(S.signal.carrier.hz,40,2000),sampleRate=S.ctx?.sampleRate??null,fftSize=S.analyser?.fftSize??8192;
+    return {carrier:{source:S.signal.carrier.source,key:S.signal.carrier.key,target_hz:S.signal.carrier.hz},harmonic_b:{source:"aeon_synthesis",rule:"2x_carrier",target_hz:carrier*2},modulation:{source:S.signal.modulation.source,key:S.signal.modulation.key,mode:S.signal.modulation.mode,target_hz:S.signal.modulation.hz},environmental_breath:{source:"aeon_field_mapping",acspec:"ACSPEC-114",target_hz:controls.field.breath},sample_rate_hz:sampleRate,fft_size:fftSize,fft_resolution_hz:sampleRate?+(sampleRate/fftSize).toFixed(2):null,dominant_fft_hz:dominantFftHz(),rms_dbfs:signalRmsDbfs(),peak_dbfs:signalPeakDbfs(),near_clipping:signalNearClipping(),audio_context_state:S.ctx?.state??"closed",master_gain:S.master?.gain.value??0};
   }
   function updateSignalMonitor(){
     const signal=signalSnapshot(),format=(value,digits=2)=>value==null?"—":`${Number(value).toFixed(digits)} Hz`;
@@ -447,6 +586,15 @@
 
   function elapsedMs(){ return S.elapsedBefore + (S.running ? performance.now()-S.startedAt : 0); }
   function updateTimer(){
+    if(protocolModeActive()){
+      const condition=S.protocol.condition;
+      protocolWatchdog();
+      sampleProtocolTelemetry();
+      if(S.protocol.state==="CONDITION_RUNNING"&&condition&&protocolConditionTime()>=condition.runtime_schedule.block_duration_s)finishProtocolCondition();
+      protocolUi();
+      if(S.running)updateSignalMonitor();
+      return;
+    }
     const total=num("#duration")*60*1000;
     const ms=Math.min(elapsedMs(),total);
     updateTransition();
@@ -460,6 +608,18 @@
     renderMicrovoidTimeline();
     if(S.running)updateSignalMonitor();
     if(ms>=total && S.running) audioStop();
+  }
+
+  async function handleProtocolTransport(){
+    const p=S.protocol;
+    if(p.state==="READY"&&p.mode==="ARMED"){audioStart();return}
+    if(p.state==="CONDITION_RUNNING"&&S.ctx){
+      await S.ctx.suspend();p.state="PAUSED";p.run.events.push({type:"pause",context_time_s:S.ctx.currentTime,at:new Date().toISOString()});stopVisualMotion({renderFrozen:true});protocolUi();return;
+    }
+    if(p.state==="PAUSED"&&S.ctx){
+      await S.ctx.resume();p.state="CONDITION_RUNNING";p.run.events.push({type:"resume",context_time_s:S.ctx.currentTime,at:new Date().toISOString()});startVisualMotion();protocolUi();return;
+    }
+    if(p.state==="PROBE_PENDING")flash("OBSERVATION REQUIRED · Phase D not installed");
   }
   function createSessionId(){
     const now=new Date();
@@ -506,8 +666,8 @@
       experiment_id:S.experimentId,
       participant_id:S.participantId,
       engine:"AEON Sound Field",
-      engine_version:"0.3.4.2",
-      engine_build:"0.3.4.2",
+      engine_version:"0.3.4.3",
+      engine_build:"0.3.4.3",
       date:S.sessionStartISO,
       duration_real_s:+(elapsedMs()/1000).toFixed(2),
       context:{
@@ -529,9 +689,26 @@
         ,phase_signal_plan:{mode:S.phaseSignalMode,phases:S.phaseSignalPlan,provenance_boundary:"Source identity remains separate for carrier, modulation, harmonic synthesis and environmental breath.",method_match_policy:"show_all_no_priority",status:"experimental_noncanonical"}
         ,acspec_time_audio_link:false
         ,matched_method_protocols:methodMatches()
-        ,construct_mapping_version:"0.3.4.2"
+        ,construct_mapping_version:"0.3.4.3"
       },
       events:{phase_transitions:S.phaseEvents,signal_transitions:S.signalEvents,parameter_changes:S.parameterEvents,plan_changes:S.planEvents,microvoids:S.microvoids},
+      protocol_runtime:{
+        mode:S.protocol.mode,
+        protocol_id:S.protocol.protocol?.protocol_id||null,
+        compiler_version:S.protocol.protocol?.compiler_version||null,
+        integrity:S.protocol.integrity,
+        visual_policy:protocolModeActive()?"decorative_static_signal_monitor_live":null,
+        audio_snapshot:S.protocol.audioSnapshot,
+        current_state:S.protocol.state,
+        current_condition_id:S.protocol.condition?.condition_id||null,
+        run_id:S.protocol.run.id,
+        run_valid:S.protocol.run.valid,
+        invalid_reason:S.protocol.run.invalidReason,
+        conditions:S.protocol.run.conditions,
+        events:S.protocol.run.events,
+        response_series_status:"not_created_probe_layer_pending",
+        calibration_only:S.protocol.run.calibration_only
+      },
       observations:loadNotes(),
       interpretations:{experimental:null,symbolic:null},
       safety:{
@@ -648,7 +825,7 @@
           <div class="drawer-card full"><h3>Vista previa JSON</h3><pre style="white-space:pre-wrap;color:#94a5b8;font:9px/1.5 ui-monospace;max-height:420px;overflow:auto">${escapeHtml(JSON.stringify(rec,null,2))}</pre></div>
           <div class="drawer-card full"><button class="action-btn cyan" id="downloadAtlasBtn" style="width:100%">Download ATLAS JSON</button></div>
         </div>`;
-      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.4.2.json")),0);
+      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.4.3.json")),0);
     }else if(type==="descenso"||type==="retorno"){
       transitionToPhase(type==="descenso"?"descenso":"retorno","manual");
       eyebrow.textContent=phaseLabels[type].toUpperCase();title.textContent=type==="descenso"?"Descent profile":"Return profile";
@@ -663,7 +840,7 @@
         </div>`;
     }else{
       eyebrow.textContent="HOME";title.textContent="AEON Sound Field";
-      content.innerHTML=`<div class="drawer-card"><h3>v0.3.4.2</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
+      content.innerHTML=`<div class="drawer-card"><h3>v0.3.4.3</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
     }
     drawer.classList.add("open");drawer.setAttribute("aria-hidden","false");
   }
@@ -702,8 +879,8 @@
   function visualRateFromFieldPulse(pulse){const p=clamp(Number(pulse)||0,.1,12),n=(p-.1)/(12-.1);return .018+n*.10}
   function visualClock(){const seconds=visualSessionSeconds(),visualHz=visualRateFromFieldPulse(S.field.pulse);return {seconds,visualHz,phase:prefersReducedMotion?0:seconds*visualHz*Math.PI*2}}
   function renderVisualFrame(){drawFieldFrame();drawMiniFrame();drawSideFrames()}
-  function visualLoop(timestamp){if(!S.running){S.visual.running=false;S.visual.raf=null;return}if(timestamp-S.visual.lastFrame>=1000/30){S.visual.lastFrame=timestamp;renderVisualFrame()}S.visual.raf=requestAnimationFrame(visualLoop)}
-  function startVisualMotion(){if(S.visual.running)return;S.visual.running=true;$("#fieldStatus").textContent="FIELD · LIVE";renderVisualFrame();S.visual.raf=requestAnimationFrame(visualLoop)}
+  function visualLoop(timestamp){if(!S.running||protocolModeActive()){S.visual.running=false;S.visual.raf=null;return}if(timestamp-S.visual.lastFrame>=1000/30){S.visual.lastFrame=timestamp;renderVisualFrame()}S.visual.raf=requestAnimationFrame(visualLoop)}
+  function startVisualMotion(){if(protocolModeActive()){S.visual.running=false;$("#fieldStatus").textContent="FIELD · PROTOCOL STATIC";renderVisualFrame();return}if(S.visual.running)return;S.visual.running=true;$("#fieldStatus").textContent="FIELD · LIVE";renderVisualFrame();S.visual.raf=requestAnimationFrame(visualLoop)}
   function stopVisualMotion({renderFrozen=true}={}){if(S.visual.raf!=null){cancelAnimationFrame(S.visual.raf);S.visual.raf=null}S.visual.running=false;$("#fieldStatus").textContent="FIELD · STATIC";if(renderFrozen)renderVisualFrame()}
   function requestStaticVisualRefresh(){if(!S.running)renderVisualFrame()}
 
@@ -868,7 +1045,9 @@
       else if(v==="atlas") openDrawer("atlas");
       else openDrawer(v);
     }));
-    $("#playBtn").addEventListener("click",()=>S.running?audioStop():audioStart());
+    $("#playBtn").addEventListener("click",()=>protocolModeActive()?handleProtocolTransport():(S.running?audioStop():audioStart()));
+    $("#armProtocolBtn").addEventListener("click",armProtocol);
+    $("#abortProtocolBtn").addEventListener("click",abortProtocol);
     $("#prevBtn").addEventListener("click",()=>{const i=PHASE_ORDER.indexOf(S.phase);if(i>0)transitionToPhase(PHASE_ORDER[i-1],"manual")});
     $("#nextBtn").addEventListener("click",()=>{const i=PHASE_ORDER.indexOf(S.phase);if(i<PHASE_ORDER.length-1)transitionToPhase(PHASE_ORDER[i+1],"manual")});
     $("#resetBtn").addEventListener("click",resetSession);
@@ -886,7 +1065,7 @@
   }
 
   async function init(){
-    ensureSession();renderFrequencies();wire();loadProfile();S.uiCarrierLibrary=S.signal.carrier.source;$("#carrierSource").value=S.uiCarrierLibrary==="method_base"?"method":"wound_symbolic";$("#modulationSelect").value=modulationOptions.some(item=>item.key===S.signal.modulation.key)?S.signal.modulation.key:"manual";$("#manualModulation").value=S.signal.modulation.hz;updateLockedPlan();renderFrequencies();syncPhaseUi();updateReadouts();renderVisualFrame();
+    ensureSession();const qaWrap=$("#protocolQaWrap");if(qaWrap)qaWrap.hidden=new URLSearchParams(location.search).get("aeon_qa")!=="1";renderFrequencies();wire();loadProfile();S.uiCarrierLibrary=S.signal.carrier.source;$("#carrierSource").value=S.uiCarrierLibrary==="method_base"?"method":"wound_symbolic";$("#modulationSelect").value=modulationOptions.some(item=>item.key===S.signal.modulation.key)?S.signal.modulation.key:"manual";$("#manualModulation").value=S.signal.modulation.hz;updateLockedPlan();renderFrequencies();syncPhaseUi();updateReadouts();protocolUi();renderVisualFrame();
     try{
       const r=await fetch("mappings.json",{cache:"no-store"});if(r.ok){$("#repoDot").classList.add("online");$("#repoStatus").textContent="LOCAL LISTO"}
     }catch(_){}

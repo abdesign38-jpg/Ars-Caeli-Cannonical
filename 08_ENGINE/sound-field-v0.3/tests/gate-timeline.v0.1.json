@@ -1,0 +1,32 @@
+{
+  "version": "0.1",
+  "conditions": {
+    "C1_LOW_ASC": {
+      "points": [
+        {"t": 0.0, "state": "ACTIVE", "ramp": true},
+        {"t": 0.02, "state": "ACTIVE", "ramp": false},
+        {"t": 8.0, "state": "SILENT", "ramp": true},
+        {"t": 8.02, "state": "SILENT", "ramp": false},
+        {"t": 10.0, "state": "ACTIVE", "ramp": true},
+        {"t": 59.999, "state": "SILENT", "ramp": false},
+        {"t": 60.0, "state": "SILENT", "ramp": false}
+      ]
+    },
+    "C2_MED_ASC": {
+      "points": [
+        {"t": 4.999, "state": "ACTIVE"},
+        {"t": 5.0, "state": "SILENT", "ramp": true},
+        {"t": 5.02, "state": "SILENT", "ramp": false},
+        {"t": 10.0, "state": "ACTIVE", "ramp": true}
+      ]
+    },
+    "C3_HIGH": {
+      "points": [
+        {"t": 1.999, "state": "ACTIVE"},
+        {"t": 2.0, "state": "SILENT", "ramp": true},
+        {"t": 2.02, "state": "SILENT", "ramp": false},
+        {"t": 10.0, "state": "ACTIVE", "ramp": true}
+      ]
+    }
+  }
+}

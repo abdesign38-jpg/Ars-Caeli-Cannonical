@@ -27,9 +27,18 @@ EXAMPLES_ROOT = PACKAGE_ROOT / "examples"
 COMPILED_ROOT = PACKAGE_ROOT / "compiled"
 COMPILER_VERSION = "0.1"
 
+def _browser_json_value(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {key: _browser_json_value(value[key]) for key in sorted(value)}
+    if isinstance(value, list):
+        return [_browser_json_value(item) for item in value]
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    return value
+
 def canonical_json_bytes(value: Any) -> bytes:
     return json.dumps(
-        value,
+        _browser_json_value(value),
         ensure_ascii=False,
         sort_keys=True,
         separators=(",", ":"),

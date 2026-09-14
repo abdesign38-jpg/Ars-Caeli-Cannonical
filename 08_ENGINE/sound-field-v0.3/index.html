@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="AEON Sound Field v0.3.4.2 — Ars Caeli symbolic and experimental session interface.">
-  <title>Ars Caeli · AEON Sound Field v0.3.4.2</title>
-  <link rel="stylesheet" href="styles.css?v=0.3.4.2">
+  <meta name="description" content="AEON Sound Field v0.3.4.3 — Ars Caeli symbolic and experimental session interface.">
+  <title>Ars Caeli · AEON Sound Field v0.3.4.3</title>
+  <link rel="stylesheet" href="styles.css?v=0.3.4.3-phase-c">
 </head>
 <body>
   <div class="cosmos" aria-hidden="true"></div>
@@ -34,7 +34,7 @@
     <div class="header-tools">
       <span class="status-dot" id="repoDot"></span>
       <span class="header-status" id="repoStatus">LOCAL</span>
-      <span class="version">v0.3.4.2</span>
+      <span class="version">v0.3.4.3</span>
     </div>
   </header>
 
@@ -240,6 +240,38 @@
       </section>
 
       <section class="card glass">
+        <div class="card-title">EXPERIMENTAL PROTOCOL</div>
+        <div class="protocol-panel" id="protocolPanel">
+          <div class="protocol-row"><span>Mode</span><strong id="protocolMode">Free Field</strong></div>
+          <div class="protocol-row"><span>Integrity</span><strong id="protocolIntegrity">NOT LOADED</strong></div>
+          <div class="protocol-row"><span>Protocol</span><strong id="protocolId">—</strong></div>
+          <div class="protocol-row"><span>Condition</span><strong id="protocolCondition">—</strong></div>
+          <div class="protocol-row"><span>Void schedule</span><strong id="protocolSchedule">—</strong></div>
+          <div class="protocol-row"><span>Scheduled silence</span><strong id="protocolScheduledSilence">—</strong></div>
+          <div class="protocol-row"><span>Gate</span><strong id="protocolGate">—</strong></div>
+          <div class="protocol-row"><span>Condition time</span><strong id="protocolTime">00:00.000 / 01:00.000</strong></div>
+          <div class="protocol-row"><span>Digital RMS</span><strong id="protocolRms">—</strong></div>
+          <div class="protocol-row"><span>Measured silence</span><strong id="protocolMeasuredSilence">—</strong></div>
+          <div class="protocol-row"><span>State</span><strong id="protocolState">FREE</strong></div>
+          <p class="protocol-error" id="protocolError" hidden></p>
+          <label class="protocol-qa" id="protocolQaWrap" hidden>QA condition
+            <select id="protocolQaCondition">
+              <option value="C1_LOW_ASC">C1_LOW_ASC</option>
+              <option value="C2_MED_ASC">C2_MED_ASC</option>
+              <option value="C3_HIGH">C3_HIGH</option>
+              <option value="C4_MED_DESC">C4_MED_DESC</option>
+              <option value="C5_LOW_DESC">C5_LOW_DESC</option>
+            </select>
+          </label>
+          <div class="protocol-actions">
+            <button class="action-btn cyan" id="armProtocolBtn">ARM PILOT</button>
+            <button class="action-btn danger" id="abortProtocolBtn" disabled>ABORT PROTOCOL</button>
+          </div>
+          <p class="protocol-notice" id="protocolNotice" hidden>OBSERVATION REQUIRED · Phase D not installed</p>
+        </div>
+      </section>
+
+      <section class="card glass">
         <div class="card-title">LIVE / AUDITION SIGNAL</div>
         <label class="field-label" for="carrierSource">Carrier source</label>
         <select id="carrierSource"><option value="method">Method protocol</option><option value="wound_symbolic">Wound symbolic correspondences</option></select>
@@ -311,10 +343,11 @@
   </section>
 
   <footer class="app-footer">
-    <span>ARS CAELI · AEON ENGINE · SOUND FIELD v0.3.4.2</span>
+    <span>ARS CAELI · AEON ENGINE · SOUND FIELD v0.3.4.3</span>
     <span>VERITAS IN SONO</span>
   </footer>
 
-  <script src="app.js?v=0.3.4.2"></script>
+  <script src="protocol-runtime.js?v=0.3.4.3-phase-c"></script>
+  <script src="app.js?v=0.3.4.3-phase-c"></script>
 </body>
 </html>

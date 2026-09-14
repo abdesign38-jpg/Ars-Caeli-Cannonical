@@ -238,3 +238,16 @@ blockquote cite{display:block;margin-top:6px;text-align:center;font:9px var(--fo
 .microvoid-pulse{animation:microvoidPulse .55s ease-out}
 @keyframes microvoidPulse{0%{box-shadow:0 0 0 rgba(225,186,115,0)}45%{box-shadow:0 0 24px rgba(225,186,115,.4)}100%{box-shadow:0 0 0 rgba(225,186,115,0)}}
 @media(prefers-reduced-motion:reduce){.microvoid-pulse{animation:none}}
+.protocol-panel{display:grid;gap:7px}
+.protocol-row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:3px 0;font:9px var(--font-mono)}
+.protocol-row span{color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.protocol-row strong{color:var(--soft);font-weight:500;text-align:right}
+.protocol-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:7px}
+.protocol-actions button:disabled{cursor:not-allowed;opacity:.35}
+.protocol-error{margin:4px 0 0;color:var(--red);font:9px/1.4 var(--font-mono)}
+.protocol-notice{margin:5px 0 0;color:var(--gold);font:9px var(--font-mono);letter-spacing:.04em}
+.protocol-qa{display:grid;gap:4px;color:var(--muted);font:8px var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
+.protocol-qa select{border:1px solid var(--line);border-radius:5px;background:#061019;color:var(--soft);padding:5px;font:9px var(--font-mono)}
+body.protocol-active .phase-rail{opacity:.45;pointer-events:none}
+body.protocol-active .field-status{color:var(--gold)}
+body.protocol-active .field-wrap canvas{filter:saturate(.7)}

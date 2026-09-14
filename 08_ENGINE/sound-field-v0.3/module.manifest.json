@@ -1,7 +1,7 @@
 {
   "id": "AEON-SOUND-FIELD",
   "name": "AEON Sound Field",
-  "version": "0.3.4.4",
+  "version": "0.3.4.5",
   "protocol_runtime": {
     "authority": "compiled AEON Pilot 01 artifacts",
     "clock": "AudioContext.currentTime",
@@ -17,6 +17,12 @@
     "mappings.json"
   ],
   "features": [
+    "compiled-protocol-runtime",
+    "deterministic-void-gate",
+    "digital-occupancy-telemetry",
+    "protocol-integrity-verification",
+    "runtime-integrity-ci",
+    "runtime-language-v0.1",
     "navigation",
     "descent-return-axis",
     "animated-mandala-torus",

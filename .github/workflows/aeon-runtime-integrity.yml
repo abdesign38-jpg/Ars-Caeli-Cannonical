@@ -1,0 +1,44 @@
+name: AEON Runtime Integrity
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "08_ENGINE/sound-field-v0.3/**"
+      - "08_ENGINE/experimental-protocol-model/v0.1/compiled/**"
+      - ".github/workflows/aeon-runtime-integrity.yml"
+  pull_request:
+    paths:
+      - "08_ENGINE/sound-field-v0.3/**"
+      - "08_ENGINE/experimental-protocol-model/v0.1/compiled/**"
+      - ".github/workflows/aeon-runtime-integrity.yml"
+
+permissions:
+  contents: read
+
+timeout-minutes: 5
+
+concurrency:
+  group: aeon-runtime-integrity-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  runtime-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Check JavaScript syntax
+        run: |
+          node --check 08_ENGINE/sound-field-v0.3/app.js
+          node --check 08_ENGINE/sound-field-v0.3/protocol-runtime.js
+      - name: Parse runtime JSON
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('08_ENGINE/sound-field-v0.3/mappings.json','utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('08_ENGINE/sound-field-v0.3/module.manifest.json','utf8'))"
+      - name: Run runtime tests
+        run: node --test 08_ENGINE/sound-field-v0.3/tests/protocol-runtime.test.js

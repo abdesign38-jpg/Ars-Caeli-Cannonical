@@ -9,6 +9,10 @@
     "C4_MED_DESC",
     "C5_LOW_DESC"
   ];
+  const INTEGRITY_FAILURE_DISPOSITIONS = Object.freeze({
+    stimulus_integrity: "ABORT_CONDITION",
+    telemetry_integrity: "CONTINUE_STIMULUS"
+  });
 
   function canonicalize(value) {
     if (Array.isArray(value)) return value.map(canonicalize);
@@ -45,6 +49,51 @@
     const error = new Error(`AEON_EXECUTION_BLOCKED: ${message}`);
     Object.assign(error, details);
     return error;
+  }
+
+  function isFiniteNonNegativeNumber(value) {
+    return typeof value === "number" && Number.isFinite(value) && value >= 0;
+  }
+
+  function integrityFailureDisposition(kind) {
+    const disposition = INTEGRITY_FAILURE_DISPOSITIONS[kind];
+    if (!disposition) throw executionError(`unsupported integrity kind: ${kind}`);
+    return disposition;
+  }
+
+  function completedConditionTiming({ blockDurationS, pauses = [], lifecycleWallS = null } = {}) {
+    if (!isFiniteNonNegativeNumber(blockDurationS)) throw executionError("invalid completed-condition block duration");
+    let pauseWallS = 0;
+    for (const pause of pauses) {
+      if (!isFiniteNonNegativeNumber(pause?.wall_duration_ms)) throw executionError("invalid pause wall duration");
+      pauseWallS += pause.wall_duration_ms / 1000;
+    }
+    return {
+      protocol_active_exposure_s: blockDurationS,
+      protocol_pause_wall_s: pauseWallS,
+      protocol_wall_duration_s: blockDurationS + pauseWallS,
+      attempt_lifecycle_wall_s: isFiniteNonNegativeNumber(lifecycleWallS) ? lifecycleWallS : null
+    };
+  }
+
+  function protocolDurationTotals(conditionRecords = []) {
+    const completed = conditionRecords.filter(record => record?.condition_status === "COMPLETED");
+    const active = completed.filter(record => isFiniteNonNegativeNumber(record.protocol_active_exposure_s));
+    const wall = completed.filter(record => isFiniteNonNegativeNumber(record.protocol_wall_duration_s));
+    const complete = completed.length > 0 && active.length === completed.length && wall.length === completed.length;
+    return {
+      completed_condition_count: completed.length,
+      active_duration_record_count: active.length,
+      wall_duration_record_count: wall.length,
+      protocol_active_exposure_s: complete ? active.reduce((sum, record) => sum + record.protocol_active_exposure_s, 0) : null,
+      protocol_wall_duration_s: complete ? wall.reduce((sum, record) => sum + record.protocol_wall_duration_s, 0) : null,
+      duration_integrity: complete ? "COMPLETE" : "INCOMPLETE"
+    };
+  }
+
+  function aggregateTelemetryIntegrity(statuses = []) {
+    const order = ["FAILED", "INCOMPLETE", "PARTIAL", "VALID", "PENDING"];
+    return statuses.reduce((worst, status) => order.indexOf(status) < order.indexOf(worst) ? status : worst, "PENDING");
   }
 
   function assertSignal(signal) {
@@ -266,6 +315,11 @@
     canonicalize,
     canonicalJson,
     deepFreeze,
+    isFiniteNonNegativeNumber,
+    integrityFailureDisposition,
+    completedConditionTiming,
+    protocolDurationTotals,
+    aggregateTelemetryIntegrity,
     sha256Hex,
     loadCompiledProtocol,
     loadCompiledCondition,

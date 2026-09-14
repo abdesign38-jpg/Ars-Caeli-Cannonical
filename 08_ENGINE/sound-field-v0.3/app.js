@@ -40,9 +40,9 @@
   const constructRegistry={
     presencia:{id:"ACSPEC-106",definition:"Nivel de ocupación sensorial del campo.",fieldKey:"presence",min:0,max:100,step:1,unit:"%",audio:"harmonic B gain/density; supporting stereo occupancy.",visual:"torus line density + particle density."},
     resonancia:{id:"ACSPEC-105",definition:"Persistencia de un patrón en la atención.",fieldKey:"resonance",min:0,max:100,step:1,unit:"%",audio:"delay feedback, capped at 0.55.",visual:"persistence / echo rings."},
-    tiempo:{id:"ACSPEC-100",definition:"Relación entre el tiempo físico y el tiempo percibido dentro del ecosistema cognitivo.",fieldKey:"pulse",min:.1,max:12,step:.1,unit:"rate",audio:"None in v0.3.4.4. Audio protocol modulation is controlled separately in Signal sources.",visual:"Field animation cadence / temporal motion.",status:"experimental_noncanonical"},
+    tiempo:{id:"ACSPEC-100",definition:"Relación entre el tiempo físico y el tiempo percibido dentro del ecosistema cognitivo.",fieldKey:"pulse",min:.1,max:12,step:.1,unit:"rate",audio:"None in v0.3.4.5. Audio protocol modulation is controlled separately in Signal sources.",visual:"Field animation cadence / temporal motion.",status:"experimental_noncanonical"},
     vacio:{id:"ACSPEC-101",definition:"Estructura de baja información utilizada para modular expectativa.",fieldKey:"void",min:0,max:100,step:1,unit:"%",audio:"delay time / temporal spacing.",visual:"field sparsity / spacing."},
-    entropia:{id:"ACSPEC-102",definition:"Imprevisibilidad controlada del entorno.",fieldKey:"entropy",min:0,max:100,step:1,unit:"%",audio:"none in v0.3.4.4; no reproducible audio mapping is currently defined.",visual:"deterministic geometric irregularity; no random audio jitter."},
+    entropia:{id:"ACSPEC-102",definition:"Imprevisibilidad controlada del entorno.",fieldKey:"entropy",min:0,max:100,step:1,unit:"%",audio:"none in v0.3.4.5; no reproducible audio mapping is currently defined.",visual:"deterministic geometric irregularity; no random audio jitter."},
     horizonte:{id:"ACSPEC-103",definition:"Profundidad espacial percibida del ecosistema.",fieldKey:"horizon",min:0,max:100,step:1,unit:"%",audio:"stereo width.",visual:"torus horizontal depth/spread."},
     cristalizacion:{id:"ACSPEC-110",definition:"Estabilización prolongada de una interpretación.",fieldKey:"crystallization",min:0,max:100,step:1,unit:"%",audio:"filter Q.",visual:"geometric rigidity; higher values reduce entropy deformation."},
     respiracion:{id:"ACSPEC-114",definition:"Oscilación lenta de la energía perceptiva global.",fieldKey:"breath",min:.03,max:.15,step:.001,unit:"Hz",audio:"slow global gain envelope with depth capped at 4%.",visual:"slow global expansion/contraction."}
@@ -158,8 +158,8 @@
     const displayTime=protocolConditionTime();
     set("#protocolGate",p.state==="PAUSED"?"PAUSED":protocolRunning()?(window.AEONProtocolRuntime?.inGateRampWindow(schedule,displayTime)?"RAMP":window.AEONProtocolRuntime?.scheduledStateAt(schedule,displayTime)||"ACTIVE"):p.state==="PROBE_PENDING"?"SILENT":"—");
     set("#protocolTime",schedule?`${protocolTimeLabel(protocolConditionTime())} / ${protocolTimeLabel(schedule.block_duration_s)}`:"00:00.000 / 01:00.000");
-    set("#protocolRms",p.telemetrySamples.length?`${p.telemetrySamples[p.telemetrySamples.length-1].rms_dbfs.toFixed(1)} dBFS`:p.telemetryError?"INVALID":"—");
-    set("#protocolMeasuredSilence",p.telemetrySummary?`${(p.telemetrySummary.measured_digital_silence_ratio*100).toFixed(1)}%`:"—");
+    set("#protocolRms",p.telemetrySamples.length?`${p.telemetrySamples[p.telemetrySamples.length-1].rms_dbfs.toFixed(1)} dBFS`:p.telemetryError?"TELEMETRY FAILED":"—");
+    set("#protocolMeasuredSilence",p.telemetryIntegrity==="FAILED"?"TELEMETRY FAILED":p.telemetrySummary?`${(p.telemetrySummary.measured_digital_silence_ratio*100).toFixed(1)}%`:"—");
     set("#protocolState",p.state);
     const error=$("#protocolError");if(error){error.textContent=p.integrity.error||"";error.hidden=!p.integrity.error}
     const notice=$("#protocolNotice");if(notice)notice.hidden=p.state!=="PROBE_PENDING";
@@ -170,6 +170,15 @@
   }
   function protocolIntegrityFailure(reason){
     failProtocolCondition(reason?.message||reason,"stimulus_integrity");
+  }
+  function markProtocolTelemetryFailure(error){
+    const p=S.protocol;
+    if(p.telemetryIntegrity==="FAILED")return;
+    stopProtocolTelemetry();
+    p.telemetryError=String(error?.message||error);
+    p.telemetryIntegrity="FAILED";
+    p.run.events.push({type:"telemetry_failure",integrity:"telemetry_integrity",condition_id:p.condition?.condition_id||null,at:new Date().toISOString(),context_time_s:S.ctx?.currentTime??null,reason:p.telemetryError});
+    protocolUi();
   }
   function protocolWatchdog(){
     const p=S.protocol;if(!protocolRunning()||!p.condition||!p.audioSnapshot)return;
@@ -597,7 +606,9 @@
       p.telemetrySamples.push({condition_time_s:+rawTime.toFixed(3),context_time_s:+S.ctx.currentTime.toFixed(3),scheduled_state:window.AEONProtocolRuntime.scheduledStateAt(schedule,rawTime),in_ramp_window:window.AEONProtocolRuntime.inGateRampWindow(schedule,rawTime),boundary_guard:boundaryGuard,...Object.fromEntries(Object.entries(metrics).map(([key,value])=>[key,key.includes("dbfs")?+value.toFixed(3):value])),measured_silent:metrics.rms_dbfs<=-80});
       protocolUi();
     }catch(error){
-      stopProtocolTelemetry();p.telemetryError=String(error?.message||error);p.telemetryIntegrity="FAILED";failProtocolCondition(`telemetry unavailable: ${p.telemetryError}`,"telemetry_integrity");
+      const disposition=window.AEONProtocolRuntime.integrityFailureDisposition("telemetry_integrity");
+      if(disposition==="CONTINUE_STIMULUS")markProtocolTelemetryFailure(`telemetry unavailable: ${error?.message||error}`);
+      else failProtocolCondition(error,"telemetry_integrity");
     }
   }
 
@@ -609,7 +620,8 @@
     const agreement=values=>values.length?values.filter(sample=>sample.measured_silent===(sample.scheduled_state==="SILENT")).length/values.length:null;
     const median=values=>{if(!values.length)return null;const sorted=values.map(sample=>sample.rms_dbfs).sort((a,b)=>a-b);return sorted[Math.floor(sorted.length/2)]};
     const expectedSampleCount=schedule.block_duration_s*1000/policy.sampling_interval_ms,completeness=samples.length/expectedSampleCount;
-    return {scheduled_silence_ratio:schedule.scheduled_silence_ratio,measured_digital_silence_ratio:ratio(samples),steady_state_measured_silence_ratio:ratio(steady),classification_agreement:agreement(samples),steady_state_classification_agreement:agreement(steady),sample_count:samples.length,expected_sample_count:expectedSampleCount,sample_completeness:completeness,steady_state_sample_count:steady.length,telemetry_status:window.AEONProtocolRuntime.classifyTelemetryStatus(samples.length,expectedSampleCount,steady.length),active_sample_count:active.length,silent_sample_count:silent.length,median_active_rms_dbfs:median(active),median_silent_rms_dbfs:median(silent),near_full_scale_count:samples.filter(sample=>sample.near_full_scale).length,above_nominal_full_scale_count:samples.filter(sample=>sample.above_nominal_full_scale).length,analysis_window_ms:policy.analysis_window_ms,boundary_guard_ms:policy.boundary_guard_ms,sample_rate_hz:policy.sample_rate_hz,telemetry_valid:!!S.telemetryAnalyser};
+    const telemetryStatus=window.AEONProtocolRuntime.classifyTelemetryStatus(samples.length,expectedSampleCount,steady.length,p.telemetryIntegrity==="FAILED");
+    return {scheduled_silence_ratio:schedule.scheduled_silence_ratio,measured_digital_silence_ratio:ratio(samples),steady_state_measured_silence_ratio:ratio(steady),classification_agreement:agreement(samples),steady_state_classification_agreement:agreement(steady),sample_count:samples.length,expected_sample_count:expectedSampleCount,sample_completeness:completeness,steady_state_sample_count:steady.length,telemetry_status:telemetryStatus,telemetry_error:p.telemetryError||null,active_sample_count:active.length,silent_sample_count:silent.length,median_active_rms_dbfs:median(active),median_silent_rms_dbfs:median(silent),near_full_scale_count:samples.filter(sample=>sample.near_full_scale).length,above_nominal_full_scale_count:samples.filter(sample=>sample.above_nominal_full_scale).length,analysis_window_ms:policy.analysis_window_ms,boundary_guard_ms:policy.boundary_guard_ms,sample_rate_hz:policy.sample_rate_hz};
   }
 
   function disposeConditionGraph(){
@@ -623,7 +635,8 @@
     if(!protocolRunning())return;
     const p=S.protocol;silenceProtocolGate();stopProtocolTelemetry();p.telemetrySummary=summarizeProtocolTelemetry();
     const run=p.currentConditionRun;run.ended_at=new Date().toISOString();run.end_perf_ms=performance.now();
-    p.run.conditions.push({condition_id:p.condition.condition_id,source_sha256:p.condition.source_sha256,executable_fingerprint:p.protocol.condition_fingerprints[p.condition.condition_id],scheduled_silence_ratio:p.condition.runtime_schedule.scheduled_silence_ratio,started_at:run.started_at,ended_at:run.ended_at,protocol_active_exposure_s:protocolConditionTime(),protocol_wall_duration_s:(run.end_perf_ms-run.start_perf_ms)/1000,pauses:run.pauses,telemetry_policy:{source:"browser_digital_output_downstream_of_protocol_gate",fft_size:1024,sampling_interval_ms:25,silence_threshold_dbfs:-80,not_acoustic_spl:true,...p.telemetryPolicy},telemetry_summary:p.telemetrySummary,telemetry_samples:p.telemetrySamples});
+    const timing=window.AEONProtocolRuntime.completedConditionTiming({blockDurationS:p.condition.runtime_schedule.block_duration_s,pauses:run.pauses,lifecycleWallS:(run.end_perf_ms-run.start_perf_ms)/1000});
+    p.run.conditions.push({condition_id:p.condition.condition_id,condition_status:"COMPLETED",stimulus_integrity:"VALID",telemetry_integrity:p.telemetrySummary.telemetry_status,source_sha256:p.condition.source_sha256,executable_fingerprint:p.protocol.condition_fingerprints[p.condition.condition_id],scheduled_silence_ratio:p.condition.runtime_schedule.scheduled_silence_ratio,started_at:run.started_at,ended_at:run.ended_at,...timing,pauses:run.pauses,telemetry_policy:{source:"browser_digital_output_downstream_of_protocol_gate",fft_size:1024,sampling_interval_ms:25,silence_threshold_dbfs:-80,not_acoustic_spl:true,...p.telemetryPolicy},telemetry_summary:p.telemetrySummary,telemetry_samples:p.telemetrySamples});
     disposeConditionGraph();p.state="PROBE_PENDING";S.running=false;clearInterval(S.timer);S.timer=null;$("#playBtn").textContent="▶";stopVisualMotion({renderFrozen:true});protocolUi();flash("Condition complete. Observation layer required.");
   }
 
@@ -738,13 +751,14 @@
   function sessionObject(){
     ensureSession();
     const x=derived();
+    const durationSummary=window.AEONProtocolRuntime.protocolDurationTotals(S.protocol.run.conditions);
     return {
       session_id:S.sessionId,
       experiment_id:S.experimentId,
       participant_id:S.participantId,
       engine:"AEON Sound Field",
-      engine_version:"0.3.4.4",
-      engine_build:"0.3.4.4",
+      engine_version:"0.3.4.5",
+      engine_build:"0.3.4.5",
       date:S.sessionStartISO,
       duration_real_s:+(elapsedMs()/1000).toFixed(2),
       context:{
@@ -766,7 +780,7 @@
         ,phase_signal_plan:{mode:S.phaseSignalMode,phases:S.phaseSignalPlan,provenance_boundary:"Source identity remains separate for carrier, modulation, harmonic synthesis and environmental breath.",method_match_policy:"show_all_no_priority",status:"experimental_noncanonical"}
         ,acspec_time_audio_link:false
         ,matched_method_protocols:methodMatches()
-        ,construct_mapping_version:"0.3.4.4"
+        ,construct_mapping_version:"0.3.4.5"
       },
       events:{phase_transitions:S.phaseEvents,signal_transitions:S.signalEvents,parameter_changes:S.parameterEvents,plan_changes:S.planEvents,microvoids:S.microvoids},
       protocol_runtime:{
@@ -780,13 +794,14 @@
         current_condition_id:S.protocol.condition?.condition_id||null,
         run_id:S.protocol.run.id,
         run_valid:S.protocol.run.valid,
+        stimulus_integrity:S.protocol.run.valid?(S.protocol.run.conditions.length?"VALID":"PENDING"):"INVALID",
+        telemetry_integrity:S.protocol.telemetryError?"FAILED":(S.protocol.telemetrySummary?.telemetry_status||"PENDING"),
+        duration_summary:durationSummary,
+        protocol_active_exposure_s:durationSummary.protocol_active_exposure_s,
+        protocol_wall_duration_s:durationSummary.protocol_wall_duration_s,
         invalid_reason:S.protocol.run.invalidReason,
         conditions:S.protocol.run.conditions,
         events:S.protocol.run.events,
-        stimulus_integrity:S.protocol.run.valid?"VALID":"INVALID",
-        telemetry_integrity:S.protocol.telemetryError?"FAILED":(S.protocol.telemetrySummary?.telemetry_status||"PENDING"),
-        protocol_active_exposure_s:S.protocol.currentConditionRun&&S.protocol.currentConditionRun.end_perf_ms?(S.protocol.currentConditionRun.end_perf_ms-S.protocol.currentConditionRun.start_perf_ms)/1000:null,
-        protocol_wall_duration_s:S.protocol.currentConditionRun&&S.protocol.currentConditionRun.end_perf_ms?(S.protocol.currentConditionRun.end_perf_ms-S.protocol.currentConditionRun.start_perf_ms)/1000:null,
         free_field_duration_real_s:protocolModeActive()?null:+(elapsedMs()/1000).toFixed(2),
         context_state_events:S.protocol.contextStateEvents,
         response_series_status:"not_created_probe_layer_pending",
@@ -908,7 +923,7 @@
           <div class="drawer-card full"><h3>Vista previa JSON</h3><pre style="white-space:pre-wrap;color:#94a5b8;font:9px/1.5 ui-monospace;max-height:420px;overflow:auto">${escapeHtml(JSON.stringify(rec,null,2))}</pre></div>
           <div class="drawer-card full"><button class="action-btn cyan" id="downloadAtlasBtn" style="width:100%">Download ATLAS JSON</button></div>
         </div>`;
-      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.4.4.json")),0);
+      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.4.5.json")),0);
     }else if(type==="descenso"||type==="retorno"){
       transitionToPhase(type==="descenso"?"descenso":"retorno","manual");
       eyebrow.textContent=phaseLabels[type].toUpperCase();title.textContent=type==="descenso"?"Descent profile":"Return profile";
@@ -923,7 +938,7 @@
         </div>`;
     }else{
       eyebrow.textContent="HOME";title.textContent="AEON Sound Field";
-      content.innerHTML=`<div class="drawer-card"><h3>v0.3.4.4</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
+      content.innerHTML=`<div class="drawer-card"><h3>v0.3.4.5</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
     }
     drawer.classList.add("open");drawer.setAttribute("aria-hidden","false");
   }

@@ -108,8 +108,74 @@ test("protocol source contains exact onset and isolation guards", () => {
   assert.equal(app.slice(timerStart, timerEnd).includes("sampleProtocolTelemetry();"), false);
 });
 
+test("protocol source keeps telemetry failure non-fatal", () => {
+  const app = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  assert.match(app, /function markProtocolTelemetryFailure\(error\)/);
+  assert.match(app, /integrityFailureDisposition\("telemetry_integrity"\)/);
+  assert.match(app, /if\(disposition==="CONTINUE_STIMULUS"\)markProtocolTelemetryFailure/);
+  assert.match(app, /telemetry_failure/);
+  const handlerStart = app.indexOf("function markProtocolTelemetryFailure");
+  const handlerEnd = app.indexOf("function protocolWatchdog", handlerStart);
+  assert.equal(app.slice(handlerStart, handlerEnd).includes('state="INVALID"'), false);
+});
+
 test("unsupported runtime rule fails closed", () => {
   const protocol = readJson(path.join(compiledRoot, "protocols", "pilot.void_x_response_crystallization.invisibilidad.v0_1.executable.json"));
   protocol.runtime_policy.manual_controls.carrier = "editable";
   assert.throws(() => runtime.assertExecutableProtocol(protocol), /AEON_EXECUTION_BLOCKED/);
+});
+
+test("integrity failure disposition separates stimulus and telemetry", () => {
+  assert.equal(runtime.integrityFailureDisposition("stimulus_integrity"), "ABORT_CONDITION");
+  assert.equal(runtime.integrityFailureDisposition("telemetry_integrity"), "CONTINUE_STIMULUS");
+  assert.throws(() => runtime.integrityFailureDisposition("unknown"), /AEON_EXECUTION_BLOCKED/);
+});
+
+test("completed condition timing separates exposure, pause, wall, and lifecycle", () => {
+  const noPause=runtime.completedConditionTiming({blockDurationS:60,lifecycleWallS:60.23});
+  assert.equal(noPause.protocol_active_exposure_s,60);
+  assert.equal(noPause.protocol_pause_wall_s,0);
+  assert.equal(noPause.protocol_wall_duration_s,60);
+  assert.equal(noPause.attempt_lifecycle_wall_s,60.23);
+  const paused=runtime.completedConditionTiming({blockDurationS:60,pauses:[{wall_duration_ms:10000}],lifecycleWallS:70.23});
+  assert.equal(paused.protocol_active_exposure_s,60);
+  assert.equal(paused.protocol_pause_wall_s,10);
+  assert.equal(paused.protocol_wall_duration_s,70);
+  assert.equal(paused.attempt_lifecycle_wall_s,70.23);
+});
+
+test("duration totals reject incomplete or coerced values", () => {
+  const complete = runtime.protocolDurationTotals([
+    {condition_status:"COMPLETED",protocol_active_exposure_s:60,protocol_wall_duration_s:70},
+    {condition_status:"COMPLETED",protocol_active_exposure_s:60,protocol_wall_duration_s:65}
+  ]);
+  assert.equal(complete.protocol_active_exposure_s,120);
+  assert.equal(complete.protocol_wall_duration_s,135);
+  assert.equal(complete.duration_integrity,"COMPLETE");
+  for (const value of [null, "", "60", -1, NaN]) {
+    const result = runtime.protocolDurationTotals([{condition_status:"COMPLETED",protocol_active_exposure_s:value,protocol_wall_duration_s:70}]);
+    assert.equal(result.protocol_active_exposure_s,null);
+    assert.equal(result.duration_integrity,"INCOMPLETE");
+  }
+});
+
+test("gate automation records deterministic commands", () => {
+  const calls = [];
+  const gain = {
+    cancelScheduledValues: value => calls.push(["cancel", value]),
+    setValueAtTime: (value, time) => calls.push(["set", value, time]),
+    linearRampToValueAtTime: (value, time) => calls.push(["ramp", value, time])
+  };
+  runtime.scheduleFixedPeriodicGate(gain, {
+    block_duration_s: 20,
+    cycle_duration_s: 10,
+    active_duration_s: 8,
+    silent_duration_s: 2,
+    whole_cycles: 2,
+    gate_envelope: {active_gain:1,silent_gain:0,ramp_ms:20}
+  }, 5);
+  assert.deepEqual(calls[0], ["cancel", 5]);
+  assert.deepEqual(calls[1], ["set", 0, 5]);
+  assert.equal(calls.filter(call => call[0] === "ramp").length, 4);
+  assert.deepEqual(calls.at(-1), ["set", 0, 25]);
 });

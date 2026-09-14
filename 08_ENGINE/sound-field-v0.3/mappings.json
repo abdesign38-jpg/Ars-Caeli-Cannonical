@@ -1,5 +1,9 @@
 {
-  "version": "0.3.4.4",
+  "version": "0.3.4.5",
+  "runtime_language": {
+    "version": "0.1",
+    "document": "docs/RUNTIME_LANGUAGE_v0.1.md"
+  },
   "protocol_runtime": {
     "authority": "compiled artifacts under 08_ENGINE/experimental-protocol-model/v0.1/compiled/",
     "scheduled_silence_ratio": "runtime_schedule.scheduled_silence_ratio is the logical runtime authority; measured digital occupancy is reported separately.",
@@ -151,9 +155,9 @@
     "definition": "Source ACSPEC construct; operational mapping is an experimental AEON implementation.",
     "presence": {"id": "ACSPEC-106", "audio": "harmonic B density and supporting stereo occupancy", "visual": "torus and particle density"},
     "resonance": {"id": "ACSPEC-105", "audio": "delay feedback capped at 0.55", "visual": "persistence rings"},
-    "time": {"id": "ACSPEC-100", "field_key": "pulse", "audio_mapping": "none in v0.3.4.4; audio protocol modulation is independent", "visual_mapping": "bounded normalized field cadence; not literal Hz-to-frame motion", "status": "experimental_noncanonical"},
+    "time": {"id": "ACSPEC-100", "field_key": "pulse", "audio_mapping": "none in v0.3.4.5; audio protocol modulation is independent", "visual_mapping": "bounded normalized field cadence; not literal Hz-to-frame motion", "status": "experimental_noncanonical"},
     "void": {"id": "ACSPEC-101", "audio": "delay spacing", "visual": "field sparsity"},
-    "entropy": {"id": "ACSPEC-102", "audio": "none in v0.3.4.4; no reproducible audio mapping is currently defined.", "visual": "deterministic irregularity"},
+    "entropy": {"id": "ACSPEC-102", "audio": "none in v0.3.4.5; no reproducible audio mapping is currently defined.", "visual": "deterministic irregularity"},
     "horizon": {"id": "ACSPEC-103", "audio": "stereo width", "visual": "torus horizontal spread"},
     "crystallization": {"id": "ACSPEC-110", "audio": "filter Q", "visual": "rigidity attenuates entropy"},
     "breath": {"id": "ACSPEC-114", "audio": "slow envelope <=4%", "visual": "global expansion/contraction"}

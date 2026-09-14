@@ -24,13 +24,53 @@ def test_parameter_metadata_and_null_onset_are_required_by_contract():
     assert validate_instance(record, "draft-v0.2/behavioral-record.schema.json")["valid"]
 
 
-def test_probe_has_design_rules_expected_counts_and_clean_choice_semantics():
+def test_probe_has_reviewed_v2_clean_semantics():
     probe = read_json(EXAMPLES / "pg01-geometric-regularity.behavioral-probe.json")
-    assert "design_rules" in probe
-    assert probe["expected_presentation_count"] == 2
-    assert "position" in probe["choices"][0]
+    assert probe["analysis_role"] in {"calibration", "primary", "secondary", "context"}
+    assert "behavioral_measured" not in {probe["analysis_role"]}
+    assert probe["evidence_role"] == "behavioral_measured"
+    assert probe["response_semantics"] == "presentation_slot"
+    assert all("position" not in choice for choice in probe["choices"])
     assert "response_order" in probe["choices"][0]
     assert "target_slot" in probe["choices"][0]
+    assert probe["has_correct_answer"] is True
+    assert "correct_choice_id" not in probe
+
+
+def test_response_series_reuses_v01_stream_contracts_and_longitudinal_timing_points():
+    series = read_json(EXAMPLES / "response-series-v0.2.template.json")
+    assert series["schema_version"] == "0.2-draft"
+    assert "behavioral_records" in series
+    assert isinstance(series["observations"], list)
+    assert isinstance(series["engine_records"], list)
+    assert isinstance(series["derived_metrics"], list)
+
+    schema_path = ROOT / "contracts" / "draft-v0.2" / "response-series.schema.json"
+    schema = read_json(schema_path)
+    for key in ("observations", "engine_records", "derived_metrics"):
+        ref = schema["properties"][key].get("$ref")
+        assert ref is not None and "response-series.schema.json" in ref
+        assert "type" not in schema["properties"][key]
+
+    record = series["behavioral_records"][0]
+    assert record["timing_point"] in {"calibration", "standalone", "pre_protocol_behavioral", "post_recovery_behavioral"}
+    assert "stimulus_onset_ms" in record["timing_trace"]
+    assert record["timing_trace"]["response_ms"] is not None
+
+    record_schema = read_json(ROOT / "contracts" / "draft-v0.2" / "behavioral-record.schema.json")
+    timing_points = record_schema["properties"]["timing_point"]["enum"]
+    assert timing_points == ["calibration", "standalone", "pre_protocol_behavioral", "post_recovery_behavioral"]
+
+
+def test_parameter_roles_preserve_manipulated_vs_constant_contract():
+    stimulus = read_json(EXAMPLES / "pg.regularity.hex.0001.perceptual-stimulus.json")
+    roles = {p["parameter_id"]: p["role"] for p in stimulus["parameters"]}
+    assert roles["regularity_deviation_ratio"] == "manipulated"
+    assert roles["sides"] == "held_constant"
+    assert roles["radius"] == "held_constant"
+
+    common_schema = read_json(ROOT / "contracts" / "draft-v0.2" / "measurement-common.schema.json")
+    assert common_schema["$defs"]["parameter"]["properties"]["role"]["enum"] == ["manipulated", "held_constant", "context", "derived", "control"]
 
 
 def test_display_context_is_split_and_integrity_reasons_are_required():

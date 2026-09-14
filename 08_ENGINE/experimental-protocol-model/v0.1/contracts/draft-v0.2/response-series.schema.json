@@ -11,9 +11,9 @@
     "participant_id":{"type":"string"},
     "protocol_id":{"type":"string"},
     "started_at":{"type":"string","format":"date-time"},
-    "observations":{"type":"array"},
-    "engine_records":{"type":"array"},
-    "derived_metrics":{"type":"array"},
+    "observations":{"$ref":"https://ars-caeli.local/contracts/response-series.schema.json#/properties/observations"},
+    "engine_records":{"$ref":"https://ars-caeli.local/contracts/response-series.schema.json#/properties/engine_records"},
+    "derived_metrics":{"$ref":"https://ars-caeli.local/contracts/response-series.schema.json#/properties/derived_metrics"},
     "behavioral_records":{"type":"array","items":{"$ref":"https://ars-caeli.local/contracts/v0.2/behavioral-record.schema.json"}},
     "interpretation_boundary":{"const":"Behavioral records describe observed choices and timing; they do not diagnose, establish causality, or prove symbolic constructs."}
   }

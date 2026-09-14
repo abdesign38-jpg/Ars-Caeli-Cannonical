@@ -131,7 +131,7 @@ def validate_examples() -> list[dict[str, Any]]:
 
 def build_validation_report() -> list[dict[str, Any]]:
     normalized: list[dict[str, Any]] = []
-    for result in validate_examples():
+    for result in sorted(validate_examples(), key=lambda item: Path(item["file"]).name):
         file_path = Path(result["file"]).resolve()
         relative = file_path.relative_to(EXAMPLES_ROOT.resolve()).as_posix()
         normalized.append({

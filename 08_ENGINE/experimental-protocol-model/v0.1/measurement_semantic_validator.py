@@ -90,6 +90,12 @@ def validate_measurement_semantics(
             _add(issues, "DUPLICATE_RESPONSE_ORDER", "choices", "response_order values must be unique")
 
         semantics = value.get("response_semantics")
+        task_type = value.get("task_type")
+        if "response_semantics" not in value and task_type is not None:
+            _add(issues, "RESPONSE_SEMANTICS_REQUIRED", "response_semantics", "probe/trial definitions must declare response_semantics")
+        elif semantics is not None and semantics not in {"presentation_slot", "categorical"}:
+            _add(issues, "UNKNOWN_RESPONSE_SEMANTICS", "response_semantics", "response_semantics must be either presentation_slot or categorical")
+
         if semantics == "presentation_slot":
             if any(slot is None for slot in target_slots):
                 _add(issues, "TARGET_SLOT_REQUIRED", "choices", "presentation_slot responses require target_slot on every choice")
@@ -99,7 +105,6 @@ def validate_measurement_semantics(
             if any(slot is not None for slot in target_slots):
                 _add(issues, "TARGET_SLOT_FORBIDDEN", "choices", "categorical responses must use target_slot=null")
 
-        task_type = value.get("task_type")
         expected_count = value.get("expected_presentation_count")
 
         if task_type == "two_alternative_forced_choice":
@@ -132,6 +137,10 @@ def validate_measurement_semantics(
         slots = [item.get("slot") for item in value["presentations"]]
         if len(slots) != len(set(slots)):
             _add(issues, "DUPLICATE_SLOT", "presentations", "presentation slots must be unique")
+
+    if "evidence_role" in value and value.get("evidence_role") == "behavioral_measured":
+        if value.get("operational_authority") is True:
+            _add(issues, "BEHAVIORAL_RECORD_NOT_OPERATIONALLY_AUTHORITATIVE", "operational_authority", "behavioral_measured records must never claim operational authority")
 
     if "response_status" in value:
         answered = value["response_status"] == "answered"
@@ -237,7 +246,8 @@ def validate_measurement_graph(
         if missing:
             _add(issues, "REQUIRED_PARAMETER_MISSING", f"trial.presentations.{index}.stimulus_ref", "missing required parameters: " + ", ".join(missing))
 
-    if len(trial.get("presentations", [])) != probe.get("expected_presentation_count"):
+    expected_presentation_count = probe.get("expected_presentation_count")
+    if expected_presentation_count is not None and len(trial.get("presentations", [])) != expected_presentation_count:
         _add(issues, "PRESENTATION_COUNT_MISMATCH", "trial.presentations", "trial presentation count must match probe expected_presentation_count")
 
     if probe.get("response_semantics") == "presentation_slot":

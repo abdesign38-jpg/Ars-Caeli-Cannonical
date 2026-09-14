@@ -30,6 +30,18 @@
     "errors": []
   },
   {
+    "file": "invisibilidad-relacional.observation-probe.json",
+    "schema": "observation-probe.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
+    "file": "invisibilidad-relacional.wound-profile.json",
+    "schema": "wound-profile.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
     "file": "draft-v0.2/pg.regularity.hex.0001.perceptual-stimulus.json",
     "schema": "draft-v0.2/perceptual-stimulus.schema.json",
     "valid": true,
@@ -66,26 +78,14 @@
     "errors": []
   },
   {
-    "file": "draft-v0.2/response-series-v0.2.template.json",
-    "schema": "draft-v0.2/response-series.schema.json",
-    "valid": true,
-    "errors": []
-  },
-  {
-    "file": "invisibilidad-relacional.observation-probe.json",
-    "schema": "observation-probe.schema.json",
-    "valid": true,
-    "errors": []
-  },
-  {
-    "file": "invisibilidad-relacional.wound-profile.json",
-    "schema": "wound-profile.schema.json",
-    "valid": true,
-    "errors": []
-  },
-  {
     "file": "pilot-01-void-x-crystallization.protocol.json",
     "schema": "experiment-protocol.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
+    "file": "draft-v0.2/response-series-v0.2.template.json",
+    "schema": "draft-v0.2/response-series.schema.json",
     "valid": true,
     "errors": []
   },

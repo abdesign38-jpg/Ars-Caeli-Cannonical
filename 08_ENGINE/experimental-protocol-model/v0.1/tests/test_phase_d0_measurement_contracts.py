@@ -49,6 +49,50 @@ def test_semantic_probe_and_stimulus_rules():
     stimulus["parameters"].append(stimulus["parameters"][0])
     assert "DUPLICATE_PARAMETER_ID" in {x.code for x in validate_measurement_semantics(stimulus)}
 
+
+def test_semantic_probe_requires_consistent_response_semantics_and_behavioral_authority():
+    probe=read(EXAMPLES/"draft-v0.2/pg01-geometric-regularity.behavioral-probe.json")
+    probe["response_semantics"]="categorical"
+    assert "ODDITY_RESPONSE_SEMANTICS" not in {x.code for x in validate_measurement_semantics(probe)}
+    probe["task_type"]="odd_one_out"
+    codes={x.code for x in validate_measurement_semantics(probe)}
+    assert "ODDITY_RESPONSE_SEMANTICS" in codes
+
+    record=read(EXAMPLES/"draft-v0.2/pg01-trial-0001.behavioral-record.json")
+    record["operational_authority"]=True
+    codes={x.code for x in validate_measurement_semantics(record)}
+    assert "BEHAVIORAL_RECORD_NOT_OPERATIONALLY_AUTHORITATIVE" in codes
+
+
+def test_measurement_graph_rejects_real_reference_errors_without_false_positive_count_mismatch():
+    from measurement_semantic_validator import validate_measurement_graph
+    probe=read(EXAMPLES/"draft-v0.2/pg01-geometric-regularity.behavioral-probe.json")
+    trial=read(EXAMPLES/"draft-v0.2/pg01-trial-0001.behavioral-trial.json")
+    record=read(EXAMPLES/"draft-v0.2/pg01-trial-0001.behavioral-record.json")
+    stimuli={
+        "pg.regularity.hex.0001": read(EXAMPLES/"draft-v0.2/pg.regularity.hex.0001.perceptual-stimulus.json"),
+        "pg.regularity.hex.0002": read(EXAMPLES/"draft-v0.2/pg.regularity.hex.0002.perceptual-stimulus.json"),
+    }
+    issues=validate_measurement_graph(probe=probe, trial=trial, record=record, stimuli_by_id=stimuli)
+    assert "PRESENTATION_COUNT_MISMATCH" not in {x.code for x in issues}
+
+    trial["presentations"].append({"slot":2,"stimulus_ref":"missing.stimulus"})
+    issues=validate_measurement_graph(probe=probe, trial=trial, record=record, stimuli_by_id=stimuli)
+    assert "STIMULUS_REFERENCE_NOT_FOUND" in {x.code for x in issues}
+
+
+def test_validation_report_requires_exact_current_payload(tmp_path):
+    from validator import build_validation_report, validation_report_is_current_and_valid, write_validation_report
+    report_path=tmp_path/"validation-report.json"
+    write_validation_report(report_path)
+    assert validation_report_is_current_and_valid(report_path)
+
+    stale=json.loads(report_path.read_text(encoding="utf-8"))
+    stale.reverse()
+    report_path.write_text(json.dumps(stale, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+    assert not validation_report_is_current_and_valid(report_path)
+
+
 def test_semantic_trial_record_rules():
     trial=read(EXAMPLES/"draft-v0.2/pg01-trial-0001.behavioral-trial.json")
     trial["presentations"].append(trial["presentations"][0])

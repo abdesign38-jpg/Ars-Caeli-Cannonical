@@ -1,35 +1,5 @@
 [
   {
-    "file": "invisibilidad-relacional.wound-profile.json",
-    "schema": "wound-profile.schema.json",
-    "valid": true,
-    "errors": []
-  },
-  {
-    "file": "retencion-afectiva.crystallization-profile.json",
-    "schema": "crystallization-profile.schema.json",
-    "valid": true,
-    "errors": []
-  },
-  {
-    "file": "void-low.profile.json",
-    "schema": "void-profile.schema.json",
-    "valid": true,
-    "errors": []
-  },
-  {
-    "file": "void-medium.profile.json",
-    "schema": "void-profile.schema.json",
-    "valid": true,
-    "errors": []
-  },
-  {
-    "file": "void-high.profile.json",
-    "schema": "void-profile.schema.json",
-    "valid": true,
-    "errors": []
-  },
-  {
     "file": "C1_LOW_ASC.stimulus-condition.json",
     "schema": "stimulus-condition.schema.json",
     "valid": true,
@@ -60,14 +30,92 @@
     "errors": []
   },
   {
+    "file": "draft-v0.2/pg.regularity.hex.0001.perceptual-stimulus.json",
+    "schema": "draft-v0.2/perceptual-stimulus.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
+    "file": "draft-v0.2/pg.regularity.hex.0002.perceptual-stimulus.json",
+    "schema": "draft-v0.2/perceptual-stimulus.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
+    "file": "draft-v0.2/pg.regularity.hex.0003.perceptual-stimulus.json",
+    "schema": "draft-v0.2/perceptual-stimulus.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
+    "file": "draft-v0.2/pg01-geometric-regularity.behavioral-probe.json",
+    "schema": "draft-v0.2/behavioral-probe.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
+    "file": "draft-v0.2/pg01-trial-0001.behavioral-record.json",
+    "schema": "draft-v0.2/behavioral-record.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
+    "file": "draft-v0.2/pg01-trial-0001.behavioral-trial.json",
+    "schema": "draft-v0.2/behavioral-trial.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
+    "file": "draft-v0.2/response-series-v0.2.template.json",
+    "schema": "draft-v0.2/response-series.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
     "file": "invisibilidad-relacional.observation-probe.json",
     "schema": "observation-probe.schema.json",
     "valid": true,
     "errors": []
   },
   {
+    "file": "invisibilidad-relacional.wound-profile.json",
+    "schema": "wound-profile.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
+    "file": "pilot-01-void-x-crystallization.protocol.json",
+    "schema": "experiment-protocol.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
     "file": "response-series.template.json",
     "schema": "response-series.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
+    "file": "retencion-afectiva.crystallization-profile.json",
+    "schema": "crystallization-profile.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
+    "file": "void-high.profile.json",
+    "schema": "void-profile.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
+    "file": "void-low.profile.json",
+    "schema": "void-profile.schema.json",
+    "valid": true,
+    "errors": []
+  },
+  {
+    "file": "void-medium.profile.json",
+    "schema": "void-profile.schema.json",
     "valid": true,
     "errors": []
   }

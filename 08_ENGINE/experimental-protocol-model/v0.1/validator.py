@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +16,7 @@ from referencing import Registry, Resource
 PACKAGE_ROOT = Path(__file__).resolve().parent
 CONTRACTS_ROOT = PACKAGE_ROOT / "contracts"
 EXAMPLES_ROOT = PACKAGE_ROOT / "examples"
+VALIDATION_REPORT_PATH = PACKAGE_ROOT / "validation-report.json"
 
 SCHEMA_BY_EXAMPLE_SUFFIX = {
     ".protocol.json": "experiment-protocol.schema.json",
@@ -126,12 +129,90 @@ def validate_examples() -> list[dict[str, Any]]:
     return results
 
 
+def build_validation_report() -> list[dict[str, Any]]:
+    normalized: list[dict[str, Any]] = []
+    for result in validate_examples():
+        file_path = Path(result["file"]).resolve()
+        relative = file_path.relative_to(EXAMPLES_ROOT.resolve()).as_posix()
+        normalized.append({
+            "file": relative,
+            "schema": result["schema"],
+            "valid": result["valid"],
+            "errors": result["errors"],
+        })
+    return normalized
+
+
+def _report_all_valid(report: list[dict[str, Any]]) -> bool:
+    return all(item["valid"] for item in report)
+
+
+def write_validation_report(path: Path = VALIDATION_REPORT_PATH) -> list[dict[str, Any]]:
+    report = build_validation_report()
+    if not _report_all_valid(report):
+        raise ValueError("Refusing to write validation-report.json because one or more examples are invalid.")
+
+    payload = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    temp_path: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+            temp_path = stream.name
+        os.replace(temp_path, path)
+        temp_path = None
+    finally:
+        if temp_path is not None:
+            try:
+                Path(temp_path).unlink()
+            except FileNotFoundError:
+                pass
+    return report
+
+
+def validation_report_is_current_and_valid(path: Path = VALIDATION_REPORT_PATH) -> bool:
+    if not path.is_file():
+        return False
+    try:
+        persisted = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    current = build_validation_report()
+    return isinstance(persisted, list) and persisted == current and _report_all_valid(current)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--examples", action="store_true", help="Validate every contract example")
     parser.add_argument("--file", type=Path, help="Validate one JSON instance")
     parser.add_argument("--schema", help="Schema filename for --file")
+    parser.add_argument("--write-report", action="store_true", help="Atomically regenerate validation-report.json from valid examples")
+    parser.add_argument("--check-report", action="store_true", help="Fail when validation-report.json is stale or invalid")
     args = parser.parse_args()
+
+    if args.write_report:
+        try:
+            report = write_validation_report()
+        except ValueError as exc:
+            print(str(exc))
+            return 1
+        print(json.dumps({"validation_report_written": str(VALIDATION_REPORT_PATH), "example_count": len(report)}, ensure_ascii=False, indent=2))
+        return 0
+
+    if args.check_report:
+        current = validation_report_is_current_and_valid()
+        print(json.dumps({"validation_report_current_and_valid": current}, ensure_ascii=False, indent=2))
+        return 0 if current else 1
 
     if args.examples:
         results = validate_examples()

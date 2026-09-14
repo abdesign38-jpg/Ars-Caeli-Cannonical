@@ -16,8 +16,6 @@ on:
 permissions:
   contents: read
 
-timeout-minutes: 5
-
 concurrency:
   group: aeon-runtime-integrity-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -25,6 +23,7 @@ concurrency:
 jobs:
   runtime-integrity:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4

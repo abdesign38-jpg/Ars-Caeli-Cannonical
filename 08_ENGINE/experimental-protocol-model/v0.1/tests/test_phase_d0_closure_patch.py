@@ -26,15 +26,27 @@ def test_parameter_metadata_and_null_onset_are_required_by_contract():
 
 def test_probe_has_reviewed_v2_clean_semantics():
     probe = read_json(EXAMPLES / "pg01-geometric-regularity.behavioral-probe.json")
-    assert probe["analysis_role"] in {"calibration", "primary", "secondary", "context"}
+    assert probe["analysis_role"] in {"calibration", "primary", "secondary", "exploratory"}
+    assert probe["analysis_role"] == "exploratory"
     assert "behavioral_measured" not in {probe["analysis_role"]}
-    assert probe["evidence_role"] == "behavioral_measured"
+    assert probe["evidence_role"] == "experimental_operationalization"
     assert probe["response_semantics"] == "presentation_slot"
     assert all("position" not in choice for choice in probe["choices"])
+    assert all(isinstance(choice["response_order"], int) and choice["response_order"] >= 0 for choice in probe["choices"])
     assert "response_order" in probe["choices"][0]
     assert "target_slot" in probe["choices"][0]
     assert probe["has_correct_answer"] is True
     assert "correct_choice_id" not in probe
+
+    stimulus = read_json(EXAMPLES / "pg.regularity.hex.0001.perceptual-stimulus.json")
+    assert stimulus["parameters"][0]["evidence_role"] == "experimental_operationalization"
+
+
+def test_trial_accepts_null_correct_choice_when_probe_has_no_correct_answer():
+    trial = read_json(EXAMPLES / "pg01-trial-0001.behavioral-trial.json")
+    trial["response_key"]["correct_choice_id"] = None
+    trial["scoring_rule_id"] = None
+    assert validate_instance(trial, "draft-v0.2/behavioral-trial.schema.json")["valid"]
 
 
 def test_response_series_reuses_v01_stream_contracts_and_longitudinal_timing_points():
@@ -71,6 +83,7 @@ def test_parameter_roles_preserve_manipulated_vs_constant_contract():
 
     common_schema = read_json(ROOT / "contracts" / "draft-v0.2" / "measurement-common.schema.json")
     assert common_schema["$defs"]["parameter"]["properties"]["role"]["enum"] == ["manipulated", "held_constant", "context", "derived", "control"]
+    assert common_schema["$defs"]["parameter"]["properties"]["evidence_role"]["const"] == "experimental_operationalization"
 
 
 def test_display_context_is_split_and_integrity_reasons_are_required():

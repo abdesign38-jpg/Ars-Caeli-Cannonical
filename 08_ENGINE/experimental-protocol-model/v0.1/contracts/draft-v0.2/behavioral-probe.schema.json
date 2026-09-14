@@ -8,15 +8,15 @@
     "probe_id":{"type":"string","minLength":1},
     "task_type":{"enum":["two_alternative_forced_choice","odd_one_out","same_different"]},
     "construct":{"type":"string","minLength":1},
-    "analysis_role":{"enum":["calibration","primary","secondary","context"]},
-    "evidence_role":{"const":"behavioral_measured"},
+    "analysis_role":{"enum":["calibration","primary","secondary","exploratory"]},
+    "evidence_role":{"const":"experimental_operationalization"},
     "instructions":{"type":"string","minLength":1},
     "stimulus_family":{"type":"string","minLength":1},
     "required_parameters":{"type":"array","items":{"type":"string"},"uniqueItems":true},
     "response_semantics":{"enum":["presentation_slot","categorical"]},
     "expected_presentation_count":{"type":"integer","minimum":1},
     "design_rules":{"type":"object","additionalProperties":false,"required":["neutral_language","no_wound_label_in_prompt","no_body_prediction_in_prompt","same_scale_across_conditions","blinding"],"properties":{"neutral_language":{"const":true},"no_wound_label_in_prompt":{"const":true},"no_body_prediction_in_prompt":{"const":true},"same_scale_across_conditions":{"const":true},"blinding":{"type":"string","enum":["single","double","none"]}}},
-    "choices":{"type":"array","minItems":2,"items":{"type":"object","additionalProperties":false,"required":["choice_id","response_order","target_slot"],"properties":{"choice_id":{"type":"string"},"response_order":{"type":["integer","null"],"minimum":0},"target_slot":{"type":["integer","null"],"minimum":0}}}},
+    "choices":{"type":"array","minItems":2,"items":{"type":"object","additionalProperties":false,"required":["choice_id","response_order","target_slot"],"properties":{"choice_id":{"type":"string"},"response_order":{"type":"integer","minimum":0},"target_slot":{"type":["integer","null"],"minimum":0}}}},
     "has_correct_answer":{"type":"boolean"},
     "trial_policy":{"oneOf":[{"type":"object","additionalProperties":false,"required":["mode","trials"],"properties":{"mode":{"const":"fixed"},"trials":{"type":"integer","minimum":1}}},{"type":"object","additionalProperties":false,"required":["mode","method_id","method_version","min_trials","max_trials","stopping_rule","seed"],"properties":{"mode":{"const":"adaptive"},"method_id":{"type":"string"},"method_version":{"type":"string"},"min_trials":{"type":"integer","minimum":1},"max_trials":{"type":"integer","minimum":1},"stopping_rule":{"type":"string"},"seed":{"type":"integer"}}}]}
   }

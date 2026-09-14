@@ -21,9 +21,10 @@ class MeasurementReferenceDuplicateError(LookupError):
     pass
 
 
-def _load(pattern: str, field: str, identifier: str) -> dict[str, Any]:
+def _load(pattern: str, field: str, identifier: str, root: Path | None = None) -> dict[str, Any]:
+    search_root = root or EXAMPLES
     matches = []
-    for path in sorted(EXAMPLES.rglob(pattern)):
+    for path in sorted(search_root.rglob(pattern)):
         value = json.loads(path.read_text(encoding="utf-8"))
         if value.get(field) == identifier:
             matches.append(value)

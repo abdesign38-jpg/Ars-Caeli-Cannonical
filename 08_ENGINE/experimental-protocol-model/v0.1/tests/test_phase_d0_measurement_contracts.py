@@ -118,12 +118,13 @@ def test_adapter_constructor_validates_output():
     value=createResponseSeriesV02Draft({"series_id":"s","session_id":"x","participant_id":"p","protocol_id":"d","started_at":"2026-01-01T00:00:00Z"})
     assert value["schema_version"]=="0.2-draft"
 
-def test_typed_missing_and_duplicate_references():
+def test_typed_missing_and_duplicate_references(tmp_path, monkeypatch):
     import measurement_adapters as adapters
     with pytest.raises(MeasurementReferenceNotFoundError): adapters.loadPerceptualStimulus("missing")
     source=read(EXAMPLES/"draft-v0.2/pg.regularity.hex.0001.perceptual-stimulus.json")
-    duplicate=EXAMPLES/"draft-v0.2/duplicate.perceptual-stimulus.json"
-    duplicate.write_text(json.dumps(source),encoding="utf-8")
-    try:
-        with pytest.raises(MeasurementReferenceDuplicateError): adapters.loadPerceptualStimulus(source["stimulus_id"])
-    finally: duplicate.unlink()
+    duplicate_a=tmp_path/"duplicate-a.perceptual-stimulus.json"
+    duplicate_b=tmp_path/"duplicate-b.perceptual-stimulus.json"
+    duplicate_a.write_text(json.dumps(source),encoding="utf-8")
+    duplicate_b.write_text(json.dumps(source),encoding="utf-8")
+    monkeypatch.setattr(adapters, "EXAMPLES", tmp_path)
+    with pytest.raises(MeasurementReferenceDuplicateError): adapters.loadPerceptualStimulus(source["stimulus_id"])

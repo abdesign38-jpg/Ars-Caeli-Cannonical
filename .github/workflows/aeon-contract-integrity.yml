@@ -35,4 +35,4 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "24"
-      - run: node --test ../../../sound-field-v0.3/tests/protocol-runtime.test.js
+      - run: node --test ../../sound-field-v0.3/tests/protocol-runtime.test.js

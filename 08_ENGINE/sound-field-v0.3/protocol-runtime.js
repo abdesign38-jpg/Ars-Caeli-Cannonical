@@ -24,6 +24,12 @@
     return JSON.stringify(canonicalize(value));
   }
 
+  function deepFreeze(value) {
+    if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
+    Object.getOwnPropertyNames(value).forEach(key => deepFreeze(value[key]));
+    return Object.freeze(value);
+  }
+
   async function sha256Hex(value) {
     if (!window.crypto?.subtle) {
       throw new Error("AEON_EXECUTION_BLOCKED: Web Crypto API unavailable");
@@ -158,9 +164,9 @@
     for (const conditionId of protocol.condition_sequence) {
       const condition = await loadCompiledCondition(`${baseUrl}/conditions/${conditionId}.executable.json`);
       await verifyConditionFingerprint(condition, protocol.condition_fingerprints[conditionId]);
-      conditions.set(conditionId, Object.freeze(condition));
+      conditions.set(conditionId, deepFreeze(condition));
     }
-    return { protocol: Object.freeze(protocol), conditions };
+    return { protocol: deepFreeze(protocol), conditions };
   }
 
   function scheduledStateAt(schedule, conditionTimeS) {
@@ -176,6 +182,57 @@
     const ramp = schedule.gate_envelope.ramp_ms / 1000;
     const cycleTime = (t + schedule.phase_offset_s) % schedule.cycle_duration_s;
     return (cycleTime < ramp) || (cycleTime >= schedule.active_duration_s && cycleTime < schedule.active_duration_s + ramp);
+  }
+
+  function boundaryGuardAt(schedule, conditionTimeS, analysisWindowMs) {
+    const t = Number(conditionTimeS);
+    if (!(t >= 0) || t >= schedule.block_duration_s) return false;
+    const guardS = Math.max(50, schedule.gate_envelope.ramp_ms + Number(analysisWindowMs || 0)) / 1000;
+    const cycleTime = (t + schedule.phase_offset_s) % schedule.cycle_duration_s;
+    return cycleTime < guardS ||
+      Math.abs(cycleTime - schedule.active_duration_s) < guardS ||
+      cycleTime > schedule.cycle_duration_s - guardS;
+  }
+
+  function telemetryTimeInBlock(rawTime, blockDurationS) {
+    return rawTime != null && rawTime >= 0 && rawTime < blockDurationS;
+  }
+
+  function classifyTelemetryStatus(sampleCount, expectedSampleCount, steadyStateSampleCount, readFailed = false) {
+    if (readFailed) return "FAILED";
+    const completeness = expectedSampleCount > 0 ? sampleCount / expectedSampleCount : 0;
+    if (completeness >= 0.95 && steadyStateSampleCount > 0) return "VALID";
+    if (completeness >= 0.80) return "PARTIAL";
+    return "INCOMPLETE";
+  }
+
+  function unexpectedContextState(state, { conditionRunning, expectedSuspend = false, expectedClose = false } = {}) {
+    if (!conditionRunning) return false;
+    if (state === "running") return false;
+    if (state === "suspended" && expectedSuspend) return false;
+    if (state === "closed" && expectedClose) return false;
+    return true;
+  }
+
+  function visibilityInvalidatesProtocol(visibilityState, conditionRunning) {
+    return conditionRunning && visibilityState === "hidden";
+  }
+
+  function rmsAndPeakDbfs(floatData) {
+    let sum = 0;
+    let peakAbs = 0;
+    for (const sample of floatData) {
+      sum += sample * sample;
+      peakAbs = Math.max(peakAbs, Math.abs(sample));
+    }
+    const rms = Math.sqrt(sum / Math.max(floatData.length, 1));
+    return {
+      rms_dbfs: 20 * Math.log10(Math.max(rms, 1e-8)),
+      peak_abs: peakAbs,
+      peak_dbfs: 20 * Math.log10(Math.max(peakAbs, 1e-8)),
+      near_full_scale: peakAbs >= 0.98,
+      above_nominal_full_scale: peakAbs > 1.0
+    };
   }
 
   function scheduleFixedPeriodicGate(gainParam, schedule, startAt) {
@@ -208,6 +265,7 @@
   window.AEONProtocolRuntime = {
     canonicalize,
     canonicalJson,
+    deepFreeze,
     sha256Hex,
     loadCompiledProtocol,
     loadCompiledCondition,
@@ -217,8 +275,14 @@
     verifyConditionFingerprint,
     scheduledStateAt,
     inGateRampWindow,
+    boundaryGuardAt,
+    telemetryTimeInBlock,
+    classifyTelemetryStatus,
+    unexpectedContextState,
+    visibilityInvalidatesProtocol,
     scheduleFixedPeriodicGate,
     rmsDbfs,
+    rmsAndPeakDbfs,
     REQUIRED_CONDITION_IDS
   };
 })();

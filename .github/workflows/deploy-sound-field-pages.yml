@@ -32,6 +32,14 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+
+      - name: Run protocol runtime tests
+        run: node --test 08_ENGINE/sound-field-v0.3/tests/protocol-runtime.test.js
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:

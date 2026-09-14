@@ -1,3 +1,5 @@
+"use strict";
+
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -38,6 +40,72 @@ test("compiled Pilot 01 condition fingerprints verify", async () => {
     runtime.assertExecutableCondition(condition);
     assert.equal(await runtime.verifyConditionFingerprint(condition, protocol.condition_fingerprints[conditionId]), protocol.condition_fingerprints[conditionId]);
   }
+});
+
+test("verified artifacts are deeply frozen", () => {
+  const protocol = readJson(path.join(compiledRoot, "protocols", "pilot.void_x_response_crystallization.invisibilidad.v0_1.executable.json"));
+  const condition = readJson(path.join(compiledRoot, "conditions", "C1_LOW_ASC.executable.json"));
+  runtime.deepFreeze(protocol);
+  runtime.deepFreeze(condition);
+  assert.equal(Object.isFrozen(protocol.runtime_policy), true);
+  assert.equal(Object.isFrozen(condition.runtime_schedule), true);
+  assert.equal(Object.isFrozen(condition.runtime_schedule.gate_envelope), true);
+  assert.throws(() => { condition.runtime_schedule.pattern = "seeded_irregular"; }, TypeError);
+  assert.throws(() => { condition.signal.carrier.hz = 440; }, TypeError);
+});
+
+test("corrupt condition fingerprint fails closed", async () => {
+  const protocol = readJson(path.join(compiledRoot, "protocols", "pilot.void_x_response_crystallization.invisibilidad.v0_1.executable.json"));
+  const condition = readJson(path.join(compiledRoot, "conditions", "C1_LOW_ASC.executable.json"));
+  condition.signal.carrier.hz = 440;
+  await assert.rejects(() => runtime.verifyConditionFingerprint(condition, protocol.condition_fingerprints.C1_LOW_ASC), /AEON_EXECUTION_BLOCKED/);
+});
+
+test("telemetry rejects samples outside the exposure interval", () => {
+  assert.equal(runtime.telemetryTimeInBlock(-0.001, 60), false);
+  assert.equal(runtime.telemetryTimeInBlock(60, 60), false);
+  assert.equal(runtime.telemetryTimeInBlock(59.999, 60), true);
+});
+
+test("boundary guard follows analyser window and gate boundaries", () => {
+  const schedule = schedules.C1_LOW_ASC;
+  assert.equal(runtime.boundaryGuardAt(schedule, 0, 21.333), true);
+  assert.equal(runtime.boundaryGuardAt(schedule, 8, 21.333), true);
+  assert.equal(runtime.boundaryGuardAt(schedule, 9, 21.333), false);
+  assert.equal(runtime.boundaryGuardAt(schedule, 10, 21.333), true);
+});
+
+test("telemetry metrics separate RMS from peak/full-scale", () => {
+  const metrics = runtime.rmsAndPeakDbfs(new Float32Array([0, 0.5, -1.0, 0.25]));
+  assert.equal(metrics.peak_abs, 1);
+  assert.equal(metrics.near_full_scale, true);
+  assert.equal(metrics.above_nominal_full_scale, false);
+  assert.ok(metrics.peak_dbfs > metrics.rms_dbfs);
+});
+
+test("telemetry status reports completeness policy", () => {
+  assert.equal(runtime.classifyTelemetryStatus(2400, 2400, 100), "VALID");
+  assert.equal(runtime.classifyTelemetryStatus(2000, 2400, 100), "PARTIAL");
+  assert.equal(runtime.classifyTelemetryStatus(1000, 2400, 100), "INCOMPLETE");
+  assert.equal(runtime.classifyTelemetryStatus(2400, 2400, 100, true), "FAILED");
+});
+
+test("unexpected context interruption and visibility loss invalidate exposure", () => {
+  assert.equal(runtime.unexpectedContextState("interrupted", { conditionRunning: true }), true);
+  assert.equal(runtime.unexpectedContextState("suspended", { conditionRunning: true, expectedSuspend: true }), false);
+  assert.equal(runtime.unexpectedContextState("running", { conditionRunning: true }), false);
+  assert.equal(runtime.visibilityInvalidatesProtocol("hidden", true), true);
+  assert.equal(runtime.visibilityInvalidatesProtocol("visible", true), false);
+});
+
+test("protocol source contains exact onset and isolation guards", () => {
+  const app = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  assert.match(app, /initializeProtocolAudioGraphExact/);
+  assert.match(app, /if\(protocolRunning\(\)\)\{updateSignalMonitor\(\);return;\}/);
+  const timerStart = app.indexOf("function updateTimer");
+  const timerEnd = app.indexOf("async function handleProtocolTransport", timerStart);
+  assert.ok(app.indexOf("function sampleProtocolTelemetry") < timerStart);
+  assert.equal(app.slice(timerStart, timerEnd).includes("sampleProtocolTelemetry();"), false);
 });
 
 test("unsupported runtime rule fails closed", () => {

@@ -40,9 +40,9 @@
   const constructRegistry={
     presencia:{id:"ACSPEC-106",definition:"Nivel de ocupación sensorial del campo.",fieldKey:"presence",min:0,max:100,step:1,unit:"%",audio:"harmonic B gain/density; supporting stereo occupancy.",visual:"torus line density + particle density."},
     resonancia:{id:"ACSPEC-105",definition:"Persistencia de un patrón en la atención.",fieldKey:"resonance",min:0,max:100,step:1,unit:"%",audio:"delay feedback, capped at 0.55.",visual:"persistence / echo rings."},
-    tiempo:{id:"ACSPEC-100",definition:"Relación entre el tiempo físico y el tiempo percibido dentro del ecosistema cognitivo.",fieldKey:"pulse",min:.1,max:12,step:.1,unit:"rate",audio:"None in v0.3.4.2. Audio protocol modulation is controlled separately in Signal sources.",visual:"Field animation cadence / temporal motion.",status:"experimental_noncanonical"},
+    tiempo:{id:"ACSPEC-100",definition:"Relación entre el tiempo físico y el tiempo percibido dentro del ecosistema cognitivo.",fieldKey:"pulse",min:.1,max:12,step:.1,unit:"rate",audio:"None in v0.3.4.4. Audio protocol modulation is controlled separately in Signal sources.",visual:"Field animation cadence / temporal motion.",status:"experimental_noncanonical"},
     vacio:{id:"ACSPEC-101",definition:"Estructura de baja información utilizada para modular expectativa.",fieldKey:"void",min:0,max:100,step:1,unit:"%",audio:"delay time / temporal spacing.",visual:"field sparsity / spacing."},
-    entropia:{id:"ACSPEC-102",definition:"Imprevisibilidad controlada del entorno.",fieldKey:"entropy",min:0,max:100,step:1,unit:"%",audio:"none in v0.3.4.2; no reproducible audio mapping is currently defined.",visual:"deterministic geometric irregularity; no random audio jitter."},
+    entropia:{id:"ACSPEC-102",definition:"Imprevisibilidad controlada del entorno.",fieldKey:"entropy",min:0,max:100,step:1,unit:"%",audio:"none in v0.3.4.4; no reproducible audio mapping is currently defined.",visual:"deterministic geometric irregularity; no random audio jitter."},
     horizonte:{id:"ACSPEC-103",definition:"Profundidad espacial percibida del ecosistema.",fieldKey:"horizon",min:0,max:100,step:1,unit:"%",audio:"stereo width.",visual:"torus horizontal depth/spread."},
     cristalizacion:{id:"ACSPEC-110",definition:"Estabilización prolongada de una interpretación.",fieldKey:"crystallization",min:0,max:100,step:1,unit:"%",audio:"filter Q.",visual:"geometric rigidity; higher values reduce entropy deformation."},
     respiracion:{id:"ACSPEC-114",definition:"Oscilación lenta de la energía perceptiva global.",fieldKey:"breath",min:.03,max:.15,step:.001,unit:"Hz",audio:"slow global gain envelope with depth capped at 4%.",visual:"slow global expansion/contraction."}
@@ -112,6 +112,7 @@
       mode:"FREE", state:"FREE", protocol:null, conditions:new Map(), conditionIndex:0, condition:null,
       integrity:{verified:false,error:null}, audioSnapshot:null, previousSignal:null, conditionAnchorCtxTime:null,
       telemetryData:null, telemetryTimer:null, telemetrySamples:[], telemetrySummary:null, telemetryError:null,
+      currentConditionRun:null, contextStateEvents:[], expectedSuspend:false, expectedClose:false,
       run:{id:null,valid:true,invalidReason:null,conditions:[],events:[],calibration_only:false}
     }
   };
@@ -136,6 +137,10 @@
     if(!S.ctx||S.protocol.conditionAnchorCtxTime==null)return 0;
     return Math.max(0,S.ctx.currentTime-S.protocol.conditionAnchorCtxTime);
   }
+  function protocolConditionTimeRaw(){
+    if(!S.ctx||S.protocol.conditionAnchorCtxTime==null)return null;
+    return S.ctx.currentTime-S.protocol.conditionAnchorCtxTime;
+  }
   function protocolTimeLabel(seconds){
     const value=Math.max(0,Number(seconds)||0),minutes=Math.floor(value/60),remaining=(value-minutes*60).toFixed(3);
     return `${String(minutes).padStart(2,"0")}:${String(remaining).padStart(6,"0")}`;
@@ -150,24 +155,21 @@
     set("#protocolCondition",condition?`${condition.condition_id} · ${p.conditionIndex+1}/5`:"—");
     set("#protocolSchedule",schedule?`${Number(schedule.active_duration_s).toFixed(1)} active / ${Number(schedule.silent_duration_s).toFixed(1)} silent`:"—");
     set("#protocolScheduledSilence",schedule?`${(Number(schedule.scheduled_silence_ratio)*100).toFixed(0)}%`:"—");
-    set("#protocolGate",p.state==="PAUSED"?"PAUSED":protocolRunning()?(window.AEONProtocolRuntime?.scheduledStateAt(schedule,protocolConditionTime())||"ACTIVE"):p.state==="PROBE_PENDING"?"SILENT":"—");
+    const displayTime=protocolConditionTime();
+    set("#protocolGate",p.state==="PAUSED"?"PAUSED":protocolRunning()?(window.AEONProtocolRuntime?.inGateRampWindow(schedule,displayTime)?"RAMP":window.AEONProtocolRuntime?.scheduledStateAt(schedule,displayTime)||"ACTIVE"):p.state==="PROBE_PENDING"?"SILENT":"—");
     set("#protocolTime",schedule?`${protocolTimeLabel(protocolConditionTime())} / ${protocolTimeLabel(schedule.block_duration_s)}`:"00:00.000 / 01:00.000");
     set("#protocolRms",p.telemetrySamples.length?`${p.telemetrySamples[p.telemetrySamples.length-1].rms_dbfs.toFixed(1)} dBFS`:p.telemetryError?"INVALID":"—");
     set("#protocolMeasuredSilence",p.telemetrySummary?`${(p.telemetrySummary.measured_digital_silence_ratio*100).toFixed(1)}%`:"—");
     set("#protocolState",p.state);
     const error=$("#protocolError");if(error){error.textContent=p.integrity.error||"";error.hidden=!p.integrity.error}
     const notice=$("#protocolNotice");if(notice)notice.hidden=p.state!=="PROBE_PENDING";
-    const arm=$("#armProtocolBtn");if(arm)arm.disabled=p.mode!=="FREE"||S.running;
+    const arm=$("#armProtocolBtn");if(arm){arm.disabled=p.mode!=="FREE"||S.running;arm.setAttribute("aria-disabled",String(arm.disabled))}
     const abort=$("#abortProtocolBtn");if(abort)abort.disabled=p.mode==="FREE"||p.state==="ABORTED";
     ["#inframundo","#activacion","#disociacion","#apertura","#constructSelect","#constructValue","#duration","#depth","#carrierSource","#modulationSelect","#manualModulation","#phaseSignalMode","#resetBtn","#prevBtn","#nextBtn","#timerBtn","#registerMicrovoidBtn"].forEach(selector=>{const element=$(selector);if(element)element.disabled=protocolModeActive()});
     document.body.classList.toggle("protocol-active",protocolModeActive());
   }
   function protocolIntegrityFailure(reason){
-    const p=S.protocol;p.integrity.verified=false;p.integrity.error=String(reason?.message||reason);p.state="INVALID";p.run.valid=false;p.run.invalidReason=p.integrity.error;
-    p.run.events.push({type:"integrity_breach",at:new Date().toISOString(),reason:p.integrity.error});
-    if(S.outputGate&&S.ctx){S.outputGate.gain.cancelScheduledValues(S.ctx.currentTime);S.outputGate.gain.setValueAtTime(0,S.ctx.currentTime)}
-    if(S.running&&S.ctx&&S.ctx.state==="running")S.ctx.suspend().catch(()=>{});
-    protocolUi();
+    failProtocolCondition(reason?.message||reason,"stimulus_integrity");
   }
   function protocolWatchdog(){
     const p=S.protocol;if(!protocolRunning()||!p.condition||!p.audioSnapshot)return;
@@ -178,7 +180,7 @@
   }
   function protocolAudioSnapshot(){
     const current=effectiveAudioControlState();
-    return Object.freeze({
+    return window.AEONProtocolRuntime.deepFreeze({
       dimensions:structuredClone(current.dimensions),
       field:{...structuredClone(current.field),breath:.073},
       depth:current.depth,
@@ -201,6 +203,7 @@
     if(S.protocol.mode==="FREE")return;
     if(S.ctx&&S.running)audioStop();
     const p=S.protocol;p.mode="FREE";p.state="ABORTED";p.condition=null;p.conditionAnchorCtxTime=null;p.conditions=new Map();p.audioSnapshot=null;p.telemetrySamples=[];p.telemetrySummary=null;
+    if(S.ctx)closeProtocolContext();
     S.signal=cloneSignal(p.previousSignal||defaultSignal);p.previousSignal=null;protocolUi();updateReadouts();flash("Protocol aborted; Free Field restored.");
   }
 
@@ -299,9 +302,9 @@
     $$("[data-plan-apply]").forEach(button=>button.addEventListener("click",()=>applyPlanRow(button.dataset.planApply)));
     $$('[data-method-phase]').forEach(button=>button.addEventListener("click",()=>useMethodSuggestion(button.dataset.method,button.dataset.methodPhase)));
   }
-  function editPlanCarrier(phase,key){const item=[...methodCarriers,...symbolicFreqs.map(([value,label])=>({value,label,source_layer:"corpus_wound",source_key:"wound_"+value}))].find(candidate=>candidate.source_key===key);if(!item)return;if(!S.draftPlan)S.draftPlan=structuredClone(S.phaseSignalPlan);const before=cloneSignal(S.draftPlan[phase].signal);S.draftPlan[phase].signal.carrier={source:item.source_layer,key:item.source_key,hz:item.value};S.draftPlan[phase].approved=false;S.draftPlan[phase].status="DRAFT";S.planEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase,from:before,to:S.draftPlan[phase].signal,mode:S.phaseSignalMode,source:"plan_edit"});renderPhaseSignalPlan()}
-  function editPlanModulation(phase,key){const item=key==="manual"?{key:"manual",source:"manual",mode:"manual",hz:Number($("#manualModulation").value)}:modulationOptions.find(candidate=>candidate.key===key);if(!item)return;if(!S.draftPlan)S.draftPlan=structuredClone(S.phaseSignalPlan);const before=cloneSignal(S.draftPlan[phase].signal);S.draftPlan[phase].signal.modulation={source:item.source,key:item.key,mode:item.mode,hz:item.hz};S.draftPlan[phase].approved=false;S.draftPlan[phase].status="DRAFT";S.planEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase,from:before,to:S.draftPlan[phase].signal,mode:S.phaseSignalMode,source:"plan_edit"});renderPhaseSignalPlan()}
-  function applyPlanRow(phase){if(!S.draftPlan)return;const committed=structuredClone(S.draftPlan[phase]);committed.approved=true;committed.status="READY";S.phaseSignalPlan[phase]=committed;S.draftPlan[phase]=structuredClone(committed);if(phase===S.phase)transitionSignalTo(committed.signal,{phase,source:"plan_apply_now"});renderPhaseSignalPlan()}
+  function editPlanCarrier(phase,key){if(protocolModeActive()){flash("CONTROLLED RUN · AUDIO PARAMETERS LOCKED");return}const item=[...methodCarriers,...symbolicFreqs.map(([value,label])=>({value,label,source_layer:"corpus_wound",source_key:"wound_"+value}))].find(candidate=>candidate.source_key===key);if(!item)return;if(!S.draftPlan)S.draftPlan=structuredClone(S.phaseSignalPlan);const before=cloneSignal(S.draftPlan[phase].signal);S.draftPlan[phase].signal.carrier={source:item.source_layer,key:item.source_key,hz:item.value};S.draftPlan[phase].approved=false;S.draftPlan[phase].status="DRAFT";S.planEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase,from:before,to:S.draftPlan[phase].signal,mode:S.phaseSignalMode,source:"plan_edit"});renderPhaseSignalPlan()}
+  function editPlanModulation(phase,key){if(protocolModeActive()){flash("CONTROLLED RUN · AUDIO PARAMETERS LOCKED");return}const item=key==="manual"?{key:"manual",source:"manual",mode:"manual",hz:Number($("#manualModulation").value)}:modulationOptions.find(candidate=>candidate.key===key);if(!item)return;if(!S.draftPlan)S.draftPlan=structuredClone(S.phaseSignalPlan);const before=cloneSignal(S.draftPlan[phase].signal);S.draftPlan[phase].signal.modulation={source:item.source,key:item.key,mode:item.mode,hz:item.hz};S.draftPlan[phase].approved=false;S.draftPlan[phase].status="DRAFT";S.planEvents.push({timestamp_s:+(elapsedMs()/1000).toFixed(1),at:new Date().toISOString(),phase,from:before,to:S.draftPlan[phase].signal,mode:S.phaseSignalMode,source:"plan_edit"});renderPhaseSignalPlan()}
+  function applyPlanRow(phase){if(protocolModeActive()){flash("CONTROLLED RUN · AUDIO PARAMETERS LOCKED");return}if(!S.draftPlan)return;const committed=structuredClone(S.draftPlan[phase]);committed.approved=true;committed.status="READY";S.phaseSignalPlan[phase]=committed;S.draftPlan[phase]=structuredClone(committed);if(phase===S.phase)transitionSignalTo(committed.signal,{phase,source:"plan_apply_now"});renderPhaseSignalPlan()}
   function updateLockedPlan(){
     if(S.phaseSignalMode!=="LOCKED")return;
     PHASE_ORDER.forEach(phase=>{S.phaseSignalPlan[phase]={approved:true,signal:cloneSignal(S.signal),status:"READY"}});
@@ -368,6 +371,27 @@
     if(startAt==null){bank.oscA.start();bank.oscB.start()}else{bank.oscA.start(startAt);bank.oscB.start(startAt)}
     return bank;
   }
+  function initializeProtocolAudioGraphExact({ctx,condition,snapshot,startAt}){
+    const signal=condition.signal,schedule=condition.runtime_schedule;
+    const width=clamp(.16+(snapshot.field.horizon/100)*.72,0,.9);
+    const set=(param,value)=>param.setValueAtTime(value,startAt);
+    S.lfo.frequency.setValueAtTime(signal.modulation.hz,startAt);
+    S.breathOsc.frequency.setValueAtTime(signal.environmental_breath_hz,startAt);
+    set(S.delay.delayTime,.06+(snapshot.field.void/100)*.42);
+    set(S.feedback.gain,clamp(snapshot.field.resonance/100,0,.55));
+    set(S.filter.frequency,clamp(650+(100-snapshot.dimensions.inframundo)*25+snapshot.dimensions.apertura*10,420,4200));
+    set(S.filter.Q,1+(snapshot.field.crystallization/100)*7);
+    set(S.lfoGain.gain,.035+snapshot.dimensions.activacion/100*.10);
+    set(S.master.gain,snapshot.aeon_master_base_gain);
+    set(S.breathGain.gain,snapshot.aeon_master_base_gain*.04);
+    S.banks.forEach(bank=>{
+      set(bank.gainA.gain,.24);
+      set(bank.gainB.gain,clamp(.025+(snapshot.field.presence/100)*.075+(snapshot.dimensions.apertura/100)*.025,.02,.13));
+      set(bank.panA.pan,-width);set(bank.panB.pan,width);
+      set(bank.oscA.frequency,signal.carrier.hz);set(bank.oscB.frequency,signal.carrier.hz*2);
+    });
+    window.AEONProtocolRuntime.scheduleFixedPeriodicGate(S.outputGate.gain,schedule,startAt);
+  }
   function activeAudioBank(){return S.banks?.[S.activeBank]??null}
   function disposeBank(bank,when=0){
     if(!bank)return;
@@ -377,6 +401,7 @@
   function equalPowerCurves(steps=128){const out=new Float32Array(steps),incoming=new Float32Array(steps);for(let i=0;i<steps;i++){const x=i/(steps-1);out[i]=Math.cos(x*Math.PI/2);incoming[i]=Math.sin(x*Math.PI/2)}return {out,incoming}}
   function signalsEqual(a,b){return a.carrier.source===b.carrier.source&&a.carrier.key===b.carrier.key&&Number(a.carrier.hz)===Number(b.carrier.hz)&&a.modulation.source===b.modulation.source&&a.modulation.key===b.modulation.key&&a.modulation.mode===b.modulation.mode&&Number(a.modulation.hz)===Number(b.modulation.hz)}
   function transitionSignalTo(signal,{phase=S.phase,source="phase_plan"}={}){
+    if(protocolModeActive()){flash("CONTROLLED RUN · AUDIO PARAMETERS LOCKED");return}
     if(!signal)return;
     const from=cloneSignal(S.signal);if(signalsEqual(from,signal)){updateSignalMonitor();return}S.signal=cloneSignal(signal);
     if(!S.running||!S.ctx){recordSignalEvent(from,S.signal,source);return}
@@ -412,7 +437,7 @@
         <span class="freq-hz">${hz} Hz</span>
         <span class="freq-label">${label}</span>
         <canvas class="freq-wave" width="110" height="20"></canvas>`;
-      row.addEventListener("click",()=>{const next=cloneSignal(S.signal);next.carrier={source:item.source_layer,key:item.source_key,hz};recordParameterChange("carrier",S.signal.carrier.hz,hz);transitionSignalTo(next,{source:"carrier_selection"});if(S.phaseSignalMode==="LOCKED")updateLockedPlan();else flash("Audition signal changed; scheduled plan unchanged.");$("#carrierReadout").textContent=hz;updateAudio();requestStaticVisualRefresh()});
+      row.addEventListener("click",()=>{if(protocolModeActive()){flash("CONTROLLED RUN · AUDIO PARAMETERS LOCKED");return}const next=cloneSignal(S.signal);next.carrier={source:item.source_layer,key:item.source_key,hz};recordParameterChange("carrier",S.signal.carrier.hz,hz);transitionSignalTo(next,{source:"carrier_selection"});if(S.phaseSignalMode==="LOCKED")updateLockedPlan();else flash("Audition signal changed; scheduled plan unchanged.");$("#carrierReadout").textContent=hz;updateAudio();requestStaticVisualRefresh()});
       root.appendChild(row);
       const c=row.querySelector("canvas"),cx=c.getContext("2d");
       cx.strokeStyle=color;cx.lineWidth=1.3;cx.beginPath();
@@ -430,7 +455,7 @@
       if(!S.protocol.integrity.verified||!S.protocol.condition)return;
       if(S.protocol.state==="PROBE_PENDING"||S.protocol.state==="INVALID"||S.protocol.state==="ABORTED")return;
     }
-    if(S.phaseSignalMode!=="LOCKED"&&PHASE_ORDER.some(phase=>!S.phaseSignalPlan[phase]?.approved)){flash("Resolve and approve every phase signal plan row before starting.");return}
+    if(!protocolModeActive()&&S.phaseSignalMode!=="LOCKED"&&PHASE_ORDER.some(phase=>!S.phaseSignalPlan[phase]?.approved)){flash("Resolve and approve every phase signal plan row before starting.");return}
     const AC=window.AudioContext||window.webkitAudioContext;
     if(!AC) return;
     S.ctx=new AC();
@@ -461,12 +486,20 @@
     S.lfo.connect(S.lfoGain);S.banks.forEach(bank=>S.lfoGain.connect(bank.gainA.gain));
     S.breathOsc.connect(S.breathGain).connect(S.master.gain);
 
+    if(protocolModeActive())initializeProtocolAudioGraphExact({ctx,condition:S.protocol.condition,snapshot:S.protocol.audioSnapshot,startAt:protocolStartAt});
     if(protocolStartAt==null){S.lfo.start();S.breathOsc.start()}else{S.lfo.start(protocolStartAt);S.breathOsc.start(protocolStartAt)}
+    if(protocolModeActive()){
+      S.protocol.expectedSuspend=false;S.protocol.expectedClose=false;
+      ctx.addEventListener("statechange",protocolContextStateChange);
+      S.protocol.contextStateEvents.push({state:ctx.state,at:new Date().toISOString(),context_time_s:ctx.currentTime,expected:false});
+    }
     S.running=true;S.startedAt=performance.now();
     if(protocolModeActive()){
       S.protocol.state="CONDITION_RUNNING";S.protocol.conditionAnchorCtxTime=protocolStartAt;S.protocol.telemetrySamples=[];S.protocol.telemetrySummary=null;
-      window.AEONProtocolRuntime.scheduleFixedPeriodicGate(S.outputGate.gain,S.protocol.condition.runtime_schedule,protocolStartAt);
+      S.protocol.telemetryError=null;S.protocol.contextStateEvents=[];S.protocol.telemetryIntegrity="PENDING";
       S.protocol.telemetryData=new Float32Array(S.telemetryAnalyser.fftSize);S.protocol.telemetryTimer=window.setInterval(()=>sampleProtocolTelemetry(),25);
+      S.protocol.currentConditionRun={scheduled_start_context_s:protocolStartAt,started_at:new Date().toISOString(),start_perf_ms:performance.now(),ended_at:null,end_perf_ms:null,pauses:[],open_pause:null};
+      S.protocol.telemetryPolicy={sampling_interval_ms:25,analysis_window_ms:S.telemetryAnalyser.fftSize/ctx.sampleRate*1000,boundary_guard_ms:Math.max(50,S.protocol.condition.runtime_schedule.gate_envelope.ramp_ms+S.telemetryAnalyser.fftSize/ctx.sampleRate*1000),sample_rate_hz:ctx.sampleRate};
     }
     $("#playBtn").textContent="Ⅱ";
     updateAudio();
@@ -477,6 +510,10 @@
 
   function audioStop(){
     if(!S.running&&!S.ctx) return;
+    if(protocolModeActive()){
+      silenceProtocolGate();stopProtocolTelemetry();disposeConditionGraph();closeProtocolContext();
+      S.running=false;clearInterval(S.timer);S.timer=null;$("#playBtn").textContent="▶";protocolUi();return;
+    }
     S.elapsedBefore += performance.now()-S.startedAt;
     stopVisualMotion({renderFrozen:true});
     const ctx=S.ctx;
@@ -489,11 +526,48 @@
       setTimeout(()=>ctx.close().catch(()=>{}),650);
     }catch(_){}
     S.running=false;S.ctx=null;S.outputGate=null;S.telemetryAnalyser=null;S.telemetrySink=null;S.banks=null;S.activeBank=0;S.oscA=S.oscB=S.gainA=S.gainB=S.panA=S.panB=null;$("#playBtn").textContent="▶";
-    clearInterval(S.timer);S.timer=null;clearInterval(S.protocol.telemetryTimer);S.protocol.telemetryTimer=null;protocolUi();
+    clearInterval(S.timer);S.timer=null;stopProtocolTelemetry();protocolUi();
+  }
+
+  function silenceProtocolGate(){
+    if(S.outputGate&&S.ctx){
+      S.outputGate.gain.cancelScheduledValues(S.ctx.currentTime);
+      S.outputGate.gain.setValueAtTime(0,S.ctx.currentTime);
+    }
+  }
+  function stopProtocolTelemetry(){
+    clearInterval(S.protocol.telemetryTimer);S.protocol.telemetryTimer=null;
+  }
+  function closeProtocolContext(){
+    const ctx=S.ctx;if(!ctx)return;
+    S.protocol.expectedClose=true;
+    try{ctx.close()}catch(_){ }
+    S.ctx=null;S.outputGate=null;S.telemetryAnalyser=null;S.telemetrySink=null;
+  }
+  function failProtocolCondition(reason,integrityKind="stimulus_integrity"){
+    const p=S.protocol;if(p.state==="INVALID"&&p.run.invalidReason)return;
+    const message=String(reason?.message||reason);silenceProtocolGate();stopProtocolTelemetry();
+    p.integrity.verified=false;p.integrity.error=message;p.state="INVALID";p.run.valid=false;p.run.invalidReason=message;
+    p.run.events.push({type:"integrity_breach",integrity:integrityKind,at:new Date().toISOString(),reason:message});
+    if(p.currentConditionRun){p.currentConditionRun.ended_at=new Date().toISOString();p.currentConditionRun.end_perf_ms=performance.now();p.currentConditionRun.open_pause=null}
+    disposeConditionGraph();
+    S.running=false;clearInterval(S.timer);S.timer=null;$("#playBtn").textContent="▶";stopVisualMotion({renderFrozen:true});
+    if(S.ctx&&S.ctx.state==="running")S.ctx.suspend().catch(()=>{});
+    protocolUi();
+  }
+  function protocolContextStateChange(){
+    const ctx=S.ctx,p=S.protocol;if(!ctx||!protocolModeActive())return;
+    const expected=(ctx.state==="suspended"&&p.expectedSuspend)||(ctx.state==="closed"&&p.expectedClose);
+    p.contextStateEvents.push({state:ctx.state,at:new Date().toISOString(),context_time_s:ctx.currentTime,expected});
+    if(window.AEONProtocolRuntime.unexpectedContextState(ctx.state,{conditionRunning:protocolRunning(),expectedSuspend:p.expectedSuspend,expectedClose:p.expectedClose})&&!expected)failProtocolCondition(`unexpected AudioContext state: ${ctx.state}`,"stimulus_integrity");
+  }
+  function protocolVisibilityChange(){
+    if(window.AEONProtocolRuntime.visibilityInvalidatesProtocol(document.visibilityState,protocolRunning()))failProtocolCondition("document visibility hidden during condition","stimulus_integrity");
   }
 
   function updateAudio(){
     if(!S.running||!S.ctx) return;
+    if(protocolRunning()){updateSignalMonitor();return;}
     const controls=effectiveAudioControlState(),d=controls.dimensions,f=controls.field,t=S.ctx.currentTime;
     const depth=num("#depth");
     S.banks?.forEach(bank=>updateBankFieldParams(bank,d,f,t));
@@ -516,36 +590,40 @@
     const p=S.protocol;if(!protocolRunning()||!S.telemetryAnalyser||!p.telemetryData||!S.ctx)return;
     try{
       S.telemetryAnalyser.getFloatTimeDomainData(p.telemetryData);
-      const conditionTime=protocolConditionTime(),schedule=p.condition.runtime_schedule;
-      const rmsDbfs=window.AEONProtocolRuntime.rmsDbfs(p.telemetryData);
-      p.telemetrySamples.push({condition_time_s:+conditionTime.toFixed(3),context_time_s:+S.ctx.currentTime.toFixed(3),scheduled_state:window.AEONProtocolRuntime.scheduledStateAt(schedule,conditionTime),in_ramp_window:window.AEONProtocolRuntime.inGateRampWindow(schedule,conditionTime),rms_dbfs:+rmsDbfs.toFixed(3),measured_silent:rmsDbfs<=-80});
+      const rawTime=protocolConditionTimeRaw(),schedule=p.condition.runtime_schedule;
+      if(!window.AEONProtocolRuntime.telemetryTimeInBlock(rawTime,schedule.block_duration_s))return;
+      const metrics=window.AEONProtocolRuntime.rmsAndPeakDbfs(p.telemetryData),policy=p.telemetryPolicy;
+      const boundaryGuard=window.AEONProtocolRuntime.boundaryGuardAt(schedule,rawTime,policy.analysis_window_ms);
+      p.telemetrySamples.push({condition_time_s:+rawTime.toFixed(3),context_time_s:+S.ctx.currentTime.toFixed(3),scheduled_state:window.AEONProtocolRuntime.scheduledStateAt(schedule,rawTime),in_ramp_window:window.AEONProtocolRuntime.inGateRampWindow(schedule,rawTime),boundary_guard:boundaryGuard,...Object.fromEntries(Object.entries(metrics).map(([key,value])=>[key,key.includes("dbfs")?+value.toFixed(3):value])),measured_silent:metrics.rms_dbfs<=-80});
       protocolUi();
     }catch(error){
-      clearInterval(p.telemetryTimer);p.telemetryTimer=null;p.telemetryError=String(error?.message||error);protocolIntegrityFailure({message:`telemetry unavailable: ${p.telemetryError}`});
+      stopProtocolTelemetry();p.telemetryError=String(error?.message||error);p.telemetryIntegrity="FAILED";failProtocolCondition(`telemetry unavailable: ${p.telemetryError}`,"telemetry_integrity");
     }
   }
 
   function summarizeProtocolTelemetry(){
-    const p=S.protocol,samples=p.telemetrySamples,schedule=p.condition.runtime_schedule;
+    const p=S.protocol,samples=p.telemetrySamples,schedule=p.condition.runtime_schedule,policy=p.telemetryPolicy;
     const active=samples.filter(sample=>sample.scheduled_state==="ACTIVE"),silent=samples.filter(sample=>sample.scheduled_state==="SILENT");
-    const steady=samples.filter(sample=>!sample.in_ramp_window&&sample.condition_time_s>=.075&&sample.condition_time_s<=schedule.block_duration_s-.075);
+    const steady=samples.filter(sample=>!sample.boundary_guard);
     const ratio=values=>values.length?values.filter(sample=>sample.measured_silent).length/values.length:null;
     const agreement=values=>values.length?values.filter(sample=>sample.measured_silent===(sample.scheduled_state==="SILENT")).length/values.length:null;
     const median=values=>{if(!values.length)return null;const sorted=values.map(sample=>sample.rms_dbfs).sort((a,b)=>a-b);return sorted[Math.floor(sorted.length/2)]};
-    return {scheduled_silence_ratio:schedule.scheduled_silence_ratio,measured_digital_silence_ratio:ratio(samples),steady_state_measured_silence_ratio:ratio(steady),classification_agreement:agreement(samples),steady_state_classification_agreement:agreement(steady),sample_count:samples.length,active_sample_count:active.length,silent_sample_count:silent.length,median_active_rms_dbfs:median(active),median_silent_rms_dbfs:median(silent),near_clipping_count:samples.filter(sample=>sample.rms_dbfs>-1).length,telemetry_valid:!!S.telemetryAnalyser};
+    const expectedSampleCount=schedule.block_duration_s*1000/policy.sampling_interval_ms,completeness=samples.length/expectedSampleCount;
+    return {scheduled_silence_ratio:schedule.scheduled_silence_ratio,measured_digital_silence_ratio:ratio(samples),steady_state_measured_silence_ratio:ratio(steady),classification_agreement:agreement(samples),steady_state_classification_agreement:agreement(steady),sample_count:samples.length,expected_sample_count:expectedSampleCount,sample_completeness:completeness,steady_state_sample_count:steady.length,telemetry_status:window.AEONProtocolRuntime.classifyTelemetryStatus(samples.length,expectedSampleCount,steady.length),active_sample_count:active.length,silent_sample_count:silent.length,median_active_rms_dbfs:median(active),median_silent_rms_dbfs:median(silent),near_full_scale_count:samples.filter(sample=>sample.near_full_scale).length,above_nominal_full_scale_count:samples.filter(sample=>sample.above_nominal_full_scale).length,analysis_window_ms:policy.analysis_window_ms,boundary_guard_ms:policy.boundary_guard_ms,sample_rate_hz:policy.sample_rate_hz,telemetry_valid:!!S.telemetryAnalyser};
   }
 
   function disposeConditionGraph(){
     S.banks?.forEach(bank=>disposeBank(bank));
     try{S.lfo?.stop();S.lfo?.disconnect();S.lfoGain?.disconnect();S.breathOsc?.stop();S.breathOsc?.disconnect();S.breathGain?.disconnect()}catch(_){ }
-    S.banks=null;S.activeBank=0;S.oscA=S.oscB=S.gainA=S.gainB=S.panA=S.panB=null;
+    [S.filter,S.delay,S.feedback,S.master].forEach(node=>{try{node?.disconnect()}catch(_){}});
+    S.banks=null;S.activeBank=0;S.oscA=S.oscB=S.gainA=S.gainB=S.panA=S.panB=null;S.filter=S.delay=S.feedback=S.master=S.lfo=S.lfoGain=S.breathOsc=S.breathGain=null;
   }
 
   function finishProtocolCondition(){
     if(!protocolRunning())return;
-    const p=S.protocol;if(S.outputGate&&S.ctx){S.outputGate.gain.cancelScheduledValues(S.ctx.currentTime);S.outputGate.gain.setValueAtTime(0,S.ctx.currentTime)}
-    clearInterval(p.telemetryTimer);p.telemetryTimer=null;p.telemetrySummary=summarizeProtocolTelemetry();
-    p.run.conditions.push({condition_id:p.condition.condition_id,source_sha256:p.condition.source_sha256,executable_fingerprint:p.protocol.condition_fingerprints[p.condition.condition_id],scheduled_silence_ratio:p.condition.runtime_schedule.scheduled_silence_ratio,started_at:new Date().toISOString(),ended_at:new Date().toISOString(),pauses:[],telemetry_policy:{source:"browser_digital_output_downstream_of_protocol_gate",fft_size:1024,sampling_interval_ms:25,silence_threshold_dbfs:-80,not_acoustic_spl:true},telemetry_summary:p.telemetrySummary,telemetry_samples:p.telemetrySamples});
+    const p=S.protocol;silenceProtocolGate();stopProtocolTelemetry();p.telemetrySummary=summarizeProtocolTelemetry();
+    const run=p.currentConditionRun;run.ended_at=new Date().toISOString();run.end_perf_ms=performance.now();
+    p.run.conditions.push({condition_id:p.condition.condition_id,source_sha256:p.condition.source_sha256,executable_fingerprint:p.protocol.condition_fingerprints[p.condition.condition_id],scheduled_silence_ratio:p.condition.runtime_schedule.scheduled_silence_ratio,started_at:run.started_at,ended_at:run.ended_at,protocol_active_exposure_s:protocolConditionTime(),protocol_wall_duration_s:(run.end_perf_ms-run.start_perf_ms)/1000,pauses:run.pauses,telemetry_policy:{source:"browser_digital_output_downstream_of_protocol_gate",fft_size:1024,sampling_interval_ms:25,silence_threshold_dbfs:-80,not_acoustic_spl:true,...p.telemetryPolicy},telemetry_summary:p.telemetrySummary,telemetry_samples:p.telemetrySamples});
     disposeConditionGraph();p.state="PROBE_PENDING";S.running=false;clearInterval(S.timer);S.timer=null;$("#playBtn").textContent="▶";stopVisualMotion({renderFrozen:true});protocolUi();flash("Condition complete. Observation layer required.");
   }
 
@@ -589,7 +667,6 @@
     if(protocolModeActive()){
       const condition=S.protocol.condition;
       protocolWatchdog();
-      sampleProtocolTelemetry();
       if(S.protocol.state==="CONDITION_RUNNING"&&condition&&protocolConditionTime()>=condition.runtime_schedule.block_duration_s)finishProtocolCondition();
       protocolUi();
       if(S.running)updateSignalMonitor();
@@ -614,10 +691,10 @@
     const p=S.protocol;
     if(p.state==="READY"&&p.mode==="ARMED"){audioStart();return}
     if(p.state==="CONDITION_RUNNING"&&S.ctx){
-      await S.ctx.suspend();p.state="PAUSED";p.run.events.push({type:"pause",context_time_s:S.ctx.currentTime,at:new Date().toISOString()});stopVisualMotion({renderFrozen:true});protocolUi();return;
+      p.expectedSuspend=true;await S.ctx.suspend();p.expectedSuspend=false;const now=performance.now();if(p.currentConditionRun)p.currentConditionRun.open_pause={start_perf_ms:now,started_at:new Date().toISOString(),context_time_s:S.ctx.currentTime};p.state="PAUSED";p.run.events.push({type:"pause",context_time_s:S.ctx.currentTime,at:new Date().toISOString()});stopVisualMotion({renderFrozen:true});protocolUi();return;
     }
     if(p.state==="PAUSED"&&S.ctx){
-      await S.ctx.resume();p.state="CONDITION_RUNNING";p.run.events.push({type:"resume",context_time_s:S.ctx.currentTime,at:new Date().toISOString()});startVisualMotion();protocolUi();return;
+      const pause=p.currentConditionRun?.open_pause;p.expectedSuspend=false;await S.ctx.resume();if(pause){pause.end_perf_ms=performance.now();pause.ended_at=new Date().toISOString();pause.wall_duration_ms=pause.end_perf_ms-pause.start_perf_ms;p.currentConditionRun.pauses.push(pause);p.currentConditionRun.open_pause=null}p.state="CONDITION_RUNNING";p.run.events.push({type:"resume",context_time_s:S.ctx.currentTime,at:new Date().toISOString()});stopVisualMotion({renderFrozen:true});$("#fieldStatus").textContent="FIELD · PROTOCOL STATIC";protocolUi();return;
     }
     if(p.state==="PROBE_PENDING")flash("OBSERVATION REQUIRED · Phase D not installed");
   }
@@ -666,8 +743,8 @@
       experiment_id:S.experimentId,
       participant_id:S.participantId,
       engine:"AEON Sound Field",
-      engine_version:"0.3.4.3",
-      engine_build:"0.3.4.3",
+      engine_version:"0.3.4.4",
+      engine_build:"0.3.4.4",
       date:S.sessionStartISO,
       duration_real_s:+(elapsedMs()/1000).toFixed(2),
       context:{
@@ -689,7 +766,7 @@
         ,phase_signal_plan:{mode:S.phaseSignalMode,phases:S.phaseSignalPlan,provenance_boundary:"Source identity remains separate for carrier, modulation, harmonic synthesis and environmental breath.",method_match_policy:"show_all_no_priority",status:"experimental_noncanonical"}
         ,acspec_time_audio_link:false
         ,matched_method_protocols:methodMatches()
-        ,construct_mapping_version:"0.3.4.3"
+        ,construct_mapping_version:"0.3.4.4"
       },
       events:{phase_transitions:S.phaseEvents,signal_transitions:S.signalEvents,parameter_changes:S.parameterEvents,plan_changes:S.planEvents,microvoids:S.microvoids},
       protocol_runtime:{
@@ -706,6 +783,12 @@
         invalid_reason:S.protocol.run.invalidReason,
         conditions:S.protocol.run.conditions,
         events:S.protocol.run.events,
+        stimulus_integrity:S.protocol.run.valid?"VALID":"INVALID",
+        telemetry_integrity:S.protocol.telemetryError?"FAILED":(S.protocol.telemetrySummary?.telemetry_status||"PENDING"),
+        protocol_active_exposure_s:S.protocol.currentConditionRun&&S.protocol.currentConditionRun.end_perf_ms?(S.protocol.currentConditionRun.end_perf_ms-S.protocol.currentConditionRun.start_perf_ms)/1000:null,
+        protocol_wall_duration_s:S.protocol.currentConditionRun&&S.protocol.currentConditionRun.end_perf_ms?(S.protocol.currentConditionRun.end_perf_ms-S.protocol.currentConditionRun.start_perf_ms)/1000:null,
+        free_field_duration_real_s:protocolModeActive()?null:+(elapsedMs()/1000).toFixed(2),
+        context_state_events:S.protocol.contextStateEvents,
         response_series_status:"not_created_probe_layer_pending",
         calibration_only:S.protocol.run.calibration_only
       },
@@ -825,7 +908,7 @@
           <div class="drawer-card full"><h3>Vista previa JSON</h3><pre style="white-space:pre-wrap;color:#94a5b8;font:9px/1.5 ui-monospace;max-height:420px;overflow:auto">${escapeHtml(JSON.stringify(rec,null,2))}</pre></div>
           <div class="drawer-card full"><button class="action-btn cyan" id="downloadAtlasBtn" style="width:100%">Download ATLAS JSON</button></div>
         </div>`;
-      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.4.3.json")),0);
+      setTimeout(()=>$("#downloadAtlasBtn")?.addEventListener("click",()=>downloadJSON(rec,rec.session_id+"_AEON_v0.3.4.4.json")),0);
     }else if(type==="descenso"||type==="retorno"){
       transitionToPhase(type==="descenso"?"descenso":"retorno","manual");
       eyebrow.textContent=phaseLabels[type].toUpperCase();title.textContent=type==="descenso"?"Descent profile":"Return profile";
@@ -840,7 +923,7 @@
         </div>`;
     }else{
       eyebrow.textContent="HOME";title.textContent="AEON Sound Field";
-      content.innerHTML=`<div class="drawer-card"><h3>v0.3.4.3</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
+      content.innerHTML=`<div class="drawer-card"><h3>v0.3.4.4</h3><p>Session interface oriented toward descent, transformation, and return, with local recording and ATLAS export.</p></div>`;
     }
     drawer.classList.add("open");drawer.setAttribute("aria-hidden","false");
   }
@@ -1032,9 +1115,9 @@
     ["#inframundo","#activacion","#disociacion","#apertura"].forEach(id=>$(id).addEventListener("input",()=>{recordParameterChangeDebounced("dimensions",null,dimensions());updateReadouts()}));
     ["#duration","#depth"].forEach(id=>$(id).addEventListener("input",()=>{recordParameterChangeDebounced(id.slice(1),null,num(id));updateReadouts()}));
     $$(".phase-step").forEach(b=>b.addEventListener("click",()=>transitionToPhase(b.dataset.phase,"manual")));
-    $("#constructSelect").addEventListener("change",()=>{recordParameterChange("construct",null,$("#constructSelect").value);updateConstructInspector()});
-    $("#constructValue").addEventListener("input",()=>{const c=constructRegistry[$("#constructSelect").value],previous=S.field[c.fieldKey];S.field[c.fieldKey]=Number($("#constructValue").value);recordParameterChangeDebounced("construct_value",previous,S.field[c.fieldKey]);updateConstructInspector();updateAudio();requestStaticVisualRefresh()});
-    $$(".seg").forEach(b=>b.addEventListener("click",()=>{$$(".seg").forEach(x=>x.classList.remove("active"));b.classList.add("active");recordParameterChange("listening_context",null,b.dataset.output)}));
+    $("#constructSelect").addEventListener("change",()=>{if(protocolModeActive()){flash("CONTROLLED RUN · AUDIO PARAMETERS LOCKED");return}recordParameterChange("construct",null,$("#constructSelect").value);updateConstructInspector()});
+    $("#constructValue").addEventListener("input",()=>{if(protocolModeActive()){flash("CONTROLLED RUN · AUDIO PARAMETERS LOCKED");return}const c=constructRegistry[$("#constructSelect").value],previous=S.field[c.fieldKey];S.field[c.fieldKey]=Number($("#constructValue").value);recordParameterChangeDebounced("construct_value",previous,S.field[c.fieldKey]);updateConstructInspector();updateAudio();requestStaticVisualRefresh()});
+    $$(".seg").forEach(b=>b.addEventListener("click",()=>{if(protocolModeActive()){flash("CONTROLLED RUN · AUDIO PARAMETERS LOCKED");return}$$(".seg").forEach(x=>x.classList.remove("active"));b.classList.add("active");recordParameterChange("listening_context",null,b.dataset.output)}));
     $$(".viz-tab").forEach(b=>b.addEventListener("click",()=>{$$(".viz-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");S.viz=b.dataset.viz;requestStaticVisualRefresh()}));
     $$(".nav-link").forEach(b=>b.addEventListener("click",()=>{
       $$(".nav-link").forEach(x=>x.classList.remove("active"));b.classList.add("active");
@@ -1059,13 +1142,13 @@
     $("#expandVizBtn").addEventListener("click",()=>flash("Expanded visualization reserved for AEON v0.4."));
     $("#closeDrawerBtn").addEventListener("click",()=>{$("#drawer").classList.remove("open");$("#drawer").setAttribute("aria-hidden","true")});
     $("#carrierSource").addEventListener("change",event=>{S.uiCarrierLibrary=event.target.value==="method"?"method_base":"corpus_wound";renderFrequencies();recordParameterChange("carrier_library",null,S.uiCarrierLibrary)});
-    $("#modulationSelect").addEventListener("change",event=>{const option=event.target.value==="manual"?{key:"manual",source:"manual",mode:"manual",hz:Number($("#manualModulation").value)}:modulationOptions.find(item=>item.key===event.target.value);if(!option)return;const next=cloneSignal(S.signal);next.modulation={source:option.source,key:option.key,mode:option.mode,hz:option.hz};$("#manualModulation").value=option.hz;recordParameterChange("modulation",S.signal.modulation,next.modulation);transitionSignalTo(next,{source:"modulation_selection"});if(S.phaseSignalMode==="LOCKED")updateLockedPlan();else flash("Audition signal changed; scheduled plan unchanged.");updateAudio();updateReadouts()});
-    $("#manualModulation").addEventListener("input",event=>{const value=Number(event.target.value),next=cloneSignal(S.signal);next.modulation={source:"manual",key:`manual_${value.toFixed(2).replace(".","_")}`,mode:"manual",hz:value};$("#modulationSelect").value="manual";recordParameterChangeDebounced("modulation",S.signal.modulation,next.modulation);transitionSignalTo(next,{source:"manual_modulation"});if(S.phaseSignalMode==="LOCKED")updateLockedPlan();updateAudio();updateReadouts()});
-    $("#phaseSignalMode").addEventListener("change",event=>{S.phaseSignalMode=event.target.value;S.draftPlan=event.target.value==="LOCKED"?null:structuredClone(S.phaseSignalPlan);recordParameterChange("phase_signal_mode",null,S.phaseSignalMode);if(S.phaseSignalMode==="LOCKED")updateLockedPlan();if(S.phaseSignalMode==="METHOD GUIDED")PHASE_ORDER.forEach(phase=>{S.phaseSignalPlan[phase].approved=false;S.phaseSignalPlan[phase].status="UNRESOLVED";S.draftPlan[phase].approved=false;S.draftPlan[phase].status="UNRESOLVED"});updateReadouts()});
+    $("#modulationSelect").addEventListener("change",event=>{if(protocolModeActive()){flash("CONTROLLED RUN · AUDIO PARAMETERS LOCKED");return}const option=event.target.value==="manual"?{key:"manual",source:"manual",mode:"manual",hz:Number($("#manualModulation").value)}:modulationOptions.find(item=>item.key===event.target.value);if(!option)return;const next=cloneSignal(S.signal);next.modulation={source:option.source,key:option.key,mode:option.mode,hz:option.hz};$("#manualModulation").value=option.hz;recordParameterChange("modulation",S.signal.modulation,next.modulation);transitionSignalTo(next,{source:"modulation_selection"});if(S.phaseSignalMode==="LOCKED")updateLockedPlan();else flash("Audition signal changed; scheduled plan unchanged.");updateAudio();updateReadouts()});
+    $("#manualModulation").addEventListener("input",event=>{if(protocolModeActive()){flash("CONTROLLED RUN · AUDIO PARAMETERS LOCKED");return}const value=Number(event.target.value),next=cloneSignal(S.signal);next.modulation={source:"manual",key:`manual_${value.toFixed(2).replace(".","_")}`,mode:"manual",hz:value};$("#modulationSelect").value="manual";recordParameterChangeDebounced("modulation",S.signal.modulation,next.modulation);transitionSignalTo(next,{source:"manual_modulation"});if(S.phaseSignalMode==="LOCKED")updateLockedPlan();updateAudio();updateReadouts()});
+    $("#phaseSignalMode").addEventListener("change",event=>{if(protocolModeActive()){flash("CONTROLLED RUN · AUDIO PARAMETERS LOCKED");return}S.phaseSignalMode=event.target.value;S.draftPlan=event.target.value==="LOCKED"?null:structuredClone(S.phaseSignalPlan);recordParameterChange("phase_signal_mode",null,S.phaseSignalMode);if(S.phaseSignalMode==="LOCKED")updateLockedPlan();if(S.phaseSignalMode==="METHOD GUIDED")PHASE_ORDER.forEach(phase=>{S.phaseSignalPlan[phase].approved=false;S.phaseSignalPlan[phase].status="UNRESOLVED";S.draftPlan[phase].approved=false;S.draftPlan[phase].status="UNRESOLVED"});updateReadouts()});
   }
 
   async function init(){
-    ensureSession();const qaWrap=$("#protocolQaWrap");if(qaWrap)qaWrap.hidden=new URLSearchParams(location.search).get("aeon_qa")!=="1";renderFrequencies();wire();loadProfile();S.uiCarrierLibrary=S.signal.carrier.source;$("#carrierSource").value=S.uiCarrierLibrary==="method_base"?"method":"wound_symbolic";$("#modulationSelect").value=modulationOptions.some(item=>item.key===S.signal.modulation.key)?S.signal.modulation.key:"manual";$("#manualModulation").value=S.signal.modulation.hz;updateLockedPlan();renderFrequencies();syncPhaseUi();updateReadouts();protocolUi();renderVisualFrame();
+    ensureSession();document.addEventListener("visibilitychange",protocolVisibilityChange);const qaWrap=$("#protocolQaWrap");if(qaWrap)qaWrap.hidden=new URLSearchParams(location.search).get("aeon_qa")!=="1";renderFrequencies();wire();loadProfile();S.uiCarrierLibrary=S.signal.carrier.source;$("#carrierSource").value=S.uiCarrierLibrary==="method_base"?"method":"wound_symbolic";$("#modulationSelect").value=modulationOptions.some(item=>item.key===S.signal.modulation.key)?S.signal.modulation.key:"manual";$("#manualModulation").value=S.signal.modulation.hz;updateLockedPlan();renderFrequencies();syncPhaseUi();updateReadouts();protocolUi();renderVisualFrame();
     try{
       const r=await fetch("mappings.json",{cache:"no-store"});if(r.ok){$("#repoDot").classList.add("online");$("#repoStatus").textContent="LOCAL LISTO"}
     }catch(_){}

@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - "08_ENGINE/experimental-protocol-model/v0.1/**"
+      - "08_ENGINE/sound-field-v0.3/**"
       - ".github/workflows/aeon-contract-integrity.yml"
   pull_request:
     paths:
       - "08_ENGINE/experimental-protocol-model/v0.1/**"
+      - "08_ENGINE/sound-field-v0.3/**"
       - ".github/workflows/aeon-contract-integrity.yml"
   workflow_dispatch:
 
@@ -30,3 +32,7 @@ jobs:
       - run: python validator.py --examples
       - run: python -m pytest -q tests
       - run: python compiler.py --check
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+      - run: node --test ../../../sound-field-v0.3/tests/protocol-runtime.test.js

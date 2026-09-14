@@ -1,7 +1,13 @@
 {
   "id": "AEON-SOUND-FIELD",
   "name": "AEON Sound Field",
-  "version": "0.3.4.3",
+  "version": "0.3.4.4",
+  "protocol_runtime": {
+    "authority": "compiled AEON Pilot 01 artifacts",
+    "clock": "AudioContext.currentTime",
+    "gate_position": "post-master/pre-analyser",
+    "telemetry_boundary": "browser digital output, not acoustic SPL or physiology"
+  },
   "status": "experimental",
   "entry": "index.html",
   "design": "neuroenergetic-alchemical-session-ui",

@@ -1,7 +1,7 @@
 {
   "package": "AEON Phase D.1 Observation Runtime Foundation REVIEWED v2",
   "baseline_commit": "b8b1a4eea2e9e5fc8e254b20340c8b3a66d367a2",
-  "payload_file_count_excluding_manifest": 32,
+  "payload_file_count_excluding_manifest": 48,
   "files": [
     {
       "path": "ARCHITECTURE_DECISIONS_D1_v0.1.md",
@@ -34,6 +34,10 @@
     {
       "path": "QA_CHECKLIST_PHASE_D1_v0.1.md",
       "sha256": "41af032fa8ef95a7331255265c0a04dbc319f39bd76a5d73929a630a4780c16a"
+    },
+    {
+      "path": "README.md",
+      "sha256": "9f9ec40e6e0db270f8120c91efa3e9f010c0ac585d80b607eef3790f1e8cf863"
     },
     {
       "path": "README_FOR_GITHUB_CODER.md",
@@ -108,6 +112,14 @@
       "sha256": "b6e4ac5f8c842f787822f2b9c16cf609f4cf76766de82e0104d406bb5af55925"
     },
     {
+      "path": "package-lock.json",
+      "sha256": "13e589eb5b727e8af4d318b135595200bc5a5d51b33020a63f8ca02e69c73588"
+    },
+    {
+      "path": "package.json",
+      "sha256": "52f0d23e64a2e0f05c99fabd60557d9cbbd6c86a44c0aede0e6b23bd854d9bbb"
+    },
+    {
       "path": "reference/CANONICALIZATION_VECTORS.json",
       "sha256": "6f4904bc511fc1e975f39f9a8cd14bac77bb3284d66e49495f8f7d08cde231c7"
     },
@@ -130,6 +142,58 @@
     {
       "path": "reference/validate-contracts.reference.py",
       "sha256": "9e167bf6f131463c790039f01de5bfe925f04436b18298f4b551a36b45b47a0d"
+    },
+    {
+      "path": "src/canonical-json.mjs",
+      "sha256": "f9c1be4c6a88e160c4a5535590ebe8ed2c94945b955b92ad93a63f41e51814e3"
+    },
+    {
+      "path": "src/clock.mjs",
+      "sha256": "4824a94135853c223e885c750749f903ea47f5cefb9e579012825874060078f2"
+    },
+    {
+      "path": "src/errors.mjs",
+      "sha256": "0b86e3f370dd1d09205150248576be957abd24d72d31c45e4338a931e76117a2"
+    },
+    {
+      "path": "src/ids.mjs",
+      "sha256": "35df1409f3fd7a0ef006c7c24284b2076b0db908404bd939b35a90af9f7a7184"
+    },
+    {
+      "path": "src/journal.mjs",
+      "sha256": "17ba1e49a9fc8072e540e4a1f0c55ad7228566c621b752f54940e3238cbaa5fe"
+    },
+    {
+      "path": "src/state-machine.mjs",
+      "sha256": "d8aa80ba15b7c432df1a8940bb2f36039f9029c126a4ad9e1e3350ea4ac8de69"
+    },
+    {
+      "path": "src/storage/memory-store.mjs",
+      "sha256": "8527c5f67b6acb3b89790a74e3a7073c84a83ab15a535558dc65c6c7bd94f16a"
+    },
+    {
+      "path": "src/storage/observation-store.mjs",
+      "sha256": "1fe2190b163069c694de742b2dbdf3fa1fdca0813b9af20f7c82bf4884d33568"
+    },
+    {
+      "path": "tests/canonical-json.test.mjs",
+      "sha256": "1e15111eb2af2b1777f62bc7ddf2e460d6977ec6e2c03865baeb83dba0566c63"
+    },
+    {
+      "path": "tests/clock-and-ids.test.mjs",
+      "sha256": "2eb9ab60aa4768c4189a06e71535e929f2361832318a7b0258ed93c9071cf44c"
+    },
+    {
+      "path": "tests/journal.test.mjs",
+      "sha256": "1f7cd51625dbe3b4d124da5896d5cc173f223977043c0931f03f64bfd8f28ca9"
+    },
+    {
+      "path": "tests/memory-store.test.mjs",
+      "sha256": "e227a64fc7307db970dafeaf5a9195be61ec6d025e5e55c2d51139fde20e34ae"
+    },
+    {
+      "path": "tests/state-machine.test.mjs",
+      "sha256": "d4089a63d87c3c98b8a7983560051a9d95d7ba95dff2d115e0e6eeb2cbc20de5"
     }
   ]
 }

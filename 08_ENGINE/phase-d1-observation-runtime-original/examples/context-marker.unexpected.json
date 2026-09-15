@@ -1,0 +1,14 @@
+{
+  "marker_schema_version": "0.1-draft",
+  "marker_id": "33333333-3333-4333-8333-333333333333",
+  "source": "participant",
+  "kind": "phenomenological",
+  "label": "unexpected_visual_salience",
+  "data": {
+    "free_text_present": true,
+    "intensity_self_rating": 6
+  },
+  "note": "The participant spontaneously reported that one presentation felt unusually salient.",
+  "interpretation_policy": "none_at_capture",
+  "projection_policy": "journal_only"
+}

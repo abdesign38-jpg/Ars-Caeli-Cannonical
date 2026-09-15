@@ -1,0 +1,25 @@
+{
+  "package": "AEON Phase D.1 Observation Runtime Foundation REVIEWED v2",
+  "baseline_commit": "b8b1a4eea2e9e5fc8e254b20340c8b3a66d367a2",
+  "checks": {
+    "json_parse": "pass",
+    "schema_self_validation": {
+      "status": "pass",
+      "count": 5
+    },
+    "canonical_ids_unique": "pass",
+    "python_reference_ast_parse": "pass",
+    "example_manifest_hashes": "pass",
+    "artifact_snapshot_hashes": "pass",
+    "package_canonicalization": "RFC8785-JCS",
+    "generated_cache_files": 0
+  },
+  "integration_not_claimed": [
+    "npm install / canonicalize package execution",
+    "Python rfc8785 package execution",
+    "repository integration",
+    "real-browser IndexedDB",
+    "GitHub Actions",
+    "D.1 closure"
+  ]
+}

@@ -1,0 +1,214 @@
+Implement AEON Phase D.1 — Observation Runtime Foundation v0.1.
+
+BASELINE:
+D.0 closure authority:
+b8b1a4eea2e9e5fc8e254b20340c8b3a66d367a2
+
+NEW MODULE:
+08_ENGINE/observation-runtime-v0.1/
+
+READ IN THIS ORDER:
+1. IMPLEMENTATION_SPEC_PHASE_D1_OBSERVATION_RUNTIME_v0.1.md
+2. ARCHITECTURE_DECISIONS_D1_v0.1.md
+3. docs/STATE_MACHINE.md
+4. docs/PERSISTENCE_AND_RECOVERY.md
+5. docs/OPEN_OBSERVATION_CHANNEL.md
+6. docs/ERROR_MODEL.md
+7. docs/SCIENTIFIC_BOUNDARIES.md
+8. docs/TEST_PLAN.md
+9. docs/CI_PLAN.md
+10. QA_CHECKLIST_PHASE_D1_v0.1.md
+11. reference/REFERENCE_API_SHAPE.md
+12. contracts/*
+13. examples/*
+
+DO NOT IMPLEMENT D.2.
+
+NON-NEGOTIABLE BOUNDARIES:
+- do not modify Sound Field behavior;
+- do not change compiled Pilot artifacts;
+- do not rewrite D.0 stable/draft schemas unless a separately reviewed D.0 defect is discovered;
+- no perceptual renderer;
+- no QUEST+;
+- no audio changes;
+- no automatic correctness in Behavioral Record;
+- no automatic symbolic interpretation.
+
+ARCHITECTURE:
+- browser-native ES modules;
+- append-only Journal is source of truth;
+- Response Series is projection;
+- IndexedDB is durable store;
+- MemoryStore mirrors the storage interface for core tests;
+- every state-changing command persists atomically;
+- optimistic Session revision blocks multi-tab overwrite;
+- every runtime load gets new runtime_epoch_id;
+- store performance.timeOrigin + performance.now per event;
+- valid RT cannot cross runtime epochs;
+- exact Probe/Trial/Stimuli are snapshotted by SHA-256;
+- export includes Session, Response Series, Journal, Artifact Snapshots and component hashes.
+
+STATE MACHINE:
+CREATED -> READY -> ARMED -> OBSERVING -> RESOLVED -> READY -> FINALIZED
+
+Abort-before-onset:
+ARMED -> RESOLVED -> record commit -> READY
+
+All attempts produce immutable history. Retry creates a new attempt.
+
+OPEN OBSERVATION CHANNEL:
+Implement CONTEXT_MARKER with:
+source:
+  participant | operator | runtime
+
+kind:
+  technical | environmental | phenomenological | procedural | unexpected
+
+Markers are JOURNAL ONLY.
+They never automatically become behavioral records, participant observations,
+derived metrics, or symbolic claims.
+
+PARTICIPANT OBSERVATIONS:
+D.1 must also support explicitly committing a stable-v0.1 participant observation
+to response_series.observations.
+
+RECOVERY:
+On startup replay Journal and compare materialized caches.
+
+If prior state:
+- ARMED -> journal recovery, abort-before-onset record
+- OBSERVING -> journal recovery, aborted record preserving onset
+- RESOLVED -> reconstruct and commit the already-captured resolution
+
+Do not invent cross-reload timing continuity.
+
+PERSISTENCE:
+IndexedDB:
+- sessions
+- events
+- artifacts
+- projections
+
+One logical command = one readwrite transaction across required stores.
+
+Before opening the transaction, finish hashing/validation/WebCrypto work.
+Inside the transaction, do not await unrelated async work; enqueue only IndexedDB requests/synchronous bookkeeping.
+Request strict durability where supported and record fallback capability.
+
+At Session creation, check/request StorageManager persistent storage and record persistent|best_effort|unavailable.
+
+Do not rely on unload/beforeunload for primary persistence.
+
+CONCURRENCY:
+Every command takes expectedRevision.
+Check revision inside transaction.
+Mismatch => SESSION_CONFLICT with zero writes.
+
+INPUT:
+Browser adapter:
+- keyboard
+- pointer
+- touch
+- first valid response wins
+- listener cleanup deterministic
+- no scoring
+
+HASHING:
+Use RFC 8785 / JCS for every content-addressed hash.
+- JavaScript: canonicalize 5.0.0
+- Python validation: rfc8785 0.1.4
+- UTF-8 canonical bytes -> SHA-256
+- add shared golden vectors for numbers, exponent forms, -0 policy, nesting and Unicode
+
+Do NOT maintain a second hand-written canonicalizer.
+
+Hashes = tamper evidence, not signatures.
+
+DEPENDENCIES:
+Production:
+canonicalize 5.0.0
+
+Dev:
+fake-indexeddb 6.2.5
+
+Python D.1 validation:
+rfc8785 0.1.4
+
+Pin exact versions and commit package-lock.json.
+
+TESTS:
+Implement the full TEST_PLAN.
+
+Especially:
+- invalid transition leaves zero side effects
+- answered / timeout / abort-before-onset / abort-after-onset
+- retries are append-only
+- epoch mismatch
+- restart recovery from ARMED / OBSERVING / RESOLVED
+- journal replay exactly recreates projection
+- context marker never projects
+- participant observation projects only to observations
+- no correctness in Behavioral Record
+- transaction failure is atomic
+- multi-tab revision conflict
+- artifact tamper
+- export tamper
+- D.0 JavaScript/Python conformance corpus
+- IndexedDBStore with fake-indexeddb
+
+DEVELOPMENT HARNESS:
+Allowed, but label:
+DEVELOPMENT HARNESS — NOT EXPERIMENT UI
+
+It should demonstrate:
+- create session
+- arm PG01
+- mark onset
+- capture response
+- add marker
+- reload/recovery
+- export/import
+- state/journal/projection inspection
+
+CI:
+Create:
+.github/workflows/aeon-observation-runtime-integrity.yml
+
+It must run:
+- D.1 schema/example validator
+- D.0 validator --examples
+- D.0 validator --check-report
+- D.0 full pytest
+- D.1 Node tests
+
+Use Python 3.12 and Node 24.
+
+BEFORE COMMIT:
+Run every D.1 test and D.0 dependency gate.
+
+ZERO-DIFF PROOFS:
+git diff -- 08_ENGINE/sound-field-v0.3
+git diff -- 08_ENGINE/experimental-protocol-model/v0.1/compiled
+git diff -- 08_ENGINE/experimental-protocol-model/v0.1/contracts
+
+The last command should be empty unless an explicitly reviewed D.0 change was
+separately authorized. For this implementation it is expected to be empty.
+
+REPORT:
+- commit SHA
+- all changed files
+- D.1 contract/example count
+- D.1 Node test count
+- D.0 Python test count
+- validation-report current yes/no
+- Sound Field diff
+- compiled diff
+- D.0 contract diff
+- deviations from spec and rationale
+
+Do not declare D.1 CLOSED from unit tests alone.
+
+D.1 closure also requires the browser harness recovery/export proof.
+
+Suggested commit:
+feat(observation-runtime): implement phase D1 foundation

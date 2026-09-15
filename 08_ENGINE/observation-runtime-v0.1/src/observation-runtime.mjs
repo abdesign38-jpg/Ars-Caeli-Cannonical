@@ -3,6 +3,7 @@ import { systemClock } from "./clock.mjs";
 import { createContextMarker } from "./context-marker.mjs";
 import { ObservationRuntimeError } from "./errors.mjs";
 import { createUuid } from "./ids.mjs";
+import { assertRecoverableSession, appendRecoveredRecord, replaySessionProjection } from "./recovery.mjs";
 import { createResponseSeries, applyJournalEvent } from "./response-series-projector.mjs";
 import { transition } from "./state-machine.mjs";
 import { MemoryStore } from "./storage/memory-store.mjs";
@@ -78,7 +79,7 @@ export class ObservationRuntime {
     return this.#transition(sessionId, expectedRevision, "startSession", null, { started_at: this.#clock.wallTimeRfc3339() });
   }
 
-  async armTrial({ sessionId, expectedRevision, probeId, trialId, timingPoint }) {
+  async armTrial({ sessionId, expectedRevision, probeId, trialId, timingPoint, displayContext = null }) {
     const refs = await this.#resolveTrialRefs(probeId, trialId);
     await this.#store.transact(sessionId, expectedRevision, (transaction) => {
       const result = transition(transaction.session.state, "armTrial");
@@ -90,7 +91,7 @@ export class ObservationRuntime {
         trialId,
         timingPoint,
         runtimeEpochId: this.#clock.runtimeEpochId(),
-        displayContext: null,
+        displayContext: clone(displayContext),
         integrity: {},
         refs,
         onset: null,
@@ -193,6 +194,32 @@ export class ObservationRuntime {
       const committed = transaction.appendEvent(event);
       transaction.session.last_event_seq = committed.seq;
       transaction.session.state = result.to;
+    });
+    return this.#store.loadSession(sessionId);
+  }
+
+  async resumeSession({ sessionId }) {
+    const current = await this.#store.loadSession(sessionId);
+    if (!current) throw new ObservationRuntimeError("SESSION_NOT_FOUND", `Session not found: ${sessionId}`);
+    assertRecoverableSession(current);
+    const events = await this.#store.listEvents(sessionId);
+    const newRuntimeEpochId = this.#clock.runtimeEpochId();
+    await this.#store.transact(sessionId, current.revision, (transaction) => {
+      const priorState = transaction.session.state;
+      const attempt = transaction.session.activeAttempt;
+      const priorRuntimeEpochId = attempt.runtimeEpochId;
+      transaction.setProjection(replaySessionProjection(transaction.session, events));
+      transaction.session.current_runtime_epoch_id = newRuntimeEpochId;
+      appendRecoveredRecord(transaction, {
+        session: transaction.session,
+        attempt,
+        priorState,
+        priorRuntimeEpochId,
+        newRuntimeEpochId,
+        eventFactory: (eventType, attemptId, payload) => this.#event(sessionId, eventType, attemptId, payload),
+        recordId: this.#uuid(),
+        recordedAt: this.#clock.wallTimeRfc3339(),
+      });
     });
     return this.#store.loadSession(sessionId);
   }

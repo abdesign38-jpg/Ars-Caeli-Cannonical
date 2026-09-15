@@ -1,7 +1,7 @@
 {
   "package": "AEON Phase D.1 Observation Runtime Foundation REVIEWED v2",
   "baseline_commit": "b8b1a4eea2e9e5fc8e254b20340c8b3a66d367a2",
-  "payload_file_count_excluding_manifest": 61,
+  "payload_file_count_excluding_manifest": 64,
   "files": [
     {
       "path": "ARCHITECTURE_DECISIONS_D1_v0.1.md",
@@ -181,7 +181,11 @@
     },
     {
       "path": "src/observation-runtime.mjs",
-      "sha256": "23b596b59d22102b1ab61b20dd036d38fa89c3606db7e0350ffd3bbd13a61e54"
+      "sha256": "0b973d979053a9e19b9765dcb93c78b1ce12615a6d1575ed680052cf158c57b0"
+    },
+    {
+      "path": "src/recovery.mjs",
+      "sha256": "f0d03cb3c888a7c225e966f4c7aa1d3c2c0c9b263b61c0c3c12d1470340f9447"
     },
     {
       "path": "src/response-series-projector.mjs",
@@ -242,6 +246,14 @@
     {
       "path": "tests/record-builder.test.mjs",
       "sha256": "631d965c05af112da2390339a40e35b91426f24b7cf988ff30f70745387705a3"
+    },
+    {
+      "path": "tests/recovery-observing-resolved.test.mjs",
+      "sha256": "f4f482543deab842a38ec4d095685d977bd6e70a8237d472efde3e4e7799d4b1"
+    },
+    {
+      "path": "tests/recovery.test.mjs",
+      "sha256": "aa97930c770725e47091524c15600ba6d102cb11440175362ed05d67de3cbd56"
     },
     {
       "path": "tests/state-machine.test.mjs",

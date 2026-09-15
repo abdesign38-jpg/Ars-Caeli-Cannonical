@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ars-caeli.local/contracts/observation-runtime/v0.1/artifact-snapshot.schema.json",
+  "title": "AEON D.1 ARTIFACT_SNAPSHOT",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "snapshot_schema_version",
+    "artifact_type",
+    "artifact_id",
+    "canonical_schema_id",
+    "sha256",
+    "document"
+  ],
+  "properties": {
+    "snapshot_schema_version": {
+      "const": "0.1-draft"
+    },
+    "artifact_type": {
+      "enum": [
+        "perceptual_stimulus",
+        "behavioral_probe",
+        "behavioral_trial"
+      ]
+    },
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical_schema_id": {
+      "type": "string",
+      "format": "uri"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "document": {
+      "type": "object"
+    }
+  }
+}

@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { ObservationRuntime } from "../src/observation-runtime.mjs";
+import { createArtifactProvider } from "../src/artifact-provider.mjs";
 import { MemoryStore } from "../src/storage/memory-store.mjs";
 
 const UUIDS = [
@@ -25,11 +26,17 @@ function makeRuntime() {
     performanceTimeOriginMs: () => 1000,
     runtimeEpochId: () => "11111111-1111-4111-8111-111111111111",
   };
-  const artifactProvider = {
-    async loadProbe(id) { return { artifact_id: id, sha256: "a".repeat(64) }; },
-    async loadTrial(id) { return { artifact_id: id, sha256: "b".repeat(64), stimulus_ids: ["stimulus-1"] }; },
-    async loadStimulus(id) { return { artifact_id: id, sha256: "c".repeat(64) }; },
-  };
+  const artifactProvider = createArtifactProvider({
+    async loadProbe(id) {
+      return { schema_version: "0.2-draft", probe_id: id, evidence_role: "experimental_operationalization", choices: [{ choice_id: "left" }, { choice_id: "right" }] };
+    },
+    async loadTrial(id) {
+      return { schema_version: "0.2-draft", trial_id: id, probe_id: "probe-1", presentations: [{ slot: 0 }, { slot: 1 }], stimulus_ids: ["stimulus-1"] };
+    },
+    async loadStimulus(id) {
+      return { schema_version: "0.2-draft", stimulus_id: id };
+    },
+  });
   return {
     store,
     runtime: new ObservationRuntime({ store, artifactProvider, clock, uuid: () => uuids.shift() }),
@@ -86,6 +93,7 @@ test("runs a canonical session command flow through the journal and projection",
   const record = (await store.loadProjection("session-1")).behavioral_records[0];
   assert.equal(record.reaction_time_ms, 750);
   assert.equal(record.evidence_role, "behavioral_measured");
+  assert.equal((await store.loadArtifactSnapshot(events[2].payload.probe_ref.sha256)).artifact_id, "probe-1");
 });
 
 test("context markers remain journal-only and participant observations project separately", async () => {

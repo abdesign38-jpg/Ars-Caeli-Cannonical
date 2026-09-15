@@ -18,4 +18,8 @@ export class ObservationStore {
   async loadProjection() {
     throw new Error("ObservationStore.loadProjection must be implemented by a storage adapter.");
   }
+
+  async loadArtifactSnapshot() {
+    throw new Error("ObservationStore.loadArtifactSnapshot must be implemented by a storage adapter.");
+  }
 }

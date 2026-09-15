@@ -56,3 +56,18 @@ test("failed callbacks do not commit staged state or journal events", async () =
   });
   assert.deepEqual(await store.listEvents("session-3"), []);
 });
+
+test("conflicting artifact snapshots fail before session commit", async () => {
+  const store = new MemoryStore();
+  const session = await store.createSession({ sessionId: "session-4", state: "CREATED" });
+  const snapshot = { snapshot_schema_version: "0.1-draft", artifact_type: "behavioral_probe", artifact_id: "probe-1", canonical_schema_id: "https://example.test/probe", sha256: "a".repeat(64), document: { value: 1 } };
+  await store.transact(session.sessionId, 0, (transaction) => transaction.saveArtifactSnapshot(snapshot));
+
+  await assert.rejects(() => store.transact(session.sessionId, 1, (transaction) => {
+    transaction.session.state = "READY";
+    transaction.saveArtifactSnapshot({ ...snapshot, document: { value: 2 } });
+  }), { code: "ARTIFACT_HASH_MISMATCH" });
+
+  assert.equal((await store.loadSession(session.sessionId)).state, "CREATED");
+  assert.equal((await store.loadSession(session.sessionId)).revision, 1);
+});

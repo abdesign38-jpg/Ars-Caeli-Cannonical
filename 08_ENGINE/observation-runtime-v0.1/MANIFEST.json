@@ -1,7 +1,7 @@
 {
   "package": "AEON Phase D.1 Observation Runtime Foundation REVIEWED v2",
   "baseline_commit": "b8b1a4eea2e9e5fc8e254b20340c8b3a66d367a2",
-  "payload_file_count_excluding_manifest": 56,
+  "payload_file_count_excluding_manifest": 61,
   "files": [
     {
       "path": "ARCHITECTURE_DECISIONS_D1_v0.1.md",
@@ -144,6 +144,10 @@
       "sha256": "9e167bf6f131463c790039f01de5bfe925f04436b18298f4b551a36b45b47a0d"
     },
     {
+      "path": "src/artifact-provider.mjs",
+      "sha256": "3688516027a43e8fcd6c5a75752c7be026147d0194a0044aa3d69cef85469885"
+    },
+    {
       "path": "src/behavioral-record-builder.mjs",
       "sha256": "ada39272ca589137b1f26dbafa92073e6b7d103083b66afed5c5d44b037a384d"
     },
@@ -160,6 +164,10 @@
       "sha256": "1fdedb7ea7ccf035fd5f8add4cca6d24495ef8e4cd5dc994f754ef24fff520b1"
     },
     {
+      "path": "src/d0-runtime-guards.mjs",
+      "sha256": "706e3771c6053b6be50f2c6cf296c2767b8df68f1067e66661a6e07f18f7e19b"
+    },
+    {
       "path": "src/errors.mjs",
       "sha256": "0b86e3f370dd1d09205150248576be957abd24d72d31c45e4338a931e76117a2"
     },
@@ -173,7 +181,7 @@
     },
     {
       "path": "src/observation-runtime.mjs",
-      "sha256": "6e455f9cd1dda63da810f524a8c21323cf5e4495d143ce9558e7df5a581219d8"
+      "sha256": "23b596b59d22102b1ab61b20dd036d38fa89c3606db7e0350ffd3bbd13a61e54"
     },
     {
       "path": "src/response-series-projector.mjs",
@@ -184,12 +192,20 @@
       "sha256": "d8aa80ba15b7c432df1a8940bb2f36039f9029c126a4ad9e1e3350ea4ac8de69"
     },
     {
+      "path": "src/storage/indexeddb-store.mjs",
+      "sha256": "41d4a41cbd7eca70f5df8efc9f2e9d890251060fb128fe4ae508ce6c908481eb"
+    },
+    {
       "path": "src/storage/memory-store.mjs",
-      "sha256": "8527c5f67b6acb3b89790a74e3a7073c84a83ab15a535558dc65c6c7bd94f16a"
+      "sha256": "6ccfd70a57880a8d42863ab09b76e267e458d6a021c190b3d9edd56942fa645b"
     },
     {
       "path": "src/storage/observation-store.mjs",
-      "sha256": "1fe2190b163069c694de742b2dbdf3fa1fdca0813b9af20f7c82bf4884d33568"
+      "sha256": "2ff1981c3777f9a2b82cb162eb3e644666ffcc7c777e94f7565b2b7bb62bedb7"
+    },
+    {
+      "path": "tests/artifact-provider.test.mjs",
+      "sha256": "609ef25af31ffe76a9da35c8dd266b8278cefc6f35f429fa74a31566b65df3aa"
     },
     {
       "path": "tests/canonical-json.test.mjs",
@@ -204,16 +220,20 @@
       "sha256": "316ed59eff166b43041c0736a060ed20250028f5ddf5d7aae84c1fdc99326462"
     },
     {
+      "path": "tests/indexeddb-store.test.mjs",
+      "sha256": "63214c3dede93d3834847836240caf85379116610fa8083f11cadbadfefcf43d"
+    },
+    {
       "path": "tests/journal.test.mjs",
       "sha256": "120c1992bfd8ad0672a9b0d872cd8e933ac32a2632f9df42a7c1da4ae43dfde7"
     },
     {
       "path": "tests/memory-store.test.mjs",
-      "sha256": "d7743ad165ea826be6ce88b66ac2749e6ce3c5992cb022f87bc5edaeba7b6d0b"
+      "sha256": "97dd633e730b5132d087c888f519de7e65d2b1b371dcf41d9e9786f833a04e9e"
     },
     {
       "path": "tests/observation-runtime.test.mjs",
-      "sha256": "a405f2954c1414e1eec3a487222d6fed56d868fcb39a6ce686472d363be97aec"
+      "sha256": "a6c4861b8e0afeb4084739c7e07b89b99b3c1be23c769bc1051d5d6903289bcc"
     },
     {
       "path": "tests/projector.test.mjs",

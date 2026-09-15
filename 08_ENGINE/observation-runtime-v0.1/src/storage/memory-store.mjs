@@ -8,6 +8,7 @@ function clone(value) {
 
 export class MemoryStore extends ObservationStore {
   #sessions = new Map();
+  #artifacts = new Map();
 
   async createSession(session) {
     if (!session?.sessionId) {
@@ -38,6 +39,11 @@ export class MemoryStore extends ObservationStore {
     return projection === undefined ? null : clone(projection);
   }
 
+  async loadArtifactSnapshot(sha256) {
+    const snapshot = this.#artifacts.get(sha256);
+    return snapshot ? clone(snapshot) : null;
+  }
+
   async transact(sessionId, expectedRevision, callback) {
     const current = this.#sessions.get(sessionId);
     if (!current) {
@@ -56,6 +62,7 @@ export class MemoryStore extends ObservationStore {
       session: clone(current.session),
       journal: current.journal.clone(),
       projection: current.projection === null ? null : clone(current.projection),
+      artifacts: new Map(),
     };
     const transaction = {
       session: draft.session,
@@ -65,11 +72,26 @@ export class MemoryStore extends ObservationStore {
       setProjection: (projection) => {
         draft.projection = clone(projection);
       },
+      saveArtifactSnapshot: (snapshot) => {
+        if (!snapshot?.sha256 || !snapshot.document) {
+          throw new ObservationRuntimeError("ARTIFACT_INVALID", "Artifact snapshots require a hash and document.");
+        }
+        draft.artifacts.set(snapshot.sha256, clone(snapshot));
+      },
     };
 
     const result = await callback(transaction);
+    for (const [sha256, snapshot] of draft.artifacts) {
+      const existing = this.#artifacts.get(sha256);
+      if (existing && JSON.stringify(existing) !== JSON.stringify(snapshot)) {
+        throw new ObservationRuntimeError("ARTIFACT_HASH_MISMATCH", `Conflicting artifact snapshot: ${sha256}`);
+      }
+    }
     draft.session.revision += 1;
     this.#sessions.set(sessionId, draft);
+    for (const [sha256, snapshot] of draft.artifacts) {
+      this.#artifacts.set(sha256, snapshot);
+    }
     return result ?? clone(draft.session);
   }
 }

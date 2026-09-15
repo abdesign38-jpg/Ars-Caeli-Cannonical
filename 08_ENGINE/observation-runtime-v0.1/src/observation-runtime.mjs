@@ -100,6 +100,7 @@ export class ObservationRuntime {
       transaction.session.attemptOrdinal = attempt.attemptOrdinal;
       transaction.session.current_attempt_id = attemptId;
       transaction.session.activeAttempt = attempt;
+      for (const snapshot of refs.snapshots) transaction.saveArtifactSnapshot(snapshot);
       const event = this.#event(sessionId, result.event, attemptId, {
         attempt_ordinal: attempt.attemptOrdinal,
         timing_point: timingPoint,
@@ -248,6 +249,7 @@ export class ObservationRuntime {
       probe_ref: ref(probe, "behavioral_probe", probeId),
       trial_ref: ref(trial, "behavioral_trial", trialId),
       stimulus_refs: stimuli.map((stimulus, index) => ref(stimulus, "perceptual_stimulus", trial.stimulus_ids[index])),
+      snapshots: [probe, trial, ...stimuli],
     };
   }
 

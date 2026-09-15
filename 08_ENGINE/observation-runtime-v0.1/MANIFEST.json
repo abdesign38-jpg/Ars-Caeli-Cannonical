@@ -1,7 +1,7 @@
 {
   "package": "AEON Phase D.1 Observation Runtime Foundation REVIEWED v2",
   "baseline_commit": "b8b1a4eea2e9e5fc8e254b20340c8b3a66d367a2",
-  "payload_file_count_excluding_manifest": 48,
+  "payload_file_count_excluding_manifest": 54,
   "files": [
     {
       "path": "ARCHITECTURE_DECISIONS_D1_v0.1.md",
@@ -144,12 +144,20 @@
       "sha256": "9e167bf6f131463c790039f01de5bfe925f04436b18298f4b551a36b45b47a0d"
     },
     {
+      "path": "src/behavioral-record-builder.mjs",
+      "sha256": "ada39272ca589137b1f26dbafa92073e6b7d103083b66afed5c5d44b037a384d"
+    },
+    {
       "path": "src/canonical-json.mjs",
       "sha256": "f9c1be4c6a88e160c4a5535590ebe8ed2c94945b955b92ad93a63f41e51814e3"
     },
     {
       "path": "src/clock.mjs",
       "sha256": "4824a94135853c223e885c750749f903ea47f5cefb9e579012825874060078f2"
+    },
+    {
+      "path": "src/context-marker.mjs",
+      "sha256": "1fdedb7ea7ccf035fd5f8add4cca6d24495ef8e4cd5dc994f754ef24fff520b1"
     },
     {
       "path": "src/errors.mjs",
@@ -162,6 +170,10 @@
     {
       "path": "src/journal.mjs",
       "sha256": "17ba1e49a9fc8072e540e4a1f0c55ad7228566c621b752f54940e3238cbaa5fe"
+    },
+    {
+      "path": "src/response-series-projector.mjs",
+      "sha256": "4168a7ed2f6b9a79e7271c86501969bb235722a29bd994ef5315644a0daade1e"
     },
     {
       "path": "src/state-machine.mjs",
@@ -184,12 +196,24 @@
       "sha256": "2eb9ab60aa4768c4189a06e71535e929f2361832318a7b0258ed93c9071cf44c"
     },
     {
+      "path": "tests/context-marker.test.mjs",
+      "sha256": "316ed59eff166b43041c0736a060ed20250028f5ddf5d7aae84c1fdc99326462"
+    },
+    {
       "path": "tests/journal.test.mjs",
       "sha256": "1f7cd51625dbe3b4d124da5896d5cc173f223977043c0931f03f64bfd8f28ca9"
     },
     {
       "path": "tests/memory-store.test.mjs",
       "sha256": "e227a64fc7307db970dafeaf5a9195be61ec6d025e5e55c2d51139fde20e34ae"
+    },
+    {
+      "path": "tests/projector.test.mjs",
+      "sha256": "c59405e36b3368e375d306cec6bec9e88519ce988b62c0f53148814a2911846e"
+    },
+    {
+      "path": "tests/record-builder.test.mjs",
+      "sha256": "631d965c05af112da2390339a40e35b91426f24b7cf988ff30f70745387705a3"
     },
     {
       "path": "tests/state-machine.test.mjs",

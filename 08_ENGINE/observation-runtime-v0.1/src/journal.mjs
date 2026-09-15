@@ -17,26 +17,26 @@ export class Journal {
   }
 
   append(event) {
-    if (!event || typeof event !== "object" || !event.eventId || !event.type) {
+    if (!event || typeof event !== "object" || !event.event_id || !event.event_type) {
       throw new ObservationRuntimeError(
         "EVENT_INVALID",
-        "Journal events require eventId and type.",
+        "Journal events require event_id and event_type.",
       );
     }
-    if (this.#eventIds.has(event.eventId)) {
+    if (this.#eventIds.has(event.event_id)) {
       throw new ObservationRuntimeError(
         "DUPLICATE_RECORD_COMMIT",
-        `Duplicate journal event: ${event.eventId}`,
-        { eventId: event.eventId },
+        `Duplicate journal event: ${event.event_id}`,
+        { event_id: event.event_id },
       );
     }
 
     const committed = Object.freeze({
       ...clone(event),
-      seq: this.#events.length + 1,
+      seq: this.#events.length,
     });
     this.#events.push(committed);
-    this.#eventIds.add(event.eventId);
+    this.#eventIds.add(event.event_id);
     return clone(committed);
   }
 

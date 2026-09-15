@@ -10,7 +10,7 @@ test("memory store commits session, journal, and projection atomically", async (
 
   await store.transact(session.sessionId, session.revision, (transaction) => {
     transaction.session.state = "READY";
-    transaction.appendEvent({ eventId: "evt-1", type: "session_started" });
+    transaction.appendEvent({ event_id: "evt-1", event_type: "session_started" });
     transaction.setProjection({ observations: [] });
   });
 
@@ -19,8 +19,8 @@ test("memory store commits session, journal, and projection atomically", async (
     state: "READY",
     revision: 1,
   });
-  assert.deepEqual((await store.listEvents("session-1")).map(({ type, seq }) => ({ type, seq })), [
-    { type: "session_started", seq: 1 },
+  assert.deepEqual((await store.listEvents("session-1")).map(({ event_type, seq }) => ({ event_type, seq })), [
+    { event_type: "session_started", seq: 0 },
   ]);
   assert.deepEqual(await store.loadProjection("session-1"), { observations: [] });
 });
@@ -45,7 +45,7 @@ test("failed callbacks do not commit staged state or journal events", async () =
 
   await assert.rejects(() => store.transact(session.sessionId, 0, (transaction) => {
     transaction.session.state = "READY";
-    transaction.appendEvent({ eventId: "evt-failed", type: "session_started" });
+    transaction.appendEvent({ event_id: "evt-failed", event_type: "session_started" });
     throw new Error("transaction failed");
   }), /transaction failed/);
 

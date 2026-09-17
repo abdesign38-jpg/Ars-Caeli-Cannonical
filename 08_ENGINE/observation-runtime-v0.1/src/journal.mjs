@@ -1,4 +1,5 @@
 import { ObservationRuntimeError } from "./errors.mjs";
+import { validateRuntimeEvent } from "./runtime-event-validator.mjs";
 
 function clone(value) {
   return structuredClone(value);
@@ -35,6 +36,7 @@ export class Journal {
       ...clone(event),
       seq: this.#events.length,
     });
+    validateRuntimeEvent(committed);
     this.#events.push(committed);
     this.#eventIds.add(event.event_id);
     return clone(committed);

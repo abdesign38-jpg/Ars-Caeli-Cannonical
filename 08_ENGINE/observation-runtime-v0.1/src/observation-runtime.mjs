@@ -5,6 +5,7 @@ import { ObservationRuntimeError } from "./errors.mjs";
 import { createUuid } from "./ids.mjs";
 import { assertRecoverableSession, appendRecoveredRecord, replaySessionProjection } from "./recovery.mjs";
 import { createResponseSeries, applyJournalEvent } from "./response-series-projector.mjs";
+import { canonicalizeJson } from "./canonical-json.mjs";
 import { transition } from "./state-machine.mjs";
 import { MemoryStore } from "./storage/memory-store.mjs";
 
@@ -198,6 +199,54 @@ export class ObservationRuntime {
     return this.#store.loadSession(sessionId);
   }
 
+  async flagIntegrity({ sessionId, expectedRevision, attemptId, dimension, status, reason }) {
+    const dimensions = {
+      perceptual_stimulus_integrity: "perceptualStimulus",
+      response_input_integrity: "responseInput",
+      timing_integrity: "timing",
+    };
+    if (!dimensions[dimension] || !["INVALID", "UNKNOWN"].includes(status) || typeof reason !== "string" || reason.length === 0) {
+      throw new ObservationRuntimeError("INTEGRITY_INVALID", "Integrity flags require a supported dimension, status, and reason.");
+    }
+    await this.#store.transact(sessionId, expectedRevision, (transaction) => {
+      transition(transaction.session.state, "flagIntegrity");
+      const attempt = this.#requireAttempt(transaction.session, attemptId);
+      attempt.integrity ??= {};
+      attempt.integrity[dimensions[dimension]] = status;
+      attempt.integrity.reasons = [...new Set([...(attempt.integrity.reasons ?? []), reason])];
+      const event = this.#event(sessionId, "integrity_flagged", attemptId, { dimension, status, reason });
+      transaction.appendEvent(event);
+      transaction.session.last_event_seq = event.seq;
+    });
+    return this.#store.loadSession(sessionId);
+  }
+
+  async finalizeSession({ sessionId, expectedRevision }) {
+    const projection = await this.#store.loadProjection(sessionId);
+    if (!projection) throw new ObservationRuntimeError("PROJECTION_DIVERGENCE", "Cannot finalize without a response-series projection.");
+    const responseSeriesSha256 = await this.#sha256(projection);
+    await this.#store.transact(sessionId, expectedRevision, (transaction) => {
+      const result = transition(transaction.session.state, "finalizeSession");
+      const event = this.#event(sessionId, result.event, null, { response_series_sha256: responseSeriesSha256 });
+      transaction.appendEvent(event);
+      transaction.session.state = result.to;
+      transaction.session.finalized_at = this.#clock.wallTimeRfc3339();
+      transaction.session.last_event_seq = event.seq;
+    });
+    return this.#store.loadSession(sessionId);
+  }
+
+  async abortSession({ sessionId, expectedRevision, reason = "session_aborted" }) {
+    await this.#store.transact(sessionId, expectedRevision, (transaction) => {
+      const result = transition(transaction.session.state, "abortSession");
+      const event = this.#event(sessionId, result.event, null, { reason });
+      transaction.appendEvent(event);
+      transaction.session.state = result.to;
+      transaction.session.last_event_seq = event.seq;
+    });
+    return this.#store.loadSession(sessionId);
+  }
+
   async resumeSession({ sessionId }) {
     const current = await this.#store.loadSession(sessionId);
     if (!current) throw new ObservationRuntimeError("SESSION_NOT_FOUND", `Session not found: ${sessionId}`);
@@ -269,13 +318,15 @@ export class ObservationRuntime {
     const probe = await this.#artifactProvider.loadProbe(probeId);
     const trial = await this.#artifactProvider.loadTrial(trialId);
     if (!probe || !trial) throw new ObservationRuntimeError("ARTIFACT_NOT_FOUND", "Probe or trial was not found.");
-    const stimuli = await Promise.all((trial.stimulus_ids ?? []).map((id) => this.#artifactProvider.loadStimulus(id)));
+    const trialDocument = trial.document ?? trial;
+    const stimulusIds = trialDocument.stimulus_ids ?? trialDocument.presentations?.map((presentation) => presentation.stimulus_ref) ?? [];
+    const stimuli = await Promise.all(stimulusIds.map((id) => this.#artifactProvider.loadStimulus(id)));
     if (stimuli.some((stimulus) => !stimulus)) throw new ObservationRuntimeError("ARTIFACT_NOT_FOUND", "A referenced stimulus was not found.");
     const ref = (artifact, artifactType, fallbackId) => ({ artifact_type: artifactType, artifact_id: artifact.artifact_id ?? fallbackId, sha256: artifact.sha256 });
     return {
       probe_ref: ref(probe, "behavioral_probe", probeId),
       trial_ref: ref(trial, "behavioral_trial", trialId),
-      stimulus_refs: stimuli.map((stimulus, index) => ref(stimulus, "perceptual_stimulus", trial.stimulus_ids[index])),
+      stimulus_refs: stimuli.map((stimulus, index) => ref(stimulus, "perceptual_stimulus", stimulusIds[index])),
       snapshots: [probe, trial, ...stimuli],
     };
   }
@@ -293,5 +344,12 @@ export class ObservationRuntime {
       attempt_id: attemptId,
       payload,
     };
+  }
+
+  async #sha256(value) {
+    if (!globalThis.crypto?.subtle) throw new ObservationRuntimeError("HASHING_UNAVAILABLE", "WebCrypto SHA-256 is required.");
+    const bytes = new TextEncoder().encode(canonicalizeJson(value));
+    const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
+    return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
   }
 }

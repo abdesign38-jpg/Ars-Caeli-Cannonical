@@ -10,7 +10,7 @@ test("memory store commits session, journal, and projection atomically", async (
 
   await store.transact(session.sessionId, session.revision, (transaction) => {
     transaction.session.state = "READY";
-    transaction.appendEvent({ event_id: "evt-1", event_type: "session_started" });
+    transaction.appendEvent({ event_schema_version: "0.1-draft", event_id: "11111111-1111-4111-8111-111111111111", session_id: "session-1", event_type: "session_started", wall_time: "2026-09-15T12:00:00Z", runtime_epoch_id: "22222222-2222-4222-8222-222222222222", performance_time_origin_ms: 1, monotonic_ms: 1, attempt_id: null, payload: { started_at: "2026-09-15T12:00:00Z" } });
     transaction.setProjection({ observations: [] });
   });
 
@@ -45,7 +45,7 @@ test("failed callbacks do not commit staged state or journal events", async () =
 
   await assert.rejects(() => store.transact(session.sessionId, 0, (transaction) => {
     transaction.session.state = "READY";
-    transaction.appendEvent({ event_id: "evt-failed", event_type: "session_started" });
+    transaction.appendEvent({ event_schema_version: "0.1-draft", event_id: "33333333-3333-4333-8333-333333333333", session_id: "session-3", event_type: "session_started", wall_time: "2026-09-15T12:00:00Z", runtime_epoch_id: "44444444-4444-4444-8444-444444444444", performance_time_origin_ms: 1, monotonic_ms: 1, attempt_id: null, payload: { started_at: "2026-09-15T12:00:00Z" } });
     throw new Error("transaction failed");
   }), /transaction failed/);
 

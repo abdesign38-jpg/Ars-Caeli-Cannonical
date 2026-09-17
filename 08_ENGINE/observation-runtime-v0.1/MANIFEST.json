@@ -1,7 +1,7 @@
 {
   "package": "AEON Phase D.1 Observation Runtime Foundation REVIEWED v2",
   "baseline_commit": "b8b1a4eea2e9e5fc8e254b20340c8b3a66d367a2",
-  "payload_file_count_excluding_manifest": 64,
+  "payload_file_count_excluding_manifest": 67,
   "files": [
     {
       "path": "ARCHITECTURE_DECISIONS_D1_v0.1.md",
@@ -177,11 +177,11 @@
     },
     {
       "path": "src/journal.mjs",
-      "sha256": "b23fa0536751845ee0f297b5749ab957516b4a0bc9e3fac90cf89b31f4471640"
+      "sha256": "f97b662387b18b50370f29e77ecfa3eaf43626589a3a371f99d4a69e04f788d0"
     },
     {
       "path": "src/observation-runtime.mjs",
-      "sha256": "0b973d979053a9e19b9765dcb93c78b1ce12615a6d1575ed680052cf158c57b0"
+      "sha256": "fd230b2376818fb3c5416942901f5080a959734b2c43b2b30ebdbf43e6d90f41"
     },
     {
       "path": "src/recovery.mjs",
@@ -190,6 +190,10 @@
     {
       "path": "src/response-series-projector.mjs",
       "sha256": "4168a7ed2f6b9a79e7271c86501969bb235722a29bd994ef5315644a0daade1e"
+    },
+    {
+      "path": "src/runtime-event-validator.mjs",
+      "sha256": "63dd8f1d1e74d0cb39000a7c960b9bd196ccab708fa5e22e38de670b41184a05"
     },
     {
       "path": "src/state-machine.mjs",
@@ -209,7 +213,7 @@
     },
     {
       "path": "tests/artifact-provider.test.mjs",
-      "sha256": "609ef25af31ffe76a9da35c8dd266b8278cefc6f35f429fa74a31566b65df3aa"
+      "sha256": "fefad3ae9de74ae60eb734e3946d4ae460ef07690c9cf75053f105804819de50"
     },
     {
       "path": "tests/canonical-json.test.mjs",
@@ -228,12 +232,16 @@
       "sha256": "63214c3dede93d3834847836240caf85379116610fa8083f11cadbadfefcf43d"
     },
     {
+      "path": "tests/integrity-terminal.test.mjs",
+      "sha256": "ac5f64e52582d5f0b6b6bc15f60bb50ec29adcf3e7e9834a572220b026f366bf"
+    },
+    {
       "path": "tests/journal.test.mjs",
-      "sha256": "120c1992bfd8ad0672a9b0d872cd8e933ac32a2632f9df42a7c1da4ae43dfde7"
+      "sha256": "26b5bd4829204068033fd7e1f77f4d8a0953cbc8c5876c7329107a16b91e549a"
     },
     {
       "path": "tests/memory-store.test.mjs",
-      "sha256": "97dd633e730b5132d087c888f519de7e65d2b1b371dcf41d9e9786f833a04e9e"
+      "sha256": "764543bdc01bada865e345b7946b642804cf6d5da63164bdd936bb843b2f5133"
     },
     {
       "path": "tests/observation-runtime.test.mjs",
@@ -254,6 +262,10 @@
     {
       "path": "tests/recovery.test.mjs",
       "sha256": "aa97930c770725e47091524c15600ba6d102cb11440175362ed05d67de3cbd56"
+    },
+    {
+      "path": "tests/runtime-event-validator.test.mjs",
+      "sha256": "c95b3e19ffc6971c3498f0e6103c2c75cadb81d9e233c303700fb1e2f0b12938"
     },
     {
       "path": "tests/state-machine.test.mjs",

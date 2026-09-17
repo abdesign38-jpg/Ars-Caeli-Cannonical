@@ -44,3 +44,19 @@ test("rejects unsupported versions and stale supplied hashes", async () => {
     { code: "ARTIFACT_HASH_MISMATCH" },
   );
 });
+
+test("preserves wrapped Trial documents for stimulus resolution", async () => {
+  const wrapped = createArtifactProvider({
+    loadTrial: async () => ({
+      document: {
+        schema_version: "0.2-draft",
+        trial_id: "trial-wrapped",
+        probe_id: "probe-1",
+        presentations: [{ slot: 0, stimulus_ref: "stimulus-a" }, { slot: 1, stimulus_ref: "stimulus-b" }],
+      },
+    }),
+  });
+  const artifact = await wrapped.loadTrial("trial-wrapped");
+  assert.equal(artifact.document.presentations[1].stimulus_ref, "stimulus-b");
+  assert.match(artifact.sha256, /^[0-9a-f]{64}$/);
+});

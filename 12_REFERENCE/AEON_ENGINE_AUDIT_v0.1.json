@@ -1,0 +1,413 @@
+{
+  "document": {
+    "id": "AEON_ENGINE_AUDIT_v0.1",
+    "kind": "audit",
+    "date": "2026-09-17",
+    "status": "inspection_complete",
+    "guardrail": "No production files were modified. This is an inspection-only report.",
+    "repository": {
+      "branch": "main",
+      "head_sha": "31a12051ead342655c5975b961d670f4df85f436",
+      "worktree_clean": true,
+      "git_status": "clean",
+      "file_count": 1013,
+      "engine_file_count": 182
+    }
+  },
+  "baseline_summary": {
+    "system_description": "The repo currently exposes multiple bounded engine surfaces rather than one monolithic generation engine.",
+    "surfaces": [
+      "experimental protocol model validation layer",
+      "browser Sound Field runtime",
+      "D.1 observation journal runtime",
+      "ATLAS memory archive"
+    ]
+  },
+  "inventory": [
+    {
+      "path": "08_ENGINE/experimental-protocol-model/v0.1",
+      "role": "Contract-first protocol specification and validation layer for Pilot 01.",
+      "runtime_status": "Active validation layer; not the primary browser execution engine.",
+      "inputs": [
+        "JSON contracts",
+        "example stimulus conditions",
+        "protocol examples",
+        "compiled condition and protocol artifacts"
+      ],
+      "outputs": [
+        "schema validation reports",
+        "compiled executable protocol data",
+        "validation status"
+      ],
+      "dependencies": [
+        "contracts",
+        "examples",
+        "validator logic",
+        "measurement adapters"
+      ],
+      "consumers": [
+        "Sound Field runtime",
+        "future experiment tooling",
+        "CI validation jobs"
+      ],
+      "generation_relevance": "High",
+      "control_type": "validation / deterministic protocol specification",
+      "evidence_code": "OBSERVED IN CODE",
+      "notes": "The README explicitly states that D.0 is validation-only infrastructure, and the compiled artifacts are treated as the authority behind the browser runtime."
+    },
+    {
+      "path": "08_ENGINE/experimental-protocol-model/v0.1/compiled",
+      "role": "Executable Pilot 01 condition and protocol data consumed by the browser runtime.",
+      "runtime_status": "Active data source for runtime verification.",
+      "inputs": [
+        "protocol JSON",
+        "condition JSON"
+      ],
+      "outputs": [
+        "fingerprinted validated conditions",
+        "protocol metadata"
+      ],
+      "dependencies": [
+        "protocol runtime policy",
+        "condition sequence contracts"
+      ],
+      "consumers": [
+        "08_ENGINE/sound-field-v0.3/protocol-runtime.js",
+        "browser protocol tests"
+      ],
+      "generation_relevance": "High",
+      "control_type": "artifact validation / deterministic execution contract",
+      "evidence_code": "OBSERVED IN CODE",
+      "notes": "The runtime validates executable state, checks runtime policy, fingerprints conditions, and rejects mismatches."
+    },
+    {
+      "path": "08_ENGINE/sound-field-v0.3/app.js",
+      "role": "Primary browser UI and execution surface for the session experience.",
+      "runtime_status": "Active experimental browser runtime; not canonical doctrine.",
+      "inputs": [
+        "mappings.json",
+        "compiled protocol artifacts",
+        "user session state",
+        "UI controls"
+      ],
+      "outputs": [
+        "audio rendering",
+        "timing state",
+        "field visualization",
+        "local session storage",
+        "ATLAS export metadata"
+      ],
+      "dependencies": [
+        "index.html",
+        "styles.css",
+        "protocol-runtime.js",
+        "mappings.json",
+        "Web Audio API"
+      ],
+      "consumers": [
+        "end-user session interactions",
+        "browser smoke harness",
+        "ATLAS export functions"
+      ],
+      "generation_relevance": "High for user-facing orchestration; low as canonical doctrine",
+      "control_type": "browser execution / UI / session orchestration",
+      "evidence_code": "OBSERVED IN CODE",
+      "notes": "The module manifest labels the runtime as experimental and says the protocol runtime authority is the compiled AEON Pilot 01 artifacts."
+    },
+    {
+      "path": "08_ENGINE/sound-field-v0.3/protocol-runtime.js",
+      "role": "Runtime validator and execution helper for compiled protocol artifacts.",
+      "runtime_status": "Active and tested.",
+      "inputs": [
+        "compiled protocol JSON",
+        "compiled condition JSON"
+      ],
+      "outputs": [
+        "state gating",
+        "schedule checks",
+        "integrity decisions",
+        "telemetry classification",
+        "deterministic gate scheduling"
+      ],
+      "dependencies": [
+        "window.crypto.subtle",
+        "canonical JSON handling",
+        "compiled artifacts"
+      ],
+      "consumers": [
+        "app.js",
+        "sound-field-v0.3/tests"
+      ],
+      "generation_relevance": "Medium-high",
+      "control_type": "execution gate / integrity guard",
+      "evidence_code": "OBSERVED IN CODE",
+      "notes": "This file explicitly implements integrity dispositions such as ABORT_CONDITION for stimulus integrity and CONTINUE_STIMULUS for telemetry integrity."
+    },
+    {
+      "path": "08_ENGINE/sound-field-v0.3/mappings.json",
+      "role": "Symbolic and operational mapping definitions for fields, signal layers, dimensions, and phase parameters.",
+      "runtime_status": "Active configuration source.",
+      "inputs": [
+        "field dimension names",
+        "signal layer metadata",
+        "phase signal metadata"
+      ],
+      "outputs": [
+        "UI state mapping",
+        "runtime signal definitions"
+      ],
+      "dependencies": [
+        "UI state",
+        "runtime values"
+      ],
+      "consumers": [
+        "app.js",
+        "rendering",
+        "signal plan updates"
+      ],
+      "generation_relevance": "Medium",
+      "control_type": "configuration mapping",
+      "evidence_code": "OBSERVED IN CODE",
+      "notes": "The manifest explicitly labels time, entropy, and symbolic mappings as experimental non-canonical."
+    },
+    {
+      "path": "08_ENGINE/observation-runtime-v0.1/src/observation-runtime.mjs",
+      "role": "Canonical D.1 session runtime facade and state machine entrypoint.",
+      "runtime_status": "Active and validated.",
+      "inputs": [
+        "session metadata",
+        "trial/probe/stimulus references",
+        "clock",
+        "artifact provider",
+        "storage backend"
+      ],
+      "outputs": [
+        "journal events",
+        "projection updates",
+        "session lifecycle transitions",
+        "export bundles",
+        "recovery actions"
+      ],
+      "dependencies": [
+        "memory/indexeddb storage",
+        "state-machine logic",
+        "recovery logic",
+        "artifact provider",
+        "exporter",
+        "canonical JSON helper",
+        "response-series projector"
+      ],
+      "consumers": [
+        "runtime callers",
+        "tests",
+        "future integration layers"
+      ],
+      "generation_relevance": "High",
+      "control_type": "state-transition runtime / event-sourced session engine",
+      "evidence_code": "OBSERVED IN CODE",
+      "notes": "The facade exposes createSession, startSession, armTrial, markStimulusOnset, captureChoice, commitResolvedAttempt, finalizeSession, abortSession, exportSession, resumeSession, and integrity flagging."
+    },
+    {
+      "path": "08_ENGINE/observation-runtime-v0.1/src/state-machine.mjs",
+      "role": "Defines normative transitions and terminal state rules.",
+      "runtime_status": "Active and tested.",
+      "inputs": [
+        "current state",
+        "command"
+      ],
+      "outputs": [
+        "event",
+        "target state",
+        "validity decisions"
+      ],
+      "dependencies": [
+        "runtime journal",
+        "session state"
+      ],
+      "consumers": [
+        "observation-runtime.mjs",
+        "state-machine tests"
+      ],
+      "generation_relevance": "High",
+      "control_type": "state validation / transition guard",
+      "evidence_code": "OBSERVED IN CODE",
+      "notes": "This layer enforces the canonical state set and rejects invalid transitions with typed runtime errors."
+    },
+    {
+      "path": "08_ENGINE/observation-runtime-v0.1/src/recovery.mjs",
+      "role": "Recovery and resume logic for incomplete or interrupted attempts.",
+      "runtime_status": "Active and tested.",
+      "inputs": [
+        "session state",
+        "event journal",
+        "projection state"
+      ],
+      "outputs": [
+        "recoverable session disposition",
+        "replay and resume actions"
+      ],
+      "dependencies": [
+        "journal",
+        "state machine"
+      ],
+      "consumers": [
+        "observation-runtime.mjs",
+        "recovery tests"
+      ],
+      "generation_relevance": "High",
+      "control_type": "recovery / resume logic",
+      "evidence_code": "OBSERVED IN CODE",
+      "notes": "Recovery logic distinguishes ARMED, OBSERVING, and RESOLVED states and preserves evidence without inventing missing onset or reaction times."
+    },
+    {
+      "path": "08_ENGINE/observation-runtime-v0.1/src/storage",
+      "role": "Persist journal, projection, and artifact snapshots for session state.",
+      "runtime_status": "Active and tested.",
+      "inputs": [
+        "session data",
+        "events",
+        "artifact snapshots"
+      ],
+      "outputs": [
+        "session storage",
+        "journal state",
+        "projection state"
+      ],
+      "dependencies": [
+        "MemoryStore",
+        "IndexedDBStore",
+        "canonical JSON"
+      ],
+      "consumers": [
+        "runtime",
+        "export verification",
+        "session store tests"
+      ],
+      "generation_relevance": "High",
+      "control_type": "persistence / atomic commit",
+      "evidence_code": "OBSERVED IN CODE",
+      "notes": "The store layer commits the session, journal, projection, and artifact state atomically and fails closed on stale revisions."
+    },
+    {
+      "path": "08_ENGINE/observation-runtime-v0.1/src/export/session-export.mjs",
+      "role": "Session export and import verification.",
+      "runtime_status": "Active and tested.",
+      "inputs": [
+        "session journal",
+        "projection",
+        "artifact snapshots"
+      ],
+      "outputs": [
+        "export bundle",
+        "verification result"
+      ],
+      "dependencies": [
+        "canonical hash",
+        "session store",
+        "projection replay"
+      ],
+      "consumers": [
+        "runtime exportSession",
+        "import verification API",
+        "export integrity tests"
+      ],
+      "generation_relevance": "High",
+      "control_type": "bundle integrity / verification",
+      "evidence_code": "OBSERVED IN CODE",
+      "notes": "The export logic explicitly separates hash mismatch and replay mismatch cases by design."
+    },
+    {
+      "path": "08_ENGINE/observation-runtime-v0.1/src/adapters",
+      "role": "Browser adapters that capture valid input events in a deterministic way.",
+      "runtime_status": "Active but intentionally non-production.",
+      "inputs": [
+        "keyboard events",
+        "pointer events",
+        "touch events"
+      ],
+      "outputs": [
+        "first valid response",
+        "input capture record"
+      ],
+      "dependencies": [
+        "browser DOM APIs",
+        "runtime event contracts"
+      ],
+      "consumers": [
+        "browser runtime tests",
+        "local proof harness"
+      ],
+      "generation_relevance": "Medium",
+      "control_type": "input capture / local proof harness",
+      "evidence_code": "OBSERVED IN CODE",
+      "notes": "The harness is documented as a development proof shell rather than a production UI."
+    },
+    {
+      "path": "09_ATLAS/README.md",
+      "role": "Memory layer and archive boundary for session records.",
+      "runtime_status": "Active doc/schema layer; not the runtime engine itself.",
+      "inputs": [
+        "exported session bundles",
+        "session metadata",
+        "observations"
+      ],
+      "outputs": [
+        "memory records",
+        "schema definitions",
+        "archive metadata"
+      ],
+      "dependencies": [
+        "repo canonical documents",
+        "session schema",
+        "exported observations"
+      ],
+      "consumers": [
+        "sound-field export",
+        "future corpus migration"
+      ],
+      "generation_relevance": "Medium",
+      "control_type": "memory archive / schema registry",
+      "evidence_code": "OBSERVED IN CODE",
+      "notes": "ATLAS explicitly states that it preserves memory and does not decide causality."
+    }
+  ],
+  "validation_baseline": [
+    {
+      "suite": "D.0 protocol model examples",
+      "command": "cd /workspaces/Ars-Caeli-Cannonical && python3 08_ENGINE/experimental-protocol-model/v0.1/validator.py --examples",
+      "result": "all example files valid",
+      "evidence_code": "OBSERVED IN TEST OUTPUT"
+    },
+    {
+      "suite": "D.0 protocol model pytest",
+      "command": "cd /workspaces/Ars-Caeli-Cannonical/08_ENGINE/experimental-protocol-model/v0.1 && PYTHONPATH=. python -m pytest -q tests",
+      "result": "56 passed in 30.46s",
+      "evidence_code": "OBSERVED IN TEST OUTPUT"
+    },
+    {
+      "suite": "Sound Field protocol runtime",
+      "command": "cd /workspaces/Ars-Caeli-Cannonical/08_ENGINE/sound-field-v0.3 && node --test tests/protocol-runtime.test.js",
+      "result": "16 passed, 0 failed",
+      "evidence_code": "OBSERVED IN TEST OUTPUT"
+    },
+    {
+      "suite": "D.1 observation runtime",
+      "command": "cd /workspaces/Ars-Caeli-Cannonical && npm ci --prefix 08_ENGINE/observation-runtime-v0.1 && npm test --prefix 08_ENGINE/observation-runtime-v0.1",
+      "result": "44 passed, 0 failed",
+      "evidence_code": "OBSERVED IN TEST OUTPUT"
+    }
+  ],
+  "interpretation": {
+    "what_it_is": "A layered experimental system with explicit epistemic separation between canonical doctrine, browser execution, evidence journaling, and memory archive.",
+    "what_it_is_not": "A single monolithic generation engine or a single canonical execution runtime.",
+    "core_strength": "The D.1 observation runtime is the strictest evidence boundary and the best current candidate for journaled session provenance.",
+    "key_gap": "There is no single cross-cutting engine map that ties the protocol artifacts, browser runtime, and ATLAS export flow into one documented runtime path.",
+    "status": "INSPECTION COMPLETE",
+    "evidence_code": "INFERENCE"
+  },
+  "follow_up": [
+    "Map how compiled protocol artifacts flow into browser execution and then into exported ATLAS memory.",
+    "Confirm the exact operational boundary between the protocol model and the browser runtime in human-facing documentation.",
+    "Confirm whether a future Track architecture should consume the journaled D.1 layer directly or via the browser runtime boundary."
+  ]
+}

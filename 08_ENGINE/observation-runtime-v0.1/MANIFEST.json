@@ -1,7 +1,7 @@
 {
   "package": "AEON Phase D.1 Observation Runtime Foundation REVIEWED v2",
   "baseline_commit": "b8b1a4eea2e9e5fc8e254b20340c8b3a66d367a2",
-  "payload_file_count_excluding_manifest": 67,
+  "payload_file_count_excluding_manifest": 77,
   "files": [
     {
       "path": "ARCHITECTURE_DECISIONS_D1_v0.1.md",
@@ -112,6 +112,14 @@
       "sha256": "b6e4ac5f8c842f787822f2b9c16cf609f4cf76766de82e0104d406bb5af55925"
     },
     {
+      "path": "harness/browser-smoke.html",
+      "sha256": "e345e7ee79c99de7079079bccafe4019d6c57c03cdc47f7b2001460305728da8"
+    },
+    {
+      "path": "harness/browser-smoke.mjs",
+      "sha256": "567880eea50719bb9329bdaf10e82cdad443de501d24b598b18fbc56da62c5a7"
+    },
+    {
       "path": "package-lock.json",
       "sha256": "13e589eb5b727e8af4d318b135595200bc5a5d51b33020a63f8ca02e69c73588"
     },
@@ -144,6 +152,22 @@
       "sha256": "9e167bf6f131463c790039f01de5bfe925f04436b18298f4b551a36b45b47a0d"
     },
     {
+      "path": "requirements-dev.txt",
+      "sha256": "88013e81853feeaa0dca291c7d446e4d3925e606b74c02b765770c5eccf53211"
+    },
+    {
+      "path": "src/adapters/browser-input-adapter.mjs",
+      "sha256": "a4c49f805677ad9c7610392f388ad673df42141c08b491b3bd1256440a3639ad"
+    },
+    {
+      "path": "src/adapters/context-marker-adapter.mjs",
+      "sha256": "df4d15a32216b6cc514c4130e9081a4ec676e64d68e97df0202d4a779899a756"
+    },
+    {
+      "path": "src/adapters/participant-observation-adapter.mjs",
+      "sha256": "4ee63779d7198658794b56e2e59bacaaa7fcdaa55f75e7635eb1dd7928008355"
+    },
+    {
       "path": "src/artifact-provider.mjs",
       "sha256": "3688516027a43e8fcd6c5a75752c7be026147d0194a0044aa3d69cef85469885"
     },
@@ -172,6 +196,10 @@
       "sha256": "0b86e3f370dd1d09205150248576be957abd24d72d31c45e4338a931e76117a2"
     },
     {
+      "path": "src/export/session-export.mjs",
+      "sha256": "0bccdfd017667b0be6e690cd583f74b9cf5c176a8ea6f98fadf5f65b150adeaa"
+    },
+    {
       "path": "src/ids.mjs",
       "sha256": "ba6317e835c8634a5bd9c334d01888265e09dde7da30fc1fc8b625e7ea29fcb2"
     },
@@ -181,7 +209,7 @@
     },
     {
       "path": "src/observation-runtime.mjs",
-      "sha256": "fd230b2376818fb3c5416942901f5080a959734b2c43b2b30ebdbf43e6d90f41"
+      "sha256": "02b44a7af5b9ae03892ae7cb5971df24773269c9b722876dc075250d3b891400"
     },
     {
       "path": "src/recovery.mjs",
@@ -216,6 +244,10 @@
       "sha256": "fefad3ae9de74ae60eb734e3946d4ae460ef07690c9cf75053f105804819de50"
     },
     {
+      "path": "tests/browser-input-adapter.test.mjs",
+      "sha256": "05da61f04dadf6ed0fd5dc0415ad48b5af5e3622e78d0d4904006a85f97faf95"
+    },
+    {
       "path": "tests/canonical-json.test.mjs",
       "sha256": "1e15111eb2af2b1777f62bc7ddf2e460d6977ec6e2c03865baeb83dba0566c63"
     },
@@ -226,6 +258,10 @@
     {
       "path": "tests/context-marker.test.mjs",
       "sha256": "316ed59eff166b43041c0736a060ed20250028f5ddf5d7aae84c1fdc99326462"
+    },
+    {
+      "path": "tests/export-integrity.test.mjs",
+      "sha256": "25ac4cfec1a10c21fc15d1097e309ac11047e80d1b87ed630fb9386cb88d29ef"
     },
     {
       "path": "tests/indexeddb-store.test.mjs",
@@ -270,6 +306,10 @@
     {
       "path": "tests/state-machine.test.mjs",
       "sha256": "d4089a63d87c3c98b8a7983560051a9d95d7ba95dff2d115e0e6eeb2cbc20de5"
+    },
+    {
+      "path": "tools/validate-contracts.py",
+      "sha256": "bf718f04e0d262faf1542b4b0b243e447dadff54833a5745d3af59629b4ef3fc"
     }
   ]
 }

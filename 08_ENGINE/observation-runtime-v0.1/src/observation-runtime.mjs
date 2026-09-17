@@ -5,6 +5,7 @@ import { ObservationRuntimeError } from "./errors.mjs";
 import { createUuid } from "./ids.mjs";
 import { assertRecoverableSession, appendRecoveredRecord, replaySessionProjection } from "./recovery.mjs";
 import { createResponseSeries, applyJournalEvent } from "./response-series-projector.mjs";
+import { buildSessionExport, verifySessionExport } from "./export/session-export.mjs";
 import { canonicalizeJson } from "./canonical-json.mjs";
 import { transition } from "./state-machine.mjs";
 import { MemoryStore } from "./storage/memory-store.mjs";
@@ -36,6 +37,10 @@ export class ObservationRuntime {
 
   static async open(options = {}) {
     return new ObservationRuntime(options);
+  }
+
+  static async verifyImport(bundle) {
+    return verifySessionExport(bundle);
   }
 
   async createSession({ sessionId = this.#uuid(), seriesId, participantId, protocolId }) {
@@ -245,6 +250,23 @@ export class ObservationRuntime {
       transaction.session.last_event_seq = event.seq;
     });
     return this.#store.loadSession(sessionId);
+  }
+
+  async exportSession({ sessionId }) {
+    const session = await this.#store.loadSession(sessionId);
+    if (!session) throw new ObservationRuntimeError("SESSION_NOT_FOUND", `Session not found: ${sessionId}`);
+    const journal = await this.#store.listEvents(sessionId);
+    const responseSeries = await this.#store.loadProjection(sessionId);
+    if (!responseSeries) throw new ObservationRuntimeError("PROJECTION_DIVERGENCE", "Cannot export without a response-series projection.");
+    const refs = journal.flatMap((event) => event.event_type === "trial_armed" ? [event.payload.probe_ref, event.payload.trial_ref, ...(event.payload.stimulus_refs ?? [])] : []);
+    const snapshots = [];
+    for (const ref of refs) {
+      const snapshot = await this.#store.loadArtifactSnapshot(ref.sha256);
+      if (!snapshot) throw new ObservationRuntimeError("ARTIFACT_NOT_FOUND", `Export artifact snapshot missing: ${ref.sha256}`);
+      snapshots.push(snapshot);
+    }
+    const uniqueSnapshots = [...new Map(snapshots.map((snapshot) => [snapshot.sha256, snapshot])).values()];
+    return buildSessionExport({ session, responseSeries, journal, artifactSnapshots: uniqueSnapshots, exportId: this.#uuid(), exportedAt: this.#clock.wallTimeRfc3339() });
   }
 
   async resumeSession({ sessionId }) {

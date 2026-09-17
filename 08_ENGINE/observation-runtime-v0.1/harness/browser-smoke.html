@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AEON D.1 Development Harness</title>
+</head>
+<body>
+  <main>
+    <h1>DEVELOPMENT HARNESS - NOT EXPERIMENT UI</h1>
+    <p id="state">No session loaded.</p>
+    <button id="start" type="button">Create and start session</button>
+    <button id="onset" type="button" disabled>Mark stimulus onset</button>
+    <button data-choice-id="left" type="button" disabled>Left</button>
+    <button data-choice-id="right" type="button" disabled>Right</button>
+    <button id="marker" type="button" disabled>Add context marker</button>
+    <pre id="output"></pre>
+  </main>
+  <script type="module" src="./browser-smoke.mjs"></script>
+</body>
+</html>
